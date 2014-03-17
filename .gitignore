@@ -1,0 +1,6 @@
+*.pyc
+.coverage
+
+build/
+dist/
+format_sql.egg-info/

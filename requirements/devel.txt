@@ -1,0 +1,7 @@
+-r testing.txt
+
+bumpversion
+ipdb
+orgco
+tox
+wheel

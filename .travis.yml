@@ -1,0 +1,10 @@
+language: python
+python:
+  - "2.7"
+  - "3.3"
+  - "pypy"
+install:
+  - pip install -r requirements/testing.txt
+script: py.test --cov=format_sql --cov-report=term-missing
+after_success:
+  - coveralls

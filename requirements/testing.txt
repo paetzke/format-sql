@@ -1,0 +1,5 @@
+-r package.txt
+
+coveralls
+pytest
+pytest-cov
