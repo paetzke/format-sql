@@ -23,5 +23,32 @@ You can then just call ``format-sql`` with files and directories:
 
 .. code:: bash
 
-    format-sql my_python_file.py my/python/dir/
+    $ format-sql my_python_file.py my/python/dir/
+
+An example:
+
+.. code:: python
+
+        sql = """
+    select *
+    from my_table as mt join ma_table as ta on ma.id = k.id
+    where idt=4 and ih in ('syds', 'sdsd');
+    
+        """
+
+Will result in:
+
+.. code:: python
+
+        sql = """
+            SELECT
+                *
+            FROM
+                my_table AS mt
+                JOIN ma_table AS ta ON ma.id = k.id
+            WHERE
+                idt=4
+                AND ih IN ('syds', 'sdsd'); """
+
+This is an early version and work in progress. Don't expect too much right now.
 
