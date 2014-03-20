@@ -81,6 +81,6 @@ class _Formatter:
         return '\n'.join(self._lines)
 
 
-def pretty_format(sql):
+def format_sql(sql):
     formatter = _Formatter()
     return formatter.k(sql)
