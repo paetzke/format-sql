@@ -7,7 +7,8 @@ All rights reserved.
 
 """
 import sqlparse
-from sqlparse.sql import Comparison, Identifier, IdentifierList, Where
+from sqlparse.sql import (Comparison, Identifier, IdentifierList, Parenthesis,
+                          Where)
 
 
 def _filter(tokens):
@@ -15,16 +16,22 @@ def _filter(tokens):
 
 
 def _val(token, indent=0):
+    if isinstance(token, Parenthesis):
+        s = ''.join([_val(tk) for tk in _filter(token.tokens)])
+        s = s.replace('\n', ' ')
+        return s
+
     if token.is_group() and len(token.tokens) > 1:
+
         if isinstance(token, Identifier):
-            return ''.join([tk.value for tk in token.tokens])
+            return ' '.join([tk.value for tk in _filter(token.tokens)])
 
         if isinstance(token, Comparison):
-            return ''.join([tk.value for tk in token.tokens])
+            return ' '.join([tk.value for tk in _filter(token.tokens)])
 
         if isinstance(token, IdentifierList):
-            s = ''.join([_val(tk) for tk in token.tokens])
-            return s.replace(',', ',\n' + ' ' * indent)
+            s = ' '.join([_val(tk) for tk in _filter(token.tokens)])
+            return s.replace(' , ', ',\n' + ' ' * indent)
 
     return token.value
 
