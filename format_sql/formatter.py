@@ -7,20 +7,31 @@ All rights reserved.
 
 """
 import sqlparse
-from sqlparse.sql import Comparison, Identifier, IdentifierList, Where
+from sqlparse.sql import (Comparison, Identifier, IdentifierList, Parenthesis,
+                          Where)
+
+
+def _filter(tokens):
+    return (token for token in tokens if not token.is_whitespace())
 
 
 def _val(token, indent=0):
+    if isinstance(token, Parenthesis):
+        s = ''.join([_val(tk) for tk in _filter(token.tokens)])
+        s = s.replace('\n', ' ')
+        return s
+
     if token.is_group() and len(token.tokens) > 1:
+
         if isinstance(token, Identifier):
-            return ''.join([tk.value for tk in token.tokens])
+            return ' '.join([tk.value for tk in _filter(token.tokens)])
 
         if isinstance(token, Comparison):
-            return ''.join([tk.value for tk in token.tokens])
+            return ' '.join([tk.value for tk in _filter(token.tokens)])
 
         if isinstance(token, IdentifierList):
-            s = ''.join([_val(tk) for tk in token.tokens])
-            return s.replace(',', ',\n' + ' ' * indent)
+            s = ' '.join([_val(tk) for tk in _filter(token.tokens)])
+            return s.replace(' , ', ',\n' + ' ' * indent)
 
     return token.value
 
@@ -49,10 +60,7 @@ class _Formatter:
     def _tokens(self, sql):
         s = sqlparse.format(sql, keyword_case='upper')
         parsed = sqlparse.parse(s)[0]
-        return self._filter(parsed.tokens)
-
-    def _filter(self, tokens):
-        return (token for token in tokens if not token.is_whitespace())
+        return _filter(parsed.tokens)
 
     def k(self, sql):
         tokens = self._tokens(sql)
@@ -68,7 +76,7 @@ class _Formatter:
 
             if isinstance(token, Where):
                 self._add_to_lines(indent)
-                self._format(self._filter(token.tokens))
+                self._format(_filter(token.tokens))
                 continue
 
             if token.value in self.TOKENS_BREAK:
