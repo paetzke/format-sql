@@ -21,12 +21,12 @@ from .formatter import format_sql
 
 def load_from_file(filename):
     with open(filename, 'r') as f:
-        content = f.read()
+        text = f.read()
     try:
-        content = unicode(content, 'utf-8')
+        text = unicode(text, 'utf-8')
     except NameError:
         pass
-    return content.splitlines()
+    return text
 
 
 def _read_dir(dirname):
