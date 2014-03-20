@@ -8,7 +8,7 @@ All rights reserved.
 """
 import os
 
-from format_sql import format_sql
+from format_sql import format_text
 from format_sql.format_sql import load_from_file
 
 
@@ -20,7 +20,7 @@ def load_data(filename):
 
 def assert_files(filename1, filename2):
     content1 = load_data(filename1)
-    content1 = format_sql(content1)
+    content1 = format_text(content1)
     content2 = load_data(filename2)
 
     assert content1 == content2
