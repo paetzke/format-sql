@@ -137,3 +137,52 @@ def test_07():
     ])
 
     assert_format(sql, expected)
+
+
+def test_08():
+    sql = "SELECT x1,x2 AS t,x3,count(1) FROM my_table AS t1 LEFT JOIN my_table2 WHERE t=3 OR x in ('78','d');"
+    expected = '\n'.join([
+        'SELECT',
+        '    x1,',
+        '    x2 AS t,',
+        '    x3,',
+        '    count(1)',
+        'FROM',
+        '    my_table AS t1',
+        '    LEFT JOIN my_table2',
+        'WHERE',
+        '    t = 3',
+        "    OR x IN ('78', 'd');",
+    ])
+
+    assert_format(sql, expected)
+
+
+def test_09():
+    sql = 'SELECT * FROM my_table AS t1 LEFT JOIN my_table2 WHERE t =3;'
+    expected = '\n'.join([
+        'SELECT',
+        '    *',
+        'FROM',
+        '    my_table AS t1',
+        '    LEFT JOIN my_table2',
+        'WHERE',
+        '    t = 3;',
+    ])
+
+    assert_format(sql, expected)
+
+
+def test_10():
+    sql = 'SELECT * FROM my_table AS t1 LEFT JOIN my_table2 WHERE t =3'
+    expected = '\n'.join([
+        'SELECT',
+        '    *',
+        'FROM',
+        '    my_table AS t1',
+        '    LEFT JOIN my_table2',
+        'WHERE',
+        '    t = 3',
+    ])
+
+    assert_format(sql, expected)
