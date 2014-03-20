@@ -64,3 +64,19 @@ def test_04():
 
 def test_04_reapply():
     assert_files('sql04_expected.py', 'sql04_expected.py')
+
+
+def test_05():
+    assert_files('sql05.py', 'sql05_expected.py')
+
+
+def test_05_reapply():
+    assert_files('sql05_expected.py', 'sql05_expected.py')
+
+
+def test_06():
+    assert_files('sql06.py', 'sql06_expected.py')
+
+
+def test_06_reapply():
+    assert_files('sql06_expected.py', 'sql06_expected.py')
