@@ -7,7 +7,7 @@ All rights reserved.
 
 """
 from .format_sql import format_sql
-from .formatter import pretty_format
+from .formatter import format_sql
 
 __version__ = '0.0.1'
 __author__ = 'Friedrich Paetzke'

@@ -16,7 +16,7 @@ import sys
 
 import sqlparse
 
-from .formatter import pretty_format
+from .formatter import format_sql
 
 
 def load_from_file(filename):
@@ -68,7 +68,7 @@ def format_sql(lines):
             continue
 
         fs = []
-        fmt = pretty_format(query).splitlines()
+        fmt = format_sql(query).splitlines()
         for line in fmt:
             fs.append(indent + line.rstrip())
 

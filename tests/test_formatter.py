@@ -6,11 +6,11 @@ Copyright (c) 2014, Friedrich Paetzke (f.paetzke@gmail.com)
 All rights reserved.
 
 """
-from format_sql import pretty_format
+from format_sql import format_sql
 
 
 def assert_format(sql, expected):
-    result = pretty_format(sql)
+    result = format_sql(sql)
     assert result == expected
 
 
