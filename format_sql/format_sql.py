@@ -30,7 +30,7 @@ def load_from_file(filename):
 
 
 def format_text(text):
-    queries = re.findall(r'([ ]*)[_\w\d]*\s*=*\s*"{3}(\s*.*?;*\s*)"{3}',
+    queries = re.findall(r'([ ]*)[_\w\d.]*\s*=*\s*\(*"{3}(\s*.*?;*\s*)"{3}',
                          text, re.DOTALL)
 
     for indent, query in queries:
