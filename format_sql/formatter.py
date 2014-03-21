@@ -17,9 +17,15 @@ def _filter(tokens):
 
 def _val(token, indent=0):
     if isinstance(token, Parenthesis):
-        s = ''.join([_val(tk) for tk in _filter(token.tokens)])
-        s = s.replace('\n', ' ')
-        return s
+        tokens = list(_filter(token.tokens))[1:-1]
+        if tokens[0].is_keyword:
+            fort = _Formatter()
+            return '(\n%s)' % fort.k(tokens=tokens, indent=indent + 8)
+        else:
+            vals = [_val(tk) for tk in _filter(token.tokens)]
+            s = ''.join(vals)
+            s = s.replace('\n', ' ')
+            return s
 
     if token.is_group() and len(token.tokens) > 1:
 
@@ -62,16 +68,16 @@ class _Formatter:
         parsed = sqlparse.parse(s)[0]
         return _filter(parsed.tokens)
 
-    def k(self, sql):
-        tokens = self._tokens(sql)
-        return self._format(tokens)
+    def k(self, sql=None, tokens=None, indent=4):
+        if not tokens:
+            tokens = self._tokens(sql)
+        return self._format(tokens, indent=indent)
 
-    def _format(self, tokens):
-        indent = 4
+    def _format(self, tokens, indent=4):
         for token in tokens:
             if token.value in self.TOKENS:
                 self._add_to_lines(indent)
-                self._lines.append(token.value)
+                self._lines.append('%s%s' % (' ' * (indent - 4), token.value))
                 continue
 
             if isinstance(token, Where):
