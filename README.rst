@@ -1,12 +1,12 @@
-format-sql
-==========
-
 .. image:: https://travis-ci.org/paetzke/format-sql.svg?branch=master
   :target: https://travis-ci.org/paetzke/format-sql
 .. image:: https://coveralls.io/repos/paetzke/format-sql/badge.png?branch=master
   :target: https://coveralls.io/r/paetzke/format-sql?branch=master
 .. image:: https://pypip.in/v/format-sql/badge.png
   :target: https://pypi.python.org/pypi/format-sql/
+
+format-sql
+==========
 
 Copyright (c) 2014, Friedrich Paetzke (f.paetzke@gmail.com)
 All rights reserved.
