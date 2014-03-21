@@ -186,3 +186,97 @@ def test_10():
     ])
 
     assert_format(sql, expected)
+
+
+def test_11():
+    sql = 'SELECT name, some_par1  FROM  zauber_table WHERE  some_par1 IN (SELECT some_par1 FROM some_special_table)'
+    expected = '\n'.join([
+        'SELECT',
+        '    name,',
+        '    some_par1',
+        'FROM',
+        '    zauber_table',
+        'WHERE',
+        '    some_par1 IN (',
+        '        SELECT',
+        '            some_par1',
+        '        FROM',
+        '            some_special_table)',
+    ])
+
+    assert_format(sql, expected)
+
+
+def test_12():
+    sql = 'SELECT geodaten_id FROM geodaten WHERE geodaten_id IN (SELECT id FROM id_check);'
+    expected = '\n'.join([
+        'SELECT',
+        '    geodaten_id',
+        'FROM',
+        '    geodaten',
+        'WHERE',
+        '    geodaten_id IN (',
+        '        SELECT',
+        '            id',
+        '        FROM',
+        '            id_check);',
+    ])
+
+    assert_format(sql, expected)
+
+
+def test_13():
+    sql = 'SELECT name, some_par1  FROM  zauber_table WHERE  some_par1 < ALL (SELECT some_par1 FROM some_special_table)'
+    expected = '\n'.join([
+        'SELECT',
+        '    name,',
+        '    some_par1',
+        'FROM',
+        '    zauber_table',
+        'WHERE',
+        '    some_par1 < ALL (',
+        '        SELECT',
+        '            some_par1',
+        '        FROM',
+        '            some_special_table)',
+    ])
+
+    assert_format(sql, expected)
+
+
+def test_14():
+    sql = 'SELECT name, some_par1  FROM  zauber_table WHERE  some_par1 < ALL (select some_par1 FROM some_special_table )'
+    expected = '\n'.join([
+        'SELECT',
+        '    name,',
+        '    some_par1',
+        'FROM',
+        '    zauber_table',
+        'WHERE',
+        '    some_par1 < ALL (',
+        '        SELECT',
+        '            some_par1',
+        '        FROM',
+        '            some_special_table)',
+    ])
+
+    assert_format(sql, expected)
+
+
+def test_15():
+    sql = 'SELECT name, some_par1 FROM zauber_table WHERE some_par1 < ALL ( select some_par1 FROM some_special_table)'
+    expected = '\n'.join([
+        'SELECT',
+        '    name,',
+        '    some_par1',
+        'FROM',
+        '    zauber_table',
+        'WHERE',
+        '    some_par1 < ALL (',
+        '        SELECT',
+        '            some_par1',
+        '        FROM',
+        '            some_special_table)',
+    ])
+
+    assert_format(sql, expected)
