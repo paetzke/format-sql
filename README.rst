@@ -1,7 +1,7 @@
 format-sql
 ==========
 
-.. image:: https://travis-ci.org/paetzke/format-sql.png?branch=master
+.. image:: https://travis-ci.org/paetzke/format-sql.svg?branch=master
   :target: https://travis-ci.org/paetzke/format-sql
 .. image:: https://coveralls.io/repos/paetzke/format-sql/badge.png?branch=master
   :target: https://coveralls.io/r/paetzke/format-sql?branch=master
