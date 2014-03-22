@@ -20,7 +20,7 @@ def _val(token, indent=0):
         tokens = list(_filter(token.tokens))[1:-1]
         if tokens[0].is_keyword:
             fort = _Formatter()
-            return '(\n%s)' % fort.k(tokens=tokens, indent=indent + 4)
+            return '(\n%s)' % fort._make_it_so(tokens=tokens, indent=indent + 4)
         else:
             vals = [_val(tk) for tk in _filter(token.tokens)]
             s = ''.join(vals)
@@ -67,7 +67,7 @@ class _Formatter:
         parsed = sqlparse.parse(s)[0]
         return _filter(parsed.tokens)
 
-    def k(self, sql=None, tokens=None, indent=0):
+    def _make_it_so(self, sql=None, tokens=None, indent=0):
         if not tokens:
             tokens = self._tokens(sql)
         return self._format(tokens, indent=indent)
@@ -97,4 +97,4 @@ class _Formatter:
 
 def format_sql(sql):
     formatter = _Formatter()
-    return formatter.k(sql)
+    return formatter._make_it_so(sql)
