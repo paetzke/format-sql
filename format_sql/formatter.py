@@ -20,7 +20,7 @@ def _val(token, indent=0):
         tokens = list(_filter(token.tokens))[1:-1]
         if tokens[0].is_keyword:
             fort = _Formatter()
-            return '(\n%s)' % fort.k(tokens=tokens, indent=indent + 8)
+            return '(\n%s)' % fort._make_it_so(tokens=tokens, indent=indent + 4)
         else:
             vals = [_val(tk) for tk in _filter(token.tokens)]
             s = ''.join(vals)
@@ -28,7 +28,6 @@ def _val(token, indent=0):
             return s
 
     if token.is_group() and len(token.tokens) > 1:
-
         if isinstance(token, Identifier):
             return ' '.join([tk.value for tk in _filter(token.tokens)])
 
@@ -68,33 +67,34 @@ class _Formatter:
         parsed = sqlparse.parse(s)[0]
         return _filter(parsed.tokens)
 
-    def k(self, sql=None, tokens=None, indent=4):
+    def _make_it_so(self, sql=None, tokens=None, indent=0):
         if not tokens:
             tokens = self._tokens(sql)
         return self._format(tokens, indent=indent)
 
-    def _format(self, tokens, indent=4):
+    def _format(self, tokens, indent=0):
         for token in tokens:
             if token.value in self.TOKENS:
+                self._add_to_lines(indent + 4)
+                self._line.append(token.value)
                 self._add_to_lines(indent)
-                self._lines.append('%s%s' % (' ' * (indent - 4), token.value))
                 continue
 
             if isinstance(token, Where):
-                self._add_to_lines(indent)
+                self._add_to_lines(indent + 4)
                 self._format(_filter(token.tokens))
                 continue
 
             if token.value in self.TOKENS_BREAK:
-                self._add_to_lines(indent)
+                self._add_to_lines(indent + 4)
 
-            self._line.append(_val(token, indent))
+            self._line.append(_val(token, indent + 4))
 
-        self._add_to_lines(indent)
+        self._add_to_lines(indent + 4)
         self._remove_white_before_semicolon()
         return '\n'.join(self._lines)
 
 
 def format_sql(sql):
     formatter = _Formatter()
-    return formatter.k(sql)
+    return formatter._make_it_so(sql)
