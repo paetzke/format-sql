@@ -76,7 +76,8 @@ class _Formatter:
         for token in tokens:
             if token.value in self.TOKENS:
                 self._add_to_lines(indent + 4)
-                self._lines.append('%s%s' % (' ' * indent, token.value))
+                self._line.append(token.value)
+                self._add_to_lines(indent)
                 continue
 
             if isinstance(token, Where):
