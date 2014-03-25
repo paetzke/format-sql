@@ -29,12 +29,9 @@ An example:
 
 .. code:: python
 
-        sql = """
-    select *
-    from my_table as mt join ma_table as ta on ma.id = k.id
-    where idt=4 and ih in ('syds', 'sdsd');
-    
-        """
+        sql = """ SELECT country, product, SUM(profit) FROM
+    sales   left join x on x.id=sales.k GROUP BY country,
+    product having f > 7 and fk=9 limit 5;    """
 
 Will result in:
 
@@ -42,13 +39,19 @@ Will result in:
 
         sql = """
             SELECT
-                *
+                country,
+                product,
+                SUM(profit)
             FROM
-                my_table AS mt
-                JOIN ma_table AS ta ON ma.id = k.id
-            WHERE
-                idt = 4
-                AND ih IN ('syds', 'sdsd'); """
+                sales
+                LEFT JOIN x ON x.id = sales.k
+            GROUP BY
+                country,
+                product
+            HAVING
+                f > 7
+                AND fk = 9
+            LIMIT 5; """
 
 This is an early version and work in progress. Don't expect too much right now.
 
