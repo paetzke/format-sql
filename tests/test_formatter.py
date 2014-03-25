@@ -280,3 +280,80 @@ def test_15():
     ])
 
     assert_format(sql, expected)
+
+
+def test_16():
+    sql = 'SELECT country, product, SUM(profit) FROM sales GROUP BY country, product;'
+    expected = '\n'.join([
+        'SELECT',
+        '    country,',
+        '    product,',
+        '    SUM(profit)',
+        'FROM',
+        '    sales',
+        'GROUP BY',
+        '    country,',
+        '    product;',
+    ])
+
+    assert_format(sql, expected)
+
+
+def test_17():
+    sql = 'SELECT name, some_par1 FROM zauber_table WHERE some_par1 < ALL ( select some_par1 FROM some_special_table group by x)'
+    expected = '\n'.join([
+        'SELECT',
+        '    name,',
+        '    some_par1',
+        'FROM',
+        '    zauber_table',
+        'WHERE',
+        '    some_par1 < ALL (',
+        '        SELECT',
+        '            some_par1',
+        '        FROM',
+        '            some_special_table',
+        '        GROUP BY',
+        '            x)',
+    ])
+
+    assert_format(sql, expected)
+
+
+def test_18():
+    sql = 'SELECT country, product, SUM(profit) FROM sales GROUP BY country, product having product > 0;'
+    expected = '\n'.join([
+        'SELECT',
+        '    country,',
+        '    product,',
+        '    SUM(profit)',
+        'FROM',
+        '    sales',
+        'GROUP BY',
+        '    country,',
+        '    product',
+        'HAVING',
+        '    product > 0;',
+    ])
+
+    assert_format(sql, expected)
+
+
+def test_19():
+    sql = 'SELECT country, product, SUM(profit) FROM sales GROUP BY country, product having f > 7 and fk=9;'
+    expected = '\n'.join([
+        'SELECT',
+        '    country,',
+        '    product,',
+        '    SUM(profit)',
+        'FROM',
+        '    sales',
+        'GROUP BY',
+        '    country,',
+        '    product',
+        'HAVING',
+        '    f > 7',
+        '    AND fk = 9;',
+    ])
+
+    assert_format(sql, expected)
