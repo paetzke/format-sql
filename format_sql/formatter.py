@@ -12,7 +12,7 @@ from sqlparse.sql import (Comparison, Identifier, IdentifierList, Parenthesis,
 
 
 def _filter(tokens):
-    return (token for token in tokens if not token.is_whitespace())
+    return [token for token in tokens if not token.is_whitespace()]
 
 
 def _val(token, indent=0):
@@ -44,7 +44,14 @@ def _val(token, indent=0):
 class _Formatter:
 
     TOKENS = ['SELECT', 'FROM', 'WHERE', ]
-    TOKENS_BREAK = ['LEFT JOIN', 'AND', 'OR', 'JOIN', ]
+    TOKENS_BREAK = [
+        ('LEFT JOIN', 0),
+        ('AND', 0),
+        ('OR', 0),
+        ('JOIN', 0),
+        ('GROUP BY', 1),
+        ('HAVING', 0),
+    ]
 
     def __init__(self):
         self._lines = []
@@ -73,7 +80,11 @@ class _Formatter:
         return self._format(tokens, indent=indent)
 
     def _format(self, tokens, indent=0):
-        for token in tokens:
+        i = -1
+        while i + 1 < len(tokens):
+            i += 1
+            token = tokens[i]
+
             if token.value in self.TOKENS:
                 self._add_to_lines(indent + 4)
                 self._line.append(token.value)
@@ -85,14 +96,27 @@ class _Formatter:
                 self._format(_filter(token.tokens))
                 continue
 
-            if token.value in self.TOKENS_BREAK:
+            in_break, k, s = self._in_break_tokens(tokens[i:])
+            if in_break:
                 self._add_to_lines(indent + 4)
+                self._line.append(s)
+                i += k
+                if s in ('GROUP BY', 'HAVING'):
+                    self._add_to_lines(indent)
+                continue
 
             self._line.append(_val(token, indent + 4))
 
         self._add_to_lines(indent + 4)
         self._remove_white_before_semicolon()
         return '\n'.join(self._lines)
+
+    def _in_break_tokens(self, tokens):
+        for token_value, tokens_len in self.TOKENS_BREAK:
+            tks = ' '.join(tk.value for tk in tokens[:tokens_len + 1])
+            if tks == token_value:
+                return True, tokens_len, token_value
+        return False, 0, ''
 
 
 def format_sql(sql):
