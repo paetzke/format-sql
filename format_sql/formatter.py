@@ -91,6 +91,18 @@ class _Formatter:
                 self._add_to_lines(indent)
                 continue
 
+            if token.value == 'LIMIT':
+                self._add_to_lines(indent + 4)
+                self._line.append(token.value)
+
+                for token in tokens[i + 1:]:
+                    i += 1
+                    s = _val(tokens[i])
+                    s = s.replace('\n', ' ')
+                    self._line.append(s)
+                self._add_to_lines(indent)
+                continue
+
             if isinstance(token, Where):
                 self._add_to_lines(indent + 4)
                 self._format(_filter(token.tokens))
