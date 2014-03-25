@@ -357,3 +357,72 @@ def test_19():
     ])
 
     assert_format(sql, expected)
+
+
+def test_20():
+    sql = 'SELECT country, product, SUM(profit) FROM sales GROUP BY country, product having f > 7 and fk=9 limit 5;'
+    expected = '\n'.join([
+        'SELECT',
+        '    country,',
+        '    product,',
+        '    SUM(profit)',
+        'FROM',
+        '    sales',
+        'GROUP BY',
+        '    country,',
+        '    product',
+        'HAVING',
+        '    f > 7',
+        '    AND fk = 9',
+        'LIMIT 5;',
+    ])
+
+    assert_format(sql, expected)
+
+
+def test_21():
+    sql = 'SELECT * FROM my_table limit 65'
+    expected = '\n'.join([
+        'SELECT',
+        '    *',
+        'FROM',
+        '    my_table',
+        'LIMIT 65',
+    ])
+
+    assert_format(sql, expected)
+
+
+def test_22():
+    sql = 'SELECT * FROM my_table limit 65,90'
+    expected = '\n'.join([
+        'SELECT',
+        '    *',
+        'FROM',
+        '    my_table',
+        'LIMIT 65, 90',
+    ])
+
+    assert_format(sql, expected)
+
+
+def test_23():
+    sql = 'SELECT country, product, SUM(profit) FROM sales   left join x on x.id=sales.k GROUP BY country, product having f > 7 and fk=9 limit 5;'
+    expected = '\n'.join([
+        'SELECT',
+        '    country,',
+        '    product,',
+        '    SUM(profit)',
+        'FROM',
+        '    sales',
+        '    LEFT JOIN x ON x.id = sales.k',
+        'GROUP BY',
+        '    country,',
+        '    product',
+        'HAVING',
+        '    f > 7',
+        '    AND fk = 9',
+        'LIMIT 5;',
+    ])
+
+    assert_format(sql, expected)
