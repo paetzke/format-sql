@@ -8,7 +8,7 @@ format-sql
 .. image:: https://pypip.in/v/format-sql/badge.png
   :target: https://pypi.python.org/pypi/format-sql/
 
-Copyright (c) 2014, Friedrich Paetzke (f.paetzke@gmail.com)
+Copyright (c) 2014, Friedrich Paetzke (paetzke@fastmail.fm)
 All rights reserved.
 
 format-sql is a tool to format SQL in your Python strings!

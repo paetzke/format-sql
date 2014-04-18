@@ -2,7 +2,7 @@
 """
 format-sql
 
-Copyright (c) 2014, Friedrich Paetzke (f.paetzke@gmail.com)
+Copyright (c) 2014, Friedrich Paetzke (paetzke@fastmail.fm)
 All rights reserved.
 
 """
@@ -15,7 +15,7 @@ setup(name='format-sql',
       version='0.0.1',
       license='BSD',
       author='Friedrich Paetzke',
-      author_email='f.paetzke@gmail.com',
+      author_email='paetzke@fastmail.fm',
       url='https://github.com/paetzke/format-sql',
       packages=find_packages(exclude=['tests*']),
       install_requires=open('requirements/package.txt').read().splitlines(),

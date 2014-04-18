@@ -3,7 +3,7 @@
 """
 format-sql
 
-Copyright (c) 2014, Friedrich Paetzke (f.paetzke@gmail.com)
+Copyright (c) 2014, Friedrich Paetzke (paetzke@fastmail.fm)
 All rights reserved.
 
 """
