@@ -29,7 +29,9 @@ def _val(token, indent=0):
 
     if token.is_group() and len(token.tokens) > 1:
         if isinstance(token, Identifier):
-            return ' '.join([tk.value for tk in _filter(token.tokens)])
+            s = ' '.join([tk.value for tk in _filter(token.tokens)])
+            s = s.replace(' . ', '.')
+            return s
 
         if isinstance(token, Comparison):
             return ' '.join([tk.value for tk in _filter(token.tokens)])

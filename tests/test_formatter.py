@@ -525,3 +525,22 @@ def test_29():
     ])
 
     assert_format(sql, expected)
+
+
+def test_30():
+    sql = 'SELECT plo.md,sp.condition,sp.rice FROM cot_iu sp JOIN loooc plo ON plo.id = sp.popop_on_loc_u_t WHERE plo.loc_u_t = %(some_thing)s AND sp.rice IS NOT NULL'
+
+    expected = '\n'.join([
+        'SELECT',
+        '    plo.md,',
+        '    sp.condition,',
+        '    sp.rice',
+        'FROM',
+        '    cot_iu sp',
+        '    JOIN loooc plo ON plo.id = sp.popop_on_loc_u_t',
+        'WHERE',
+        '    plo.loc_u_t = %(some_thing)s',
+        '    AND sp.rice IS NOT NULL',
+    ])
+
+    assert_format(sql, expected)
