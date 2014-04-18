@@ -49,6 +49,7 @@ class _Formatter:
     TOKENS = ['SELECT', 'FROM', 'WHERE', ]
     TOKENS_BREAK = [
         ('LEFT JOIN', 0),
+        ('INNER JOIN', 0),
         ('AND', 0),
         ('OR', 0),
         ('JOIN', 0),
