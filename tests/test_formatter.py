@@ -426,3 +426,43 @@ def test_23():
     ])
 
     assert_format(sql, expected)
+
+
+def test_24():
+    sql = 'SELECT df.*, dt.p FROM my_table '
+    expected = '\n'.join([
+        'SELECT',
+        '    df.*,',
+        '    dt.p',
+        'FROM',
+        '    my_table',
+    ])
+
+    assert_format(sql, expected)
+
+
+def test_25():
+    sql = 'SELECT x.country, f.product, SUM(fp.profit) FROM sales;'
+    expected = '\n'.join([
+        'SELECT',
+        '    x.country,',
+        '    f.product,',
+        '    SUM(fp.profit)',
+        'FROM',
+        '    sales;',
+    ])
+
+    assert_format(sql, expected)
+
+
+def test_26():
+    sql = 'SELECT x.country, f.product FROM sales;'
+    expected = '\n'.join([
+        'SELECT',
+        '    x.country,',
+        '    f.product',
+        'FROM',
+        '    sales;',
+    ])
+
+    assert_format(sql, expected)
