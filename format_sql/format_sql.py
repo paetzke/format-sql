@@ -61,11 +61,9 @@ def format_file(filename):
     content = format_text(content)
 
     if content:
-        content = '\n'.join(content)
         content = content.encode('utf-8')
         with open(filename, 'wb') as f:
             f.write(content)
-            f.write('\n')
 
 
 def format_files_in_directory(dirname):
