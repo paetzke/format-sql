@@ -51,6 +51,7 @@ class _Formatter:
         ('OR', 0),
         ('JOIN', 0),
         ('GROUP BY', 1),
+        ('ORDER BY', 1),
         ('HAVING', 0),
     ]
 
@@ -114,7 +115,7 @@ class _Formatter:
                 self._add_to_lines(indent + 4)
                 self._line.append(s)
                 i += k
-                if s in ('GROUP BY', 'HAVING'):
+                if s in ('GROUP BY', 'HAVING', 'ORDER BY'):
                     self._add_to_lines(indent)
                 continue
 
