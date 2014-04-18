@@ -466,3 +466,62 @@ def test_26():
     ])
 
     assert_format(sql, expected)
+
+
+def test_27():
+    sql = 'SELECT x.country, f.product FROM sales WHERE x.t=5 oR tz.oi=  "s";'
+    expected = '\n'.join([
+        'SELECT',
+        '    x.country,',
+        '    f.product',
+        'FROM',
+        '    sales',
+        'WHERE',
+        '    x.t = 5',
+        '    OR tz.oi = "s";',
+    ])
+
+    assert_format(sql, expected)
+
+
+def test_28():
+    sql = 'SELECT country, product, SUM(profit) FROM sales   left join x on x.id=sales.k order BY k asc, k.lk DESC limit 5;'
+    expected = '\n'.join([
+        'SELECT',
+        '    country,',
+        '    product,',
+        '    SUM(profit)',
+        'FROM',
+        '    sales',
+        '    LEFT JOIN x ON x.id = sales.k',
+        'ORDER BY',
+        '    k ASC,',
+        '    k.lk DESC',
+        'LIMIT 5;',
+    ])
+
+    assert_format(sql, expected)
+
+
+def test_29():
+    sql = 'SELECT country, product, SUM(profit) FROM sales   left join x on x.id=sales.k GROUP BY country, product having f > 7 and fk=9 order BY k asc limit 5;'
+    expected = '\n'.join([
+        'SELECT',
+        '    country,',
+        '    product,',
+        '    SUM(profit)',
+        'FROM',
+        '    sales',
+        '    LEFT JOIN x ON x.id = sales.k',
+        'GROUP BY',
+        '    country,',
+        '    product',
+        'HAVING',
+        '    f > 7',
+        '    AND fk = 9',
+        'ORDER BY',
+        '    k ASC',
+        'LIMIT 5;',
+    ])
+
+    assert_format(sql, expected)
