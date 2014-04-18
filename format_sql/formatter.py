@@ -36,6 +36,7 @@ def _val(token, indent=0):
 
         if isinstance(token, IdentifierList):
             s = ' '.join([_val(tk) for tk in _filter(token.tokens)])
+            s = s.replace(' . ', '.')
             return s.replace(' , ', ',\n' + ' ' * indent)
 
     return token.value
