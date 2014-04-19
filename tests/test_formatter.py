@@ -594,3 +594,20 @@ def test_33():
     ])
 
     assert_format(sql, expected)
+
+
+def test_34():
+    sql = 'SELECT q.`cnd` FROM mart AS q WHERE m_id = "14"  AND (cq.qt IS NULL OR cq.qt=0)'
+    expected = '\n'.join([
+        'SELECT',
+        '    q.`cnd`',
+        'FROM',
+        '    mart AS q',
+        'WHERE',
+        '    m_id = "14"',
+        '    AND (',
+        '        cq.qt IS NULL',
+        '        OR cq.qt = 0)',
+    ])
+
+    assert_format(sql, expected)
