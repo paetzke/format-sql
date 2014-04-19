@@ -14,8 +14,6 @@ import os
 import re
 import sys
 
-import sqlparse
-
 from .formatter import format_sql
 
 
