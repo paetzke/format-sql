@@ -18,9 +18,12 @@ def _filter(tokens):
 def _val(token, indent=0):
     if isinstance(token, Parenthesis):
         tokens = list(_filter(token.tokens))[1:-1]
-        if tokens[0].is_keyword:
+        if tokens[0].is_keyword or isinstance(tokens[0], Comparison):
+            indent += 4
+            if isinstance(tokens[0], Comparison):
+                indent -= 4
             fort = _Formatter()
-            return '(\n%s)' % fort._make_it_so(tokens=tokens, indent=indent + 4)
+            return '(\n%s)' % fort._make_it_so(tokens=tokens, indent=indent)
         else:
             vals = [_val(tk) for tk in _filter(token.tokens)]
             s = ''.join(vals)
