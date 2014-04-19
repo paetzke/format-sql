@@ -556,3 +556,41 @@ def test_31():
     ])
 
     assert_format(sql, expected)
+
+
+def test_32():
+    sql = 'SELECT * FROM uiop AS s GROUP BY s.id HAVING NOT (min_number = 1 AND max_number = cnt)'
+    expected = '\n'.join([
+        'SELECT',
+        '    *',
+        'FROM',
+        '    uiop AS s',
+        'GROUP BY',
+        '    s.id',
+        'HAVING',
+        '    NOT (',
+        '        min_number = 1',
+        '        AND max_number = cnt)',
+    ])
+
+    assert_format(sql, expected)
+
+
+def test_33():
+    sql = 'SELECT * FROM uiop AS s INNER JOIN rag AS r ON s.r_id = r.id GROUP BY s.id HAVING cnt > 0 AND NOT (min_number = 1 AND max_number = cnt)'
+    expected = '\n'.join([
+        'SELECT',
+        '    *',
+        'FROM',
+        '    uiop AS s',
+        '    INNER JOIN rag AS r ON s.r_id = r.id',
+        'GROUP BY',
+        '    s.id',
+        'HAVING',
+        '    cnt > 0',
+        '    AND NOT (',
+        '        min_number = 1',
+        '        AND max_number = cnt)',
+    ])
+
+    assert_format(sql, expected)
