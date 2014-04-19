@@ -18,10 +18,9 @@ def _filter(tokens):
 def _val(token, indent=0):
     if isinstance(token, Parenthesis):
         tokens = list(_filter(token.tokens))[1:-1]
-        if tokens[0].is_keyword or isinstance(tokens[0], Comparison):
-            indent += 4
-            if isinstance(tokens[0], Comparison):
-                indent -= 4
+        if tokens[0].is_keyword or isinstance(tokens[0], Comparison) or isinstance(tokens[0], Identifier):
+            if tokens[0].is_keyword:
+                indent += 4
             fort = _Formatter()
             return '(\n%s)' % fort._make_it_so(tokens=tokens, indent=indent)
         else:
