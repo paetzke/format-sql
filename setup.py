@@ -20,7 +20,7 @@ setup(name='format-sql',
       packages=find_packages(exclude=['tests*']),
       install_requires=open('requirements/package.txt').read().splitlines(),
       entry_points={
-          'console_scripts': ['format-sql = format_sql.format_sql:main']
+          'console_scripts': ['format-sql = format_sql.file_handling:main']
       },
       classifiers=[
           'Intended Audience :: Developers',

@@ -8,8 +8,7 @@ All rights reserved.
 """
 import os
 
-from format_sql import format_file
-from format_sql.format_sql import load_from_file
+from format_sql.file_handling import format_file, load_from_file, main
 
 
 def get_test_file(filename):

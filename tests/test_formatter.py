@@ -6,7 +6,7 @@ Copyright (c) 2014, Friedrich Paetzke (paetzke@fastmail.fm)
 All rights reserved.
 
 """
-from format_sql import format_sql
+from format_sql.formatter import format_sql
 
 
 def assert_format(sql, expected):
