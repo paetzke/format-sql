@@ -26,7 +26,36 @@ def load_from_file(filename):
     return text
 
 
-def format_text(text):
+def _get_file_in_path(path, file_type, recursive):
+    pathname = os.path.abspath(path)
+    if os.path.isfile(pathname):
+        yield pathname
+    elif os.path.isdir(pathname) and recursive:
+        for root, unused_dir, files in os.walk(pathname):
+            for item in fnmatch.filter(files, '*.' + file_type):
+                fname = os.path.join(root, item)
+                yield fname
+
+
+def format_file(filename, file_type):
+    try:
+        format_text = {
+            'py': _format_py_text,
+            'sql': _format_sql_text,
+        }[file_type]
+    except KeyError:
+        return
+
+    content = load_from_file(filename)
+    content = format_text(content)
+
+    if content:
+        content = content.encode('utf-8')
+        with open(filename, 'wb') as f:
+            f.write(content)
+
+
+def _format_py_text(text):
     queries = re.findall(r'([ ]*)[_\w\d.]*\s*=*\s*\(*"{3}(\s*.*?;*\s*)"{3}',
                          text, re.DOTALL)
 
@@ -53,29 +82,8 @@ def format_text(text):
     return text
 
 
-def format_file(filename):
-    content = load_from_file(filename)
-    content = format_text(content)
+def _format_sql_text(text):
+    if not text.lower().startswith('select '):
+        return
 
-    if content:
-        content = content.encode('utf-8')
-        with open(filename, 'wb') as f:
-            f.write(content)
-
-
-def format_files_in_directory(dirname):
-    for root, unused_dir, files in os.walk(dirname):
-        for item in fnmatch.filter(files, "*.py"):
-            fname = os.path.join(root, item)
-            yield fname
-
-
-def format_path(pathname):
-    pathname = os.path.abspath(pathname)
-    if os.path.isfile(pathname):
-        yield pathname
-    elif os.path.isdir(pathname):
-        for filename in format_files_in_directory(pathname):
-            yield filename
-
-
+    return format_sql(text) + '\n'
