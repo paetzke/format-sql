@@ -20,7 +20,7 @@ setup(name='format-sql',
       packages=find_packages(exclude=['tests*']),
       install_requires=open('requirements/package.txt').read().splitlines(),
       entry_points={
-          'console_scripts': ['format-sql = format_sql.file_handling:main']
+          'console_scripts': ['format-sql = format_sql.main:main']
       },
       classifiers=[
           'Intended Audience :: Developers',
@@ -30,6 +30,7 @@ setup(name='format-sql',
           'Programming Language :: Python :: 2.7',
           'Programming Language :: Python :: 3',
           'Programming Language :: Python :: 3.3',
+          'Programming Language :: Python :: 3.4',
           'Programming Language :: Python :: Implementation :: CPython',
           'Programming Language :: Python :: Implementation :: PyPy',
           'Topic :: Software Development :: Libraries',

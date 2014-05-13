@@ -7,14 +7,9 @@ All rights reserved.
 
 """
 import os
-import sys
 
-from format_sql.file_handling import format_file, load_from_file, main
-
-try:
-    from unittest.mock import patch
-except ImportError:
-    from mock import patch
+from format_sql.file_handling import (_format_sql_text, _get_file_in_path,
+                                      format_file, load_from_file)
 
 
 def get_test_file(filename):
@@ -25,12 +20,27 @@ def get_test_file(filename):
 
 def test_format_empty_file():
     filename = get_test_file('empty.py')
-    format_file(filename)
+    format_file(filename, 'py')
     assert load_from_file(filename) == ''
 
 
-def test_main():
-    sys.argv = ['NULL', 'tests']
-    with patch('format_sql.file_handling.format_file') as mocked:
-        main()
-        assert mocked.call_count == 19
+def test_find_no_files_in_folder_if_recursive_is_false(tmpdir):
+    p = tmpdir.mkdir('sub').join('hello.py')
+    p.write('content')
+
+    results = _get_file_in_path(tmpdir.strpath, 'py', False)
+    assert list(results) == []
+
+
+def test_find_files_in_folder_if_recursive_is_true(tmpdir):
+    p = tmpdir.mkdir('sub').join('hello.py')
+    p.write('content')
+
+    results = list(_get_file_in_path(tmpdir.strpath, 'py', True))
+    assert len(results) == 1
+    assert results[0].endswith('/sub/hello.py')
+
+
+def test_format_sql_text():
+    result = _format_sql_text('select * from table;')
+    assert result == 'SELECT\n    *\nFROM\n    TABLE;\n'
