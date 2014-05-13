@@ -12,7 +12,6 @@ from __future__ import print_function
 import fnmatch
 import os
 import re
-import sys
 
 from .formatter import format_sql
 
@@ -80,12 +79,3 @@ def format_path(pathname):
             yield filename
 
 
-def main():
-    for arg in sys.argv[1:]:
-        for filename in format_path(arg):
-            print(filename)
-            format_file(filename)
-
-
-if __name__ == '__main__':
-    main()
