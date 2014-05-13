@@ -23,7 +23,17 @@ You can then just call ``format-sql`` with files and directories:
 
 .. code:: bash
 
-    $ format-sql my_python_file.py my/python/dir/
+    $ format-sql  -h
+    usage: format-sql [-h] [--types [TYPES [TYPES ...]]] [-r] paths [paths ...]
+    
+    positional arguments:
+      paths
+    
+    optional arguments:
+      -h, --help            show this help message and exit
+      --types [TYPES [TYPES ...]]
+                            Process given file types. Default value is "py"
+      -r, --recursive       Process files found in subdirectories.
 
 An example:
 
