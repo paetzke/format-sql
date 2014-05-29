@@ -99,7 +99,10 @@ def test_handle_select(sql, expected_token):
     ('INNER JOIN', Token(Type.JOIN, 'INNER JOIN')),
     ('JOIN', Token(Type.JOIN, 'JOIN')),
     ('LEFT JOIN', Token(Type.JOIN, 'LEFT JOIN')),
+    ('LEFT OUTER JOIN', Token(Type.JOIN, 'LEFT OUTER JOIN')),
     ('RIGHT JOIN', Token(Type.JOIN, 'RIGHT JOIN')),
+    ('RIGHT OUTER JOIN', Token(Type.JOIN, 'RIGHT OUTER JOIN')),
+    ('FULL OUTER JOIN', Token(Type.JOIN, 'FULL OUTER JOIN')),
 ])
 def test_handle_join(sql, expected_token):
     assert_tokens(sql, [expected_token])
