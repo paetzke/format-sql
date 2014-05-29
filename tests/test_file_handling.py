@@ -6,22 +6,11 @@ Copyright (c) 2014, Friedrich Paetzke (paetzke@fastmail.fm)
 All rights reserved.
 
 """
-import os
+from __future__ import unicode_literals
 
-from format_sql.file_handling import (_format_sql_text, _get_file_in_path,
-                                      format_file, load_from_file)
-
-
-def get_test_file(filename):
-    test_data = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
-    filename = os.path.join(test_data, 'tests/data', filename)
-    return filename
-
-
-def test_format_empty_file():
-    filename = get_test_file('empty.py')
-    format_file(filename, 'py')
-    assert load_from_file(filename) == ''
+from format_sql.file_handling import (_format_py_text, _format_sql_text,
+                                      _get_file_in_path, format_file)
+from mock import patch
 
 
 def test_find_no_files_in_folder_if_recursive_is_false(tmpdir):
@@ -42,5 +31,41 @@ def test_find_files_in_folder_if_recursive_is_true(tmpdir):
 
 
 def test_format_sql_text():
-    result = _format_sql_text('select * from table;')
-    assert result == 'SELECT\n    *\nFROM\n    TABLE;\n'
+    result = _format_sql_text('select * from tab')
+    assert result == 'SELECT\n    *\nFROM\n    tab\n'
+
+
+def test_dont_change_empty_file(tmpdir):
+    pe = tmpdir.join('hello.py')
+    pe.write('')
+    format_file(pe.strpath, 'py')
+    assert pe.read() == ''
+
+
+def test_recognize_sql_in_assignment():
+    with patch('format_sql.file_handling.format_sql') as mocked_format_sql:
+        _format_py_text('''def func():
+    sql = """
+select *
+from my_table
+    """
+
+    return None
+''')
+
+        mocked_format_sql.assert_called_once_with('select * from my_table')
+
+
+def test_recognize_sql_in_function_call():
+    with patch('format_sql.file_handling.format_sql') as mocked_format_sql:
+        _format_py_text('''def func():
+    sql.execute("""select *
+from my_table
+
+    """)
+
+    print('')
+    return None
+''')
+
+        mocked_format_sql.assert_called_once_with('select * from my_table')
