@@ -1,4 +1,3 @@
-#! /usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 format-sql
@@ -13,7 +12,7 @@ import fnmatch
 import os
 import re
 
-from .formatter import format_sql
+from .shortcuts import format_sql
 
 
 def load_from_file(filename):
@@ -86,4 +85,4 @@ def _format_sql_text(text):
     if not text.lower().startswith('select '):
         return
 
-    return format_sql(text) + '\n'
+    return format_sql(text)

@@ -7,7 +7,9 @@ All rights reserved.
 
 """
 from .file_handling import format_file
-from .formatter import format_sql
+from .parser import (Comma, Compare, From, Group, Having, Identifier, Join, Key,
+                     Limit, Link, Select, Statement, Sub, Where)
+from .shortcuts import format_sql
 
 __version__ = '0.0.2'
 __author__ = 'Friedrich Paetzke'

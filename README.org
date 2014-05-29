@@ -1,0 +1,64 @@
+* format-sql
+
+[[https://travis-ci.org/paetzke/format-sql][https://travis-ci.org/paetzke/format-sql.svg?branch=master]]
+[[https://coveralls.io/r/paetzke/format-sql?branch=master][https://coveralls.io/repos/paetzke/format-sql/badge.png?branch=master]]
+[[https://pypi.python.org/pypi/format-sql/][https://pypip.in/v/format-sql/badge.png]]
+
+format-sql is a tool to format SQL in your Python strings!
+
+Install =format-sql= via =pip=:
+
+#+BEGIN_SRC bash
+$ pip install format-sql
+#+END_SRC
+
+You can then just call =format-sql= with files and directories:
+
+#+BEGIN_SRC bash
+$ format-sql  -h
+usage: format-sql [-h] [--types [TYPES [TYPES ...]]] [-r] paths [paths ...]
+
+positional arguments:
+  paths
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --types [TYPES [TYPES ...]]
+                        Process given file types. Default value is "py"
+  -r, --recursive       Process files found in subdirectories.
+#+END_SRC
+
+An example:
+
+#+BEGIN_SRC python
+    sql = """ SELECT country, product, SUM(profit) FROM
+sales   left join x on x.id=sales.k GROUP BY country,
+product having f > 7 and fk=9 limit 5;    """
+#+END_SRC
+
+Will result in:
+
+#+BEGIN_SRC python
+    sql = """
+        SELECT
+            country,
+            product,
+            SUM(profit)
+        FROM
+            sales
+            LEFT JOIN x
+                ON x.id = sales.k
+        GROUP BY
+            country,
+            product
+        HAVING
+            f > 7
+            AND fk = 9
+        LIMIT
+            5
+        ; """
+#+END_SRC
+
+
+
+Copyright (c) 2014, Friedrich Paetzke (paetzke@fastmail.fm). All rights reserved.
