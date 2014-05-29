@@ -9,7 +9,8 @@ All rights reserved.
 from collections import namedtuple
 
 from format_sql.parser import (Comma, Compare, From, Group, Having, Identifier,
-                               Join, Key, Limit, Link, Select, Sub, Where)
+                               Join, Key, Limit, Link, Order, Select, Sub,
+                               Where)
 from format_sql.tokenizer import Token, Type
 from pytest import fixture
 
@@ -820,5 +821,68 @@ def select_in_from_and_join():
             '            tab1) AS t',
             '    JOIN tab2',
             '        ON t.id = tab.id',
+            ''
+        ])
+
+
+@fixture
+def select_with_single_order_value():
+    return Data(
+        sql='SELECT * FROM tab1 ORDER BY some_column',
+        tokens=[
+            Token(Type.SELECT, 'SELECT'),
+            Token(Type.STR, '*'),
+            Token(Type.FROM, 'FROM'),
+            Token(Type.STR, 'tab1'),
+            Token(Type.ORDER, 'ORDER BY'),
+            Token(Type.STR, 'some_column')
+        ],
+        statements=[
+            Select('SELECT', statements=[Identifier('*')]),
+            From('FROM', statements=[Identifier('tab1')]),
+            Order('ORDER BY', statements=[Identifier('some_column')])
+        ],
+        style=[
+            'SELECT',
+            '    *',
+            'FROM',
+            '    tab1',
+            'ORDER BY',
+            '    some_column',
+            ''
+        ])
+
+
+@fixture
+def select_with_order_values():
+    return Data(
+        sql='SELECT * FROM tab1 ORDER BY some_column, second_column DESC',
+        tokens=[
+            Token(Type.SELECT, 'SELECT'),
+            Token(Type.STR, '*'),
+            Token(Type.FROM, 'FROM'),
+            Token(Type.STR, 'tab1'),
+            Token(Type.ORDER, 'ORDER BY'),
+            Token(Type.STR, 'some_column'),
+            Token(Type.PUNCTUATION, ','),
+            Token(Type.STR, 'second_column DESC')
+        ],
+        statements=[
+            Select('SELECT', statements=[Identifier('*')]),
+            From('FROM', statements=[Identifier('tab1')]),
+            Order('ORDER BY', statements=[
+                Identifier('some_column'),
+                Comma(','),
+                Identifier('second_column DESC')
+            ])
+        ],
+        style=[
+            'SELECT',
+            '    *',
+            'FROM',
+            '    tab1',
+            'ORDER BY',
+            '    some_column,',
+            '    second_column DESC',
             ''
         ])

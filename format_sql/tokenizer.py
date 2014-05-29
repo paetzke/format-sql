@@ -11,7 +11,7 @@ from itertools import chain
 
 import sqlparse
 
-ADDITIONAL = ['FROM', 'WHERE', 'LIMIT', 'GROUP BY', 'HAVING']
+ADDITIONAL = ['FROM', 'WHERE', 'LIMIT', 'GROUP BY', 'HAVING', 'ORDER BY']
 COMPARES = ('=', 'IN', '<>', '>', '<',  '!=', 'IS')
 JOINS = ('JOIN', 'INNER JOIN', 'FULL OUTER JOIN', 'LEFT OUTER JOIN',
          'LEFT JOIN',  'RIGHT OUTER JOIN', 'RIGHT JOIN')
@@ -46,6 +46,7 @@ class Type:
     SELECT = 'SELECT'
     STR = 'STR'
     WHERE = 'WHERE'
+    ORDER = 'ORDER'
 
 
 class Token:
@@ -77,6 +78,7 @@ class Token:
                 'GROUP BY': Type.GROUP,
                 'HAVING': Type.HAVING,
                 'LIMIT': Type.LIMIT,
+                'ORDER BY': Type.ORDER,
                 'WHERE': Type.WHERE,
             }[value]
             return cls(token_type, value)

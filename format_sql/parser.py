@@ -55,6 +55,10 @@ class Link(Statement):
     pass
 
 
+class Order(Statement):
+    pass
+
+
 class Select(Statement):
     pass
 
@@ -84,6 +88,7 @@ def _cls_from_dict(token, sub_tokens):
         Type.GROUP: Group,
         Type.HAVING: Having,
         Type.LIMIT: Limit,
+        Type.ORDER: Order,
         Type.WHERE: Where,
     }
 
@@ -119,7 +124,7 @@ def _parse(tokens, nested=False):
         token, sub_tokens = tokens[i], tokens[i + 1:]
 
         if nested and token.token_type in [Type.FROM, Type.GROUP, Type.HAVING,
-                                           Type.LIMIT, Type.WHERE]:
+                                           Type.LIMIT, Type.ORDER, Type.WHERE]:
             break
         if token.is_closing_parenthesis():
             break

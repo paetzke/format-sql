@@ -92,3 +92,11 @@ def test_style_select_in_from(select_in_from):
 
 def test_style_select_in_from_and_join(select_in_from_and_join):
     _test(select_in_from_and_join)
+
+
+def test_style_select_with_single_order_value(select_with_single_order_value):
+    _test(select_with_single_order_value)
+
+
+def test_style_select_with_order_values(select_with_order_values):
+    _test(select_with_order_values)
