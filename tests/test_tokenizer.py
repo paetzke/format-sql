@@ -15,7 +15,7 @@ def assert_tokens(sql, expected_tokens):
     assert len(tokens) == len(expected_tokens)
     for token, expected_token in zip(tokens, expected_tokens):
         assert token.value == expected_token.value
-        assert token.token_type == expected_token.token_type
+        assert token._type == expected_token._type
 
 
 def _test(data):
