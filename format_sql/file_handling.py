@@ -36,7 +36,7 @@ def _get_file_in_path(path, file_type, recursive):
                 yield fname
 
 
-def format_file(filename, file_type):
+def format_file(filename, file_type, **kwargs):
     try:
         format_text = {
             'py': _format_py_text,
@@ -46,7 +46,7 @@ def format_file(filename, file_type):
         return
 
     content = load_from_file(filename)
-    content = format_text(content)
+    content = format_text(content, **kwargs)
 
     if content:
         content = content.encode('utf-8')
@@ -54,9 +54,14 @@ def format_file(filename, file_type):
             f.write(content)
 
 
-def _format_py_text(text):
-    queries = re.findall(r'([ ]*)[_\w\d.]*\s*=*\s*\(*"{3}(\s*.*?;*\s*)"{3}',
-                         text, re.DOTALL)
+def _format_py_text(text, with_semicolon=True):
+    if with_semicolon:
+        semicolon_re = r';'
+    else:
+        semicolon_re = r';?'
+
+    regex = r'([ ]*)[_\w\d.]*\s*=*\s*\(*"{3}(\s*.*?%s\s*)"{3}' % (semicolon_re)
+    queries = re.findall(regex,  text, re.DOTALL)
 
     for indent, query in queries:
         indent += ' ' * 4
