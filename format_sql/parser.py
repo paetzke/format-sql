@@ -100,11 +100,11 @@ def _cls_from_dict(token, sub_tokens):
 
     statement, count = None, 0
     try:
-        cls = statements_with_subs[token.token_type]
+        cls = statements_with_subs[token._type]
         statement, count = _cls_with_sub_statements(cls, token, sub_tokens)
     except KeyError:
         try:
-            cls = statements_without_subs[token.token_type]
+            cls = statements_without_subs[token._type]
             statement = cls(token.value)
         except KeyError:
             pass
@@ -123,8 +123,8 @@ def _parse(tokens, nested=False):
         # Py3k: token, *sub_tokens
         token, sub_tokens = tokens[i], tokens[i + 1:]
 
-        if nested and token.token_type in [Type.FROM, Type.GROUP, Type.HAVING,
-                                           Type.LIMIT, Type.ORDER, Type.WHERE]:
+        if nested and token._type in [Type.FROM, Type.GROUP, Type.HAVING,
+                                      Type.LIMIT, Type.ORDER, Type.WHERE]:
             break
         if token.is_closing_parenthesis():
             break
@@ -133,9 +133,9 @@ def _parse(tokens, nested=False):
         if statement:
             i += count
 
-        elif token.token_type == Type.STR:
-            if sub_tokens and sub_tokens[0].token_type == Type.COMPARE:
-                is_list_compare = sub_tokens[1].token_type == Type.PUNCTUATION
+        elif token._type == Type.STR:
+            if sub_tokens and sub_tokens[0]._type == Type.COMPARE:
+                is_list_compare = sub_tokens[1]._type == Type.PUNCTUATION
                 if is_list_compare:
                     tks = [token, sub_tokens[0]]
                     sub_statement, count = _parse(sub_tokens[1:], nested=True)

@@ -52,20 +52,20 @@ class Type:
 class Token:
 
     def __init__(self, token_type, value):
-        self.token_type = token_type
+        self._type = token_type
         self.value = value
 
     def __str__(self):
-        return '<Token %s: %s>' % (self.token_type, self.value)
+        return '<Token %s: %s>' % (self._type, self.value)
 
     def is_closing_parenthesis(self):
-        return self.token_type == Type.PUNCTUATION and self.value == ')'
+        return self._type == Type.PUNCTUATION and self.value == ')'
 
     def is_opening_parenthesis(self):
-        return self.token_type == Type.PUNCTUATION and self.value == '('
+        return self._type == Type.PUNCTUATION and self.value == '('
 
     def is_comma(self):
-        return self.token_type == Type.PUNCTUATION and self.value == ','
+        return self._type == Type.PUNCTUATION and self.value == ','
 
     @classmethod
     def from_value(cls, value):
@@ -117,7 +117,7 @@ def _merge_str_tokens(tokens):
     str_tokens = []
 
     for token in tokens:
-        if token.token_type == Type.STR:
+        if token._type == Type.STR:
             str_tokens.append(token)
         else:
             if str_tokens:
