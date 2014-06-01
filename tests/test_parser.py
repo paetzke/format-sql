@@ -7,6 +7,7 @@ All rights reserved.
 
 """
 from format_sql.parser import parse
+from format_sql.tokenizer import Token, Type
 
 
 def assert_statement(statements1, statements2):
@@ -104,3 +105,23 @@ def test_parse_select_with_single_order_value(select_with_single_order_value):
 
 def test_parse_select_with_order_values(select_with_order_values):
     _test(select_with_order_values)
+
+
+def test_parse_can_handle_unknown_combinations():
+    """
+    Here we assert that the function returns at all in a short time. Maybe
+    there is a better way to do that.
+
+    """
+    tokens = [
+        Token(Type.SELECT,  'SELECT'),
+        Token(Type.STR, '*'),
+        Token(Type.FROM, 'FROM'),
+        Token(Type.STR, 'MY_TABLE'),
+        Token(Type.COMPARE, '<'),
+        Token(Type.STR, 'xyz'),
+        Token(Type.COMPARE, '>'),
+        Token(Type.STR, ';')
+    ]
+
+    parse(tokens)
