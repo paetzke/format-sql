@@ -10,28 +10,6 @@ format-sql
 
 format-sql is a tool to format SQL in your Python strings!
 
-Install ``format-sql`` via ``pip``:
-
-.. code:: bash
-
-    $ pip install format-sql
-
-You can then just call ``format-sql`` with files and directories:
-
-.. code:: bash
-
-    $ format-sql  -h
-    usage: format-sql [-h] [--types [TYPES [TYPES ...]]] [-r] paths [paths ...]
-    
-    positional arguments:
-      paths
-    
-    optional arguments:
-      -h, --help            show this help message and exit
-      --types [TYPES [TYPES ...]]
-                            Process given file types. Default value is "py"
-      -r, --recursive       Process files found in subdirectories.
-
 An example:
 
 .. code:: python
@@ -62,6 +40,30 @@ Will result in:
             LIMIT
                 5
             ; """
+
+Install ``format-sql`` via ``pip``:
+
+.. code:: bash
+
+    $ pip install format-sql
+
+You can then just call ``format-sql`` with files and directories:
+
+.. code:: bash
+
+    $ format-sql -h
+    usage: format-sql [-h] [--types [TYPES [TYPES ...]]] [-r] [--no-semicolon]
+                      paths [paths ...]
+    
+    positional arguments:
+      paths
+    
+    optional arguments:
+      -h, --help            show this help message and exit
+      --types [TYPES [TYPES ...]]
+                            Process given file types. Default value is "py".
+      -r, --recursive       Process files found in subdirectories.
+      --no-semicolon        Try to detect SQL queries with no trailing semicolon.
 
 Copyright (c) 2014, Friedrich Paetzke (paetzke@fastmail.fm). All rights reserved.
 
