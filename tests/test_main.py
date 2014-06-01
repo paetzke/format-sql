@@ -50,6 +50,20 @@ def test_args_recursive_is_active():
     assert args.recursive
 
 
+def test_args_has_no_semicolon():
+    args = 'file1 --no-semicolon'.split()
+    args = _get_args(args)
+
+    assert args.no_semicolon
+
+
+def test_args_default_has_semicolon():
+    args = 'file1'.split()
+    args = _get_args(args)
+
+    assert not args.no_semicolon
+
+
 def test_main_args():
     args = 'file1 file2 --types sql'.split()
 

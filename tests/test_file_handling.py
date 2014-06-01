@@ -43,29 +43,47 @@ def test_dont_change_empty_file(tmpdir):
 
 
 def test_recognize_sql_in_assignment():
-    with patch('format_sql.file_handling.format_sql') as mocked_format_sql:
-        _format_py_text('''def func():
+    content = '''def func():
     sql = """
 select *
-from my_table
+from my_table ;
     """
 
     return None
-''')
+'''
+    with patch('format_sql.file_handling.format_sql') as mocked_format_sql:
+        _format_py_text(content)
 
-        mocked_format_sql.assert_called_once_with('select * from my_table')
+        mocked_format_sql.assert_called_once_with('select * from my_table ;')
 
 
 def test_recognize_sql_in_function_call():
-    with patch('format_sql.file_handling.format_sql') as mocked_format_sql:
-        _format_py_text('''def func():
+    content = '''def func():
     sql.execute("""select *
 from my_table
-
+;
     """)
 
     print('')
     return None
-''')
+'''
+    with patch('format_sql.file_handling.format_sql') as mocked_format_sql:
+        _format_py_text(content)
+
+        mocked_format_sql.assert_called_once_with('select * from my_table ;')
+
+
+def test_recognize_sql_without_semicolon():
+    content = '''def func():
+    sql.execute("""select *
+from my_table
+    """)
+
+    print('')
+    return None
+'''
+
+    with patch('format_sql.file_handling.format_sql') as mocked_format_sql:
+        _format_py_text(content, with_semicolon=False)
 
         mocked_format_sql.assert_called_once_with('select * from my_table')
