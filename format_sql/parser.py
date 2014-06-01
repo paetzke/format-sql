@@ -163,6 +163,10 @@ def _parse(tokens, nested=False):
             statement = Comma(token.value)
             i += 1
 
+        if statement is None:
+            statement = Identifier(token.value)
+            i += 1
+
         statements.append(statement)
 
     return statements, i
