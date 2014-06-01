@@ -16,7 +16,7 @@ setup(name='format-sql',
       license='BSD',
       author='Friedrich Paetzke',
       author_email='paetzke@fastmail.fm',
-      url='https://github.com/paetzke/format-sql',
+      url='http://paetzke.me/project/format-sql',
       packages=find_packages(exclude=['tests*']),
       install_requires=open('requirements/package.txt').read().splitlines(),
       entry_points={
