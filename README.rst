@@ -65,5 +65,13 @@ You can then just call ``format-sql`` with files and directories:
       -r, --recursive       Process files found in subdirectories.
       --no-semicolon        Try to detect SQL queries with no trailing semicolon.
 
+Changes
+-------
+
+0.1
+~~~
+
+* Add parameter ``--no-semicolon`` to enable taking SQL queries without semicolon into account.
+
 Copyright (c) 2014, Friedrich Paetzke (paetzke@fastmail.fm). All rights reserved.
 
