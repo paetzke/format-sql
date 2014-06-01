@@ -65,6 +65,9 @@ optional arguments:
 
 ** Changes
 
+*** 0.x
+- Add handling for unknown token sequences.
+
 *** 0.1
 - Add parameter =--no-semicolon= to enable taking SQL queries without semicolon into account.
 
