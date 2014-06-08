@@ -145,7 +145,11 @@ def test_handle_compare(sql, expected_token):
     ('d.d DESC', Token(Type.STR, 'd.d DESC')),
     ('COUNT(*)', Token(Type.STR, 'COUNT(*)')),
     ('COUNT(*) AS cnt', Token(Type.STR, 'COUNT(*) AS cnt')),
-    ("'value is here'", Token(Type.STR, "'value is here'"))
+    ("'value is here'", Token(Type.STR, "'value is here'")),
+    ('INTERVAL', Token(Type.STR, 'INTERVAL')),
+    ('ANDOR', Token(Type.STR, 'ANDOR')),
+    ('FROMME', Token(Type.STR, 'FROMME')),
+    ('ORDER BY', Token(Type.ORDER, 'ORDER BY'))
 ])
 def test_handle_str(sql, expected_token):
     assert_tokens(sql, [expected_token])
