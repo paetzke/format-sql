@@ -11,13 +11,16 @@ from itertools import chain
 
 import sqlparse
 
-ADDITIONAL = ['FROM', 'WHERE', 'LIMIT', 'GROUP BY', 'HAVING', 'ORDER BY']
-COMPARES = ('=', 'IN', '<>', '>', '<',  '!=', 'IS')
+ADDITIONAL = ('FROM', 'WHERE', 'LIMIT', 'GROUP BY', 'HAVING', 'ORDER BY')
+COMPARES = ('=', '!=', 'IN', '<>', '>', '<', 'IS')
 JOINS = ('JOIN', 'INNER JOIN', 'FULL OUTER JOIN', 'LEFT OUTER JOIN',
          'LEFT JOIN',  'RIGHT OUTER JOIN', 'RIGHT JOIN')
 KEYWORDS = ('ON', 'NULL', 'NOT')
 LINKS = ('AND', 'OR')
 SELECTS = ('SELECT DISTINCT', 'SELECT SQL_NO_CACHE', 'SELECT')
+PUNCTUATIONS = (',', ')', '(')
+
+
 STRS = [
     r'\w+\(.*?\)',
     r'".*?"',
@@ -25,12 +28,8 @@ STRS = [
     r'[_\w\d\.`%]+',
     r"'.*?'"
 ]
-PUNCTUATIONS = [r',', r'\)', r'\(']
 IGNORABLE = ['\s+', '.+?']
-
-CHAINED = chain(JOINS, SELECTS, ADDITIONAL, PUNCTUATIONS,
-                COMPARES, LINKS, KEYWORDS, STRS, IGNORABLE)
-TOKENS_RE = re.compile('|'.join('(%s)' % x for x in CHAINED))
+TOKENS_RE = re.compile('|'.join('(%s)' % x for x in chain(STRS, IGNORABLE)))
 
 
 class Type:
@@ -69,10 +68,11 @@ class Token:
 
     @classmethod
     def from_value(cls, value):
-        if not value.strip():
+        value = value.strip()
+        if not value:
             return None
 
-        try:
+        if value in ADDITIONAL:
             token_type = {
                 'FROM': Type.FROM,
                 'GROUP BY': Type.GROUP,
@@ -82,8 +82,6 @@ class Token:
                 'WHERE': Type.WHERE,
             }[value]
             return cls(token_type, value)
-        except KeyError:
-            pass
 
         token_types = {
             COMPARES: Type.COMPARE,
@@ -91,9 +89,8 @@ class Token:
             KEYWORDS: Type.KEYWORD,
             LINKS: Type.LINK,
             SELECTS: Type.SELECT,
-            (',', '(', ')'): Type.PUNCTUATION,
+            PUNCTUATIONS: Type.PUNCTUATION,
         }
-
         for values, token_type in token_types.items():
             if value in values:
                 return cls(token_type, value)
@@ -129,12 +126,35 @@ def _merge_str_tokens(tokens):
         yield _create_str_token(str_tokens)
 
 
+def _startswith_and_is_not_partial(s, word):
+    if s.startswith(word):
+        if len(s) <= len(word) or s[len(word)] == ' ':
+            return True
+    return False
+
+
 def _tokenize(sql_str):
-    scanner = TOKENS_RE.scanner(sql_str)
-    for m in iter(scanner.match, None):
-        token = Token.from_value(m.group())
+    kwords = list(chain(ADDITIONAL, COMPARES, JOINS, KEYWORDS, LINKS, SELECTS,
+                        PUNCTUATIONS))
+
+    i = 0
+    while i < len(sql_str):
+        sub_str = sql_str[i:]
+
+        for kw in kwords:
+            if _startswith_and_is_not_partial(sub_str, kw):
+                val = kw
+                break
+        else:
+            mat = re.match(TOKENS_RE, sub_str)
+            if mat:
+                val = mat.group(0)
+
+        token = Token.from_value(val)
         if token:
             yield token
+
+        i += len(val)
 
 
 def tokenize(sql_str):
