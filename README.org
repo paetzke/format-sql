@@ -65,8 +65,10 @@ optional arguments:
 
 ** Changes
 
-*** 0.x
+*** NEXT
 - Add handling for unknown token sequences.
+- Fix detecting special words.
+  Word boundaries have been ignored.
 
 *** 0.1
 - Add parameter =--no-semicolon= to enable taking SQL queries without semicolon into account.

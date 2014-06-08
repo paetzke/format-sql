@@ -68,10 +68,11 @@ You can then just call ``format-sql`` with files and directories:
 Changes
 -------
 
-0.x
-~~~
+NEXT
+~~~~
 
 * Add handling for unknown token sequences.
+* Fix detecting special words. Word boundaries have been ignored.
 
 0.1
 ~~~
