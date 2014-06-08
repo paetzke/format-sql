@@ -13,7 +13,7 @@ from .tokenizer import normalize_sql, tokenize
 
 def format_sql(sql):
     sql, has_semicolon = normalize_sql(sql)
-    tokens = list(tokenize(sql))
+    tokens = tokenize(sql)
     parsed = parse(tokens)
     styled = style(parsed)
     if has_semicolon:

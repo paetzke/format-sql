@@ -6,14 +6,18 @@ Copyright (c) 2014, Friedrich Paetzke (paetzke@fastmail.fm)
 All rights reserved.
 
 """
+try:
+    from itertools import zip_longest
+except ImportError:
+    from itertools import izip_longest as zip_longest
+
 import pytest
 from format_sql.tokenizer import normalize_sql, Token, tokenize, Type
 
 
 def assert_tokens(sql, expected_tokens):
     tokens = tokenize(sql)
-    assert len(tokens) == len(expected_tokens)
-    for token, expected_token in zip(tokens, expected_tokens):
+    for token, expected_token in zip_longest(tokens, expected_tokens):
         assert token.value == expected_token.value
         assert token._type == expected_token._type
 
@@ -141,7 +145,11 @@ def test_handle_compare(sql, expected_token):
     ('d.d DESC', Token(Type.STR, 'd.d DESC')),
     ('COUNT(*)', Token(Type.STR, 'COUNT(*)')),
     ('COUNT(*) AS cnt', Token(Type.STR, 'COUNT(*) AS cnt')),
-    ("'value is here'", Token(Type.STR, "'value is here'"))
+    ("'value is here'", Token(Type.STR, "'value is here'")),
+    ('INTERVAL', Token(Type.STR, 'INTERVAL')),
+    ('ANDOR', Token(Type.STR, 'ANDOR')),
+    ('FROMME', Token(Type.STR, 'FROMME')),
+    ('ORDER BY', Token(Type.ORDER, 'ORDER BY'))
 ])
 def test_handle_str(sql, expected_token):
     assert_tokens(sql, [expected_token])
