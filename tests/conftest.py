@@ -886,3 +886,31 @@ def select_with_order_values():
             '    second_column DESC',
             ''
         ])
+
+
+@fixture
+def select_with_single_sub_on():
+    return Data(
+        sql='',
+        tokens=[],
+        statements=[
+            Select('SELECT', statements=[Identifier('*')]),
+            From('FROM', statements=[
+                Identifier('tab1'),
+                Join('INNER JOIN'),
+                Identifier('tab2'),
+                Key('ON'),
+                Sub('(', statements=[
+                    Compare('tab1.id2 = tab2.id2'),
+                ])
+            ]),
+        ],
+        style=[
+            'SELECT',
+            '    *',
+            'FROM',
+            '    tab1',
+            '    INNER JOIN tab2',
+            '        ON (tab1.id2 = tab2.id2)',
+            ''
+        ])

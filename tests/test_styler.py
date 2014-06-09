@@ -100,3 +100,7 @@ def test_style_select_with_single_order_value(select_with_single_order_value):
 
 def test_style_select_with_order_values(select_with_order_values):
     _test(select_with_order_values)
+
+
+def test_select_with_single_sub_on(select_with_single_sub_on):
+    _test(select_with_single_sub_on)
