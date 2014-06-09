@@ -126,6 +126,8 @@ def test_handle_join(sql, expected_token):
     ('!=', Token(Type.COMPARE, '!=')),
     ('<>', Token(Type.COMPARE, '<>')),
     ('>', Token(Type.COMPARE, '>')),
+    ('LIKE', Token(Type.COMPARE, 'LIKE')),
+    ('LIKE BINARY', Token(Type.COMPARE, 'LIKE BINARY')),
 ])
 def test_handle_compare(sql, expected_token):
     assert_tokens(sql, [expected_token])
