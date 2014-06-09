@@ -12,7 +12,7 @@ from itertools import chain
 import sqlparse
 
 ADDITIONAL = ('FROM', 'WHERE', 'LIMIT', 'GROUP BY', 'HAVING', 'ORDER BY')
-COMPARES = ('=', '!=', 'IN', '<>', '>', '<', 'IS')
+COMPARES = ('=', '!=', 'IN', '<>', '>', '<', 'IS', 'LIKE BINARY', 'LIKE')
 JOINS = ('JOIN', 'INNER JOIN', 'FULL OUTER JOIN', 'LEFT OUTER JOIN',
          'LEFT JOIN',  'RIGHT OUTER JOIN', 'RIGHT JOIN')
 KEYWORDS = ('ON', 'NULL', 'NOT')
