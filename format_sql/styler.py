@@ -6,7 +6,7 @@ Copyright (c) 2014, Friedrich Paetzke (paetzke@fastmail.fm)
 All rights reserved.
 
 """
-from .parser import Comma, Compare, Identifier, Join, Key, Link, Sub
+from .parser import Comma, Compare, Identifier, Join, Key, Link, Sub, Where
 
 
 def _add_to_last_line(result, value, prefix=''):
@@ -40,6 +40,12 @@ def _style_statements(statement, last_statement, result):
         return
 
     sub = _style(statement.statements)
+
+    if statement.is_sub_with_one_statement():
+        if last_statement.is_keyword_on():
+            result.append('%s%s' % (result.pop(),
+                                    _style(statement.statements)[0]))
+            return
 
     if _has_type_chain(statement, [Compare, Sub]):
         _add_to_last_line(result, ' ' + sub.pop(0))

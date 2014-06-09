@@ -18,6 +18,14 @@ class Statement:
     def __str__(self):
         return '%s-%s' % (self.__class__, self.value)
 
+    def is_keyword_on(self):
+        return isinstance(self, Key) and self.value == 'ON'
+
+    def is_sub_with_one_statement(self):
+        return all([isinstance(self, Sub),
+                    len(self.statements) == 1,
+                    len(self.statements[0].statements) == 0])
+
 
 class Comma(Statement):
     pass
