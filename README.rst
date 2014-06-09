@@ -73,6 +73,7 @@ NEXT
 
 * Add handling for unknown token sequences.
 * Fix detecting special words. Word boundaries have been ignored.
+* Single comparison in joins are printed on one line.
 
 0.1
 ~~~
