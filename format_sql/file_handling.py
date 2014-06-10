@@ -25,6 +25,12 @@ def load_from_file(filename):
     return text
 
 
+def write_file(filename, content):
+    content = content.encode('utf-8')
+    with open(filename, 'wb') as f:
+        f.write(content)
+
+
 def _get_file_in_path(path, file_type, recursive):
     pathname = os.path.abspath(path)
     if os.path.isfile(pathname):
@@ -49,9 +55,7 @@ def format_file(filename, file_type, **kwargs):
     content = format_text(content, **kwargs)
 
     if content:
-        content = content.encode('utf-8')
-        with open(filename, 'wb') as f:
-            f.write(content)
+        write_file(filename, content)
 
 
 def _format_py_text(text, with_semicolon=True):
@@ -86,7 +90,7 @@ def _format_py_text(text, with_semicolon=True):
     return text
 
 
-def _format_sql_text(text):
+def _format_sql_text(text, **unused_kwargs):
     if not text.lower().startswith('select '):
         return
 

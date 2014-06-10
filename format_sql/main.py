@@ -39,7 +39,8 @@ def main(call_args=sys.argv):
     for file_type, path in product(args.types, args.paths):
         for filename in _get_file_in_path(path, file_type, args.recursive):
             print(filename)
-            format_file(filename, file_type, not args.no_semicolon)
+            format_file(filename, file_type,
+                        with_semicolon=not args.no_semicolon)
 
 
 if __name__ == '__main__':
