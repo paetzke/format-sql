@@ -70,6 +70,11 @@ You can try format-sql online: `http://paetzke.me/format-sql <http://paetzke.me/
 Changes
 -------
 
+0.2.1
+~~~~~
+
+* Fix an issue with passing command line arguments.
+
 0.2
 ~~~
 
