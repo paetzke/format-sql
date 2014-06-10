@@ -6,6 +6,7 @@ Copyright (c) 2014, Friedrich Paetzke (paetzke@fastmail.fm)
 All rights reserved.
 
 """
+import pytest
 from format_sql.main import _get_args, main
 
 try:
@@ -71,3 +72,21 @@ def test_main_args():
         main(args)
         assert mocked_get_file.call_args_list == [call('file1', 'sql', False),
                                                   call('file2', 'sql', False)]
+
+
+@pytest.mark.parametrize('args, file_content, expected_output', [
+    ('file1 --types sql', 'select * from tabl',
+     'SELECT\n    *\nFROM\n    tabl\n'),
+    ('file1', 'a = """select * from tabl;"""',
+     'a = """\n    SELECT\n        *\n    FROM\n        tabl\n    ; """'),
+])
+@patch('format_sql.main._get_file_in_path')
+@patch('format_sql.file_handling.load_from_file')
+@patch('format_sql.file_handling.write_file')
+def test_main_args3(mocked_write_file, mocked_load_from_file, mocked_get_file, args, file_content, expected_output):
+    mocked_get_file.return_value = ['file1']
+    mocked_load_from_file.return_value = file_content
+
+    main(args.split())
+    mocked_load_from_file.assert_called_once()
+    mocked_write_file.assert_called_once_with('file1', expected_output)
