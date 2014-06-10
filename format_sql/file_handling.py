@@ -90,7 +90,7 @@ def _format_py_text(text, with_semicolon=True):
     return text
 
 
-def _format_sql_text(text):
+def _format_sql_text(text, **unused_kwargs):
     if not text.lower().startswith('select '):
         return
 
