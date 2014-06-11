@@ -19,8 +19,9 @@ from .file_handling import _get_file_in_path, format_file
 def _get_args(call_args):
     parser = ArgumentParser('format-sql')
 
-    parser.add_argument('--types', dest='types', type=str, nargs='*',
-                        default=['py'],
+    parser.add_argument('--types', dest='types', type=str,
+                        choices=['py', 'sql'],
+                        action='append',
                         help='Process given file types. Default value is "py".')
     parser.add_argument('paths', type=str, nargs='+')
     parser.add_argument('-r', '--recursive', dest='recursive',
@@ -30,6 +31,9 @@ def _get_args(call_args):
                         help='Try to detect SQL queries with no trailing semicolon.')
 
     args, _unused_unknown_args = parser.parse_known_args(call_args)
+    if not args.types:
+        args.types = ['py']
+
     return args
 
 

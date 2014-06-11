@@ -15,30 +15,18 @@ except ImportError:
     from mock import call, patch
 
 
-def test_args_recognition():
-    args = 'file1 --types py sql'.split()
-    args = _get_args(args)
+@pytest.mark.parametrize('args, expected_paths, expected_types', [
+    ('file1 file2 --types sql --types py', ['file1', 'file2'], ['sql', 'py']),
+    ('file1 --types py --types sql', ['file1'], ['py', 'sql']),
+    ('file1 file2 --types sql', ['file1', 'file2'], ['sql']),
+    ('file1 file2', ['file1', 'file2'], ['py']),
+    ('--types sql file2 file1', ['file2', 'file1'], ['sql']),
+])
+def test_get_args(args, expected_paths, expected_types):
+    args = _get_args(args.split())
 
-    assert args.types == ['py', 'sql']
-    assert args.paths == ['file1']
-    assert not args.recursive
-
-
-def test_args_default_types():
-    args = 'file1 file2'.split()
-    args = _get_args(args)
-
-    assert args.paths == ['file1', 'file2']
-    assert args.types == ['py']
-    assert not args.recursive
-
-
-def test_args_override_default_type():
-    args = 'file1 file2 --types sql'.split()
-    args = _get_args(args)
-
-    assert args.paths == ['file1', 'file2']
-    assert args.types == ['sql']
+    assert args.paths == expected_paths
+    assert args.types == expected_types
     assert not args.recursive
 
 
