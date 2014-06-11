@@ -52,23 +52,27 @@ You can then just call ``format-sql`` with files and directories:
 .. code:: bash
 
     $ format-sql -h
-    usage: format-sql [-h] [--types [TYPES [TYPES ...]]] [-r] [--no-semicolon]
+    usage: format-sql [-h] [--types {py,sql}] [-r] [--no-semicolon]
                       paths [paths ...]
     
     positional arguments:
       paths
     
     optional arguments:
-      -h, --help            show this help message and exit
-      --types [TYPES [TYPES ...]]
-                            Process given file types. Default value is "py".
-      -r, --recursive       Process files found in subdirectories.
-      --no-semicolon        Try to detect SQL queries with no trailing semicolon.
+      -h, --help        show this help message and exit
+      --types {py,sql}  Process given file types. Default value is "py".
+      -r, --recursive   Process files found in subdirectories.
+      --no-semicolon    Try to detect SQL queries with no trailing semicolon.
 
 You can try format-sql online: `http://paetzke.me/format-sql <http://paetzke.me/format-sql>`_.
 
 Changes
 -------
+
+0.2.2
+~~~~~
+
+* Fix an issue with passing ``--types`` command line argument.
 
 0.2.1
 ~~~~~
