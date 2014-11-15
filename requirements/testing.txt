@@ -1,5 +1,3 @@
--r package.txt
-
 coveralls
 mock
 pytest

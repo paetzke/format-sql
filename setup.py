@@ -18,7 +18,6 @@ setup(name='format-sql',
       author_email='paetzke@fastmail.fm',
       url='http://paetzke.me/project/format-sql',
       packages=find_packages(exclude=['tests*']),
-      install_requires=open('requirements/package.txt').read().splitlines(),
       entry_points={
           'console_scripts': ['format-sql = format_sql.main:main']
       },
