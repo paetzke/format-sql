@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 format-sql
+Makes your SQL readable.
 
 Copyright (c) 2014, Friedrich Paetzke (paetzke@fastmail.fm)
 All rights reserved.
@@ -9,14 +10,13 @@ All rights reserved.
 from setuptools import find_packages, setup
 
 setup(name='format-sql',
-      py_modules=['format_sql'],
-      description='format-sql is a tool to format SQL in your Python strings!',
+      description='Makes your SQL readable.',
       long_description=(open('README.rst').read()),
       version='0.2.2',
       license='BSD',
       author='Friedrich Paetzke',
       author_email='paetzke@fastmail.fm',
-      url='http://paetzke.me/project/format-sql',
+      url='https://github.com/paetzke/format-sql',
       packages=find_packages(exclude=['tests*']),
       entry_points={
           'console_scripts': ['format-sql = format_sql.main:main']
