@@ -8,7 +8,7 @@ format-sql
 .. image:: https://pypip.in/v/format-sql/badge.png
   :target: https://pypi.python.org/pypi/format-sql/
 
-format-sql is a tool to format SQL in your Python strings!
+Makes your SQL readable.
 
 An example:
 
@@ -29,17 +29,15 @@ Will result in:
                 SUM(profit)
             FROM
                 sales
-                LEFT JOIN x
-                    ON x.id = sales.k
+                LEFT JOIN x ON
+                    x.id = sales.k
             GROUP BY
                 country,
                 product
             HAVING
                 f > 7
                 AND fk = 9
-            LIMIT
-                5
-            ; """
+            LIMIT 5; """
 
 Install ``format-sql`` via ``pip``:
 
