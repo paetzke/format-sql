@@ -1,169 +1,347 @@
 # -*- coding: utf-8 -*-
 """
 format-sql
+Makes your SQL readable.
 
 Copyright (c) 2014, Friedrich Paetzke (paetzke@fastmail.fm)
 All rights reserved.
 
 """
+import pytest
+from format_sql.tokenizer import StringNotTerminated, Token, tokenize
+
 try:
     from itertools import zip_longest
 except ImportError:
     from itertools import izip_longest as zip_longest
 
-import pytest
-from format_sql.tokenizer import normalize_sql, Token, tokenize, Type
+
+def assert_tokens(tokens1, tokens2):
+    tokens2 = list(tokens2)
+    for tk1, tk2 in zip_longest(tokens1, tokens2):
+        assert tk1._value == tk2._value, ">%s< >%s<" % (tk1, tk2)
+        assert tk1._type == tk2._type, ">%s< >%s<" % (tk1, tk2)
 
 
-def assert_tokens(sql, expected_tokens):
-    tokens = tokenize(sql)
-    for token, expected_token in zip_longest(tokens, expected_tokens):
-        assert token.value == expected_token.value
-        assert token._type == expected_token._type
+@pytest.mark.parametrize(('sql', 'expected_tokens'), [
+    ('GROUP BY year', [
+        (Token.GROUP_BY, 'GROUP BY'),
+        (Token.IDENTIFIER, 'year'),
+    ]),
+    ('GROUP BY year, country, product', [
+        (Token.GROUP_BY, 'GROUP BY'),
+        (Token.IDENTIFIER, 'year'),
+        (Token.COMMA, ','),
+        (Token.IDENTIFIER, 'country'),
+        (Token.COMMA, ','),
+        (Token.IDENTIFIER, 'product'),
+    ]),
+    ('GROUP BY year, country, product With Rollup',  [
+        (Token.GROUP_BY, 'GROUP BY'),
+        (Token.IDENTIFIER, 'year'),
+        (Token.COMMA, ','),
+        (Token.IDENTIFIER, 'country'),
+        (Token.COMMA, ','),
+        (Token.IDENTIFIER, 'product'),
+        (Token.WITH_ROLLUP, 'With Rollup'),
+    ]),
+    ('select count(1) from my_table', [
+        (Token.SELECT, 'select'),
+        (Token.FUNC, 'count'),
+        (Token.PARENTHESIS_OPEN, '('),
+        (Token.NUMBER, '1'),
+        (Token.PARENTHESIS_CLOSE, ')'),
+        (Token.FROM, 'from'),
+        (Token.IDENTIFIER, 'my_table'),
+    ]),
+    ('select distinct count(1) from my_table', [
+        (Token.SELECT, 'select distinct'),
+        (Token.FUNC, 'count'),
+        (Token.PARENTHESIS_OPEN, '('),
+        (Token.NUMBER, '1'),
+        (Token.PARENTHESIS_CLOSE, ')'),
+        (Token.FROM, 'from'),
+        (Token.IDENTIFIER, 'my_table'),
+    ]),
+    ('GROUP   by year, country, product With Rollup',  [
+        (Token.GROUP_BY, 'GROUP   by'),
+        (Token.IDENTIFIER, 'year'),
+        (Token.COMMA, ','),
+        (Token.IDENTIFIER, 'country'),
+        (Token.COMMA, ','),
+        (Token.IDENTIFIER, 'product'),
+        (Token.WITH_ROLLUP, 'With Rollup'),
+    ]),
+    ('select  count\n(distinct(1)) from my_table', [
+        (Token.SELECT, 'select'),
+        (Token.FUNC, 'count'),
+        (Token.PARENTHESIS_OPEN, '('),
+        (Token.FUNC, 'distinct'),
+        (Token.PARENTHESIS_OPEN, '('),
+        (Token.NUMBER, '1'),
+        (Token.PARENTHESIS_CLOSE, ')'),
+        (Token.PARENTHESIS_CLOSE, ')'),
+        (Token.FROM, 'from'),
+        (Token.IDENTIFIER, 'my_table'),
+    ]),
+    ('select count(1) as cnt from my_table', [
+        (Token.SELECT, 'select'),
+        (Token.FUNC, 'count'),
+        (Token.PARENTHESIS_OPEN, '('),
+        (Token.NUMBER, '1'),
+        (Token.PARENTHESIS_CLOSE, ')'),
+        (Token.AS, 'as'),
+        (Token.IDENTIFIER, 'cnt'),
+        (Token.FROM, 'from'),
+        (Token.IDENTIFIER, 'my_table'),
+    ]),
 
-
-def _test(data):
-    assert_tokens(data.sql, data.tokens)
-
-
-def test_tokenize_select_from(select_from):
-    _test(select_from)
-
-
-def test_tokenize_select_with_group_and_having(select_with_group_and_having):
-    _test(select_with_group_and_having)
-
-
-def test_tokenize_select_with_limit(select_with_limit):
-    _test(select_with_limit)
-
-
-def test_tokenize_select_with_limit_and_offset(select_with_limit_and_offset):
-    _test(select_with_limit_and_offset)
-
-
-def test_tokenize_select_with_complex_filter(select_with_complex_filter):
-    _test(select_with_complex_filter)
-
-
-def test_tokenize_select_with_sub_select_in_filter(select_with_sub_select_in_filter):
-    _test(select_with_sub_select_in_filter)
-
-
-def test_tokenize_select_with_complex_having(select_with_complex_having):
-    _test(select_with_complex_having)
-
-
-def test_tokenize_select_with_where_filters(select_with_where_filters):
-    _test(select_with_where_filters)
-
-
-def test_tokenize_select_with_join(select_with_join):
-    _test(select_with_join)
-
-
-def test_tokenize_select_with_join_and_on(select_with_join_and_on):
-    _test(select_with_join_and_on)
-
-
-def test_tokenize_select_with_multiple_columns(select_with_multiple_columns):
-    _test(select_with_multiple_columns)
-
-
-def test_tokenize_select_with_not_in_compare(select_with_not_in_compare):
-    _test(select_with_not_in_compare)
-
-
-def test_tokenize_select_with_filter_in_list(select_with_filter_in_list):
-    _test(select_with_filter_in_list)
-
-
-def test_tokenize_select_with_multiple_joins(select_with_multiple_joins):
-    _test(select_with_multiple_joins)
-
-
-def test_tokenize_select_in_from(select_in_from):
-    _test(select_in_from)
-
-
-def test_tokenize_select_in_from_and_join(select_in_from_and_join):
-    _test(select_in_from_and_join)
-
-
-def test_tokenize_select_with_single_order_value(select_with_single_order_value):
-    _test(select_with_single_order_value)
-
-
-def test_tokenize_select_with_order_values(select_with_order_values):
-    _test(select_with_order_values)
-
-
-@pytest.mark.parametrize('sql, expected_token', [
-    ('SELECT', Token(Type.SELECT, 'SELECT')),
-    ('SELECT DISTINCT', Token(Type.SELECT, 'SELECT DISTINCT')),
-    ('SELECT SQL_NO_CACHE', Token(Type.SELECT, 'SELECT SQL_NO_CACHE')),
 ])
-def test_handle_select(sql, expected_token):
-    assert_tokens(sql, [expected_token])
+def test_tokenize(sql, expected_tokens):
+    tokens = [Token(token_type, token_value)
+              for token_type, token_value in expected_tokens]
+
+    assert_tokens(tokens, tokenize(sql))
 
 
-@pytest.mark.parametrize('sql, expected_token', [
-    ('INNER JOIN', Token(Type.JOIN, 'INNER JOIN')),
-    ('JOIN', Token(Type.JOIN, 'JOIN')),
-    ('LEFT JOIN', Token(Type.JOIN, 'LEFT JOIN')),
-    ('LEFT OUTER JOIN', Token(Type.JOIN, 'LEFT OUTER JOIN')),
-    ('RIGHT JOIN', Token(Type.JOIN, 'RIGHT JOIN')),
-    ('RIGHT OUTER JOIN', Token(Type.JOIN, 'RIGHT OUTER JOIN')),
-    ('FULL OUTER JOIN', Token(Type.JOIN, 'FULL OUTER JOIN')),
+@pytest.mark.parametrize(('sql', 'expected_token'), [
+    ('123', (Token.NUMBER, '123')),
+    ('1.23', (Token.NUMBER, '1.23')),
+    ('-1.23', (Token.NUMBER, '-1.23')),
+    ('+1.23', (Token.NUMBER, '+1.23')),
 ])
-def test_handle_join(sql, expected_token):
-    assert_tokens(sql, [expected_token])
+def test_tokenize_numbers(sql, expected_token):
+    token_type, token_value = expected_token
+    token = Token(token_type, token_value)
+
+    assert_tokens([token], tokenize(sql))
 
 
-@pytest.mark.parametrize('sql, expected_token', [
-    ('=', Token(Type.COMPARE, '=')),
-    ('<', Token(Type.COMPARE, '<')),
-    ('!=', Token(Type.COMPARE, '!=')),
-    ('<>', Token(Type.COMPARE, '<>')),
-    ('>', Token(Type.COMPARE, '>')),
-    ('LIKE', Token(Type.COMPARE, 'LIKE')),
-    ('LIKE BINARY', Token(Type.COMPARE, 'LIKE BINARY')),
+@pytest.mark.parametrize(('sql', 'expected_token'), [
+    ('"s s( ) ss"', (Token.STR, '"s s( ) ss"')),
+    ("'s s( ) ss'", (Token.STR, "'s s( ) ss'")),
 ])
-def test_handle_compare(sql, expected_token):
-    assert_tokens(sql, [expected_token])
+def test_tokenize_strs(sql, expected_token):
+    token_type, token_value = expected_token
+    token = Token(token_type, token_value)
+
+    assert_tokens([token], tokenize(sql))
 
 
-@pytest.mark.parametrize('sql, expected_token', [
-    ('my_table AS t1', Token(Type.STR, 'my_table AS t1')),
-    ('q.`cnd`', Token(Type.STR, 'q.`cnd`')),
-    ('gt.fu_d', Token(Type.STR, 'gt.fu_d')),
-    ('q.`cnd` AS e2', Token(Type.STR, 'q.`cnd` AS e2')),
-    ('count(1)', Token(Type.STR, 'count(1)')),
-    ('count(1) AS cnt', Token(Type.STR, 'count(1) AS cnt')),
-    ('count(`s`.`dd`) AS cnt', Token(Type.STR, 'count(`s`.`dd`) AS cnt')),
-    ('%(some_thing)s', Token(Type.STR, '%(some_thing)s')),
-    ('%%(some_thing_2)s', Token(Type.STR, '%%(some_thing_2)s')),
-    ('s.id ASC', Token(Type.STR, 's.id ASC')),
-    ('d.d DESC', Token(Type.STR, 'd.d DESC')),
-    ('COUNT(*)', Token(Type.STR, 'COUNT(*)')),
-    ('COUNT(*) AS cnt', Token(Type.STR, 'COUNT(*) AS cnt')),
-    ("'value is here'", Token(Type.STR, "'value is here'")),
-    ('INTERVAL', Token(Type.STR, 'INTERVAL')),
-    ('ANDOR', Token(Type.STR, 'ANDOR')),
-    ('FROMME', Token(Type.STR, 'FROMME')),
-    ('ORDER BY', Token(Type.ORDER, 'ORDER BY'))
+@pytest.mark.parametrize(('sql', 'expected_token'), [
+    ('xyz', (Token.IDENTIFIER, 'xyz')),
+    ('xy1', (Token.IDENTIFIER, 'xy1')),
+    ('xy1.tf', (Token.IDENTIFIER, 'xy1.tf')),
+    ('*', (Token.IDENTIFIER, '*')),
+    ('t.*', (Token.IDENTIFIER, 't.*')),
+    ('%(t)s', (Token.IDENTIFIER, '%(t)s')),
+    ('%(t_s)s', (Token.IDENTIFIER, '%(t_s)s')),
+    ('`xy1`.`tf`', (Token.IDENTIFIER, '`xy1`.`tf`')),
+    ('`xy1``', (Token.IDENTIFIER, '`xy1`')),
+    ('%s', (Token.IDENTIFIER, '%s')),
 ])
-def test_handle_str(sql, expected_token):
-    assert_tokens(sql, [expected_token])
+def test_tokenize_identifier(sql, expected_token):
+    token_type, token_value = expected_token
+    token = Token(token_type, token_value)
+
+    assert_tokens([token], tokenize(sql))
 
 
-@pytest.mark.parametrize('sql, expected_sql, expected_has_semicolon', [
-    ('Select * FROM my_table', 'SELECT * FROM my_table', False),
-    ('left join', 'LEFT JOIN', False),
-    ('x in ("78", "d")', 'x IN ("78", "d")', False),
-    ('Select * FROM my_table;', 'SELECT * FROM my_table', True),
+@pytest.mark.parametrize(('sql', 'expected_token'), [
+    ('Join', (Token.JOIN, 'Join')),
+    ('Inner Join', (Token.JOIN, 'Inner Join')),
+    ('natural Join', (Token.JOIN, 'natural Join')),
+    ('LEFT  Join', (Token.JOIN, 'LEFT  Join')),
+    ('LEFT  OUTER Join', (Token.JOIN, 'LEFT  OUTER Join')),
+    ('Right  Join', (Token.JOIN, 'Right  Join')),
+    ('Right  OUTER Join', (Token.JOIN, 'Right  OUTER Join')),
 ])
-def test_normalize_sql(sql, expected_sql, expected_has_semicolon):
-    normalized, has_semicolon = normalize_sql(sql)
-    assert normalized == expected_sql
-    assert has_semicolon == expected_has_semicolon
+def test_tokenize_join(sql, expected_token):
+    token_type, token_value = expected_token
+    token = Token(token_type, token_value)
+
+    assert_tokens([token], tokenize(sql))
+
+
+@pytest.mark.parametrize(('sql', 'expected_token'), [
+    ('Select', (Token.SELECT, 'Select')),
+    ('Select distinct', (Token.SELECT, 'Select distinct')),
+    ('Select sql_no_cache', (Token.SELECT, 'Select sql_no_cache')),
+])
+def test_tokenize_select(sql, expected_token):
+    token_type, token_value = expected_token
+    token = Token(token_type, token_value)
+
+    assert_tokens([token], tokenize(sql))
+
+
+@pytest.mark.parametrize(('sql', 'expected_token'), [
+    ('=', (Token.COMPARE, '=')),
+    ('<>', (Token.COMPARE, '<>')),
+    ('<', (Token.COMPARE, '<')),
+    ('>', (Token.COMPARE, '>')),
+    ('!=', (Token.COMPARE, '!=')),
+    ('>=', (Token.COMPARE, '>=')),
+    ('<=', (Token.COMPARE, '<=')),
+])
+def test_tokenize_compare(sql, expected_token):
+    token_type, token_value = expected_token
+    token = Token(token_type, token_value)
+
+    assert_tokens([token], tokenize(sql))
+
+
+@pytest.mark.parametrize(('sql', 'expected_token'), [
+    ('and', (Token.LINK, 'and')),
+    ('Or', (Token.LINK, 'Or')),
+])
+def test_tokenize_link(sql, expected_token):
+    token_type, token_value = expected_token
+    token = Token(token_type, token_value)
+
+    assert_tokens([token], tokenize(sql))
+
+
+@pytest.mark.parametrize('sql', [
+    '"213',
+    '"s s( ) ss\'',
+])
+def test_tokenize_str_is_not_terminated(sql):
+    with pytest.raises(StringNotTerminated):
+        list(tokenize(sql))
+
+
+def test_tokenize_from_1(from_1):
+    assert_tokens(from_1.tokens, tokenize(from_1.sql))
+
+
+def test_tokenize_from_2(from_2):
+    assert_tokens(from_2.tokens, tokenize(from_2.sql))
+
+
+def test_tokenize_from_3(from_3):
+    assert_tokens(from_3.tokens, tokenize(from_3.sql))
+
+
+def test_tokenize_from_4(from_4):
+    assert_tokens(from_4.tokens, tokenize(from_4.sql))
+
+
+def test_tokenize_from_5(from_5):
+    assert_tokens(from_5.tokens, tokenize(from_5.sql))
+
+
+def test_tokenize_func_1(func_1):
+    assert_tokens(func_1.tokens, tokenize(func_1.sql))
+
+
+def test_tokenize_func_2(func_2):
+    assert_tokens(func_2.tokens, tokenize(func_2.sql))
+
+
+def test_tokenize_func_3(func_3):
+    assert_tokens(func_3.tokens, tokenize(func_3.sql))
+
+
+def test_tokenize_func_4(func_4):
+    assert_tokens(func_4.tokens, tokenize(func_4.sql))
+
+
+def test_tokenize_group_by_1(group_by_1):
+    assert_tokens(group_by_1.tokens, tokenize(group_by_1.sql))
+
+
+def test_tokenize_group_by_2(group_by_2):
+    assert_tokens(group_by_2.tokens, tokenize(group_by_2.sql))
+
+
+def test_tokenize_group_by_3(group_by_3):
+    assert_tokens(group_by_3.tokens, tokenize(group_by_3.sql))
+
+
+def test_tokenize_group_by_4(group_by_4):
+    assert_tokens(group_by_4.tokens, tokenize(group_by_4.sql))
+
+
+def test_tokenize_having_1(having_1):
+    assert_tokens(having_1.tokens, tokenize(having_1.sql))
+
+
+def test_tokenize_having_2(having_2):
+    assert_tokens(having_2.tokens, tokenize(having_2.sql))
+
+
+def test_tokenize_limit_1(limit_1):
+    assert_tokens(limit_1.tokens, tokenize(limit_1.sql))
+
+
+def test_tokenize_limit_2(limit_2):
+    assert_tokens(limit_2.tokens, tokenize(limit_2.sql))
+
+
+def test_tokenize_limit_3(limit_3):
+    assert_tokens(limit_3.tokens, tokenize(limit_3.sql))
+
+
+def test_tokenize_order_by_1(order_by_1):
+    assert_tokens(order_by_1.tokens, tokenize(order_by_1.sql))
+
+
+def test_tokenize_order_by_2(order_by_2):
+    assert_tokens(order_by_2.tokens, tokenize(order_by_2.sql))
+
+
+def test_tokenize_order_by_3(order_by_3):
+    assert_tokens(order_by_3.tokens, tokenize(order_by_3.sql))
+
+
+def test_tokenize_order_by_4(order_by_4):
+    assert_tokens(order_by_4.tokens, tokenize(order_by_4.sql))
+
+
+def test_tokenize_select_1(select_1):
+    assert_tokens(select_1.tokens, tokenize(select_1.sql))
+
+
+def test_tokenize_select_2(select_2):
+    assert_tokens(select_2.tokens, tokenize(select_2.sql))
+
+
+def test_tokenize_select_3(select_3):
+    assert_tokens(select_3.tokens, tokenize(select_3.sql))
+
+
+def test_tokenize_where_1(where_1):
+    assert_tokens(where_1.tokens, tokenize(where_1.sql))
+
+
+def test_tokenize_where_2(where_2):
+    assert_tokens(where_2.tokens, tokenize(where_2.sql))
+
+
+def test_tokenize_where_3(where_3):
+    assert_tokens(where_3.tokens, tokenize(where_3.sql))
+
+
+def test_tokenize_where_4(where_4):
+    assert_tokens(where_4.tokens, tokenize(where_4.sql))
+
+
+def test_tokenize_where_5(where_5):
+    assert_tokens(where_5.tokens, tokenize(where_5.sql))
+
+
+def test_tokenize_where_6(where_6):
+    assert_tokens(where_6.tokens, tokenize(where_6.sql))
+
+
+def test_tokenize_where_7(where_7):
+    assert_tokens(where_7.tokens, tokenize(where_7.sql))
+
+
+def test_tokenize_composition_1(composition_1):
+    assert_tokens(composition_1.tokens, tokenize(composition_1.sql))
+
+
+def test_tokenize_composition_2(composition_2):
+    assert_tokens(composition_2.tokens, tokenize(composition_2.sql))

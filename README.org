@@ -4,7 +4,9 @@
 [[https://coveralls.io/r/paetzke/format-sql?branch=master][https://coveralls.io/repos/paetzke/format-sql/badge.png?branch=master]]
 [[https://pypi.python.org/pypi/format-sql/][https://pypip.in/v/format-sql/badge.png]]
 
-format-sql is a tool to format SQL in your Python strings!
+
+Makes your SQL readable.
+
 
 An example:
 
@@ -24,17 +26,15 @@ Will result in:
             SUM(profit)
         FROM
             sales
-            LEFT JOIN x
-                ON x.id = sales.k
+            LEFT JOIN x ON
+                x.id = sales.k
         GROUP BY
             country,
             product
         HAVING
             f > 7
             AND fk = 9
-        LIMIT
-            5
-        ; """
+        LIMIT 5; """
 #+END_SRC
 
 

@@ -1,916 +1,922 @@
 # -*- coding: utf-8 -*-
 """
 format-sql
+Makes your SQL readable.
 
 Copyright (c) 2014, Friedrich Paetzke (paetzke@fastmail.fm)
 All rights reserved.
 
 """
+import os
 from collections import namedtuple
 
-from format_sql.parser import (Comma, Compare, From, Group, Having, Identifier,
-                               Join, Key, Limit, Link, Order, Select, Sub,
-                               Where)
-from format_sql.tokenizer import Token, Type
+from format_sql.parser import (Condition, From, Func, GroupBy, Having,
+                               Identifier, Join, Limit, Link, Not, Number, On,
+                               Operator, OrderBy, Select, Semicolon, Str,
+                               SubSelect, Where)
+from format_sql.tokenizer import Token
 from pytest import fixture
 
 Data = namedtuple('Data', ['sql', 'tokens', 'statements', 'style'])
 
 
 @fixture
-def select_with_limit():
+def test_data():
+    class TestData:
+
+        def get_path(self, path):
+            return os.path.join(os.path.join(os.path.dirname(__file__), 'data'), path)
+
+    return TestData()
+
+
+@fixture
+def from_1():
     return Data(
-        sql='SELECT * FROM my_table LIMIT 65',
+        sql='From x',
         tokens=[
-            Token(Type.SELECT, 'SELECT'),
-            Token(Type.STR, '*'),
-            Token(Type.FROM, 'FROM'),
-            Token(Type.STR, 'my_table'),
-            Token(Type.LIMIT, 'LIMIT'),
-            Token(Type.STR, '65'),
+            Token(Token.FROM, 'From'),
+            Token(Token.IDENTIFIER, 'x')
         ],
         statements=[
-            Select('SELECT', statements=[Identifier('*')]),
-            From('FROM', statements=[Identifier('my_table')]),
-            Limit('LIMIT', statements=[Identifier('65')]),
+            From('From', values=[Identifier('x')])
         ],
         style=[
-            'SELECT',
-            '    *',
             'FROM',
-            '    my_table',
-            'LIMIT',
-            '    65',
-            ''
+            '    x'
         ])
 
 
 @fixture
-def select_with_limit_and_offset():
+def from_2():
     return Data(
-        sql='SELECT * FROM my_table LIMIT 65,90',
+        sql='From x as t',
         tokens=[
-            Token(Type.SELECT, 'SELECT'),
-            Token(Type.STR, '*'),
-            Token(Type.FROM, 'FROM'),
-            Token(Type.STR, 'my_table'),
-            Token(Type.LIMIT, 'LIMIT'),
-            Token(Type.STR, '65'),
-            Token(Type.PUNCTUATION, ','),
-            Token(Type.STR, '90'),
+            Token(Token.FROM, 'From'),
+            Token(Token.IDENTIFIER, 'x'),
+            Token(Token.AS, 'as'),
+            Token(Token.IDENTIFIER, 't')
         ],
         statements=[
-            Select('SELECT', statements=[Identifier('*')]),
-            From('FROM', statements=[Identifier('my_table')]),
-            Limit('LIMIT', statements=[
-                Identifier('65'),
-                Comma(','),
-                Identifier('90')])
+            From('From', values=[Identifier('x', as_='as', alias='t')])
         ],
         style=[
-            'SELECT',
-            '    *',
             'FROM',
-            '    my_table',
-            'LIMIT',
-            '    65,',
-            '    90',
-            ''
+            '    x AS t'
         ])
 
 
 @fixture
-def select_from():
+def from_3():
     return Data(
-        sql='SELECT * FROM my_table',
+        sql='From x t, r As z',
         tokens=[
-            Token(Type.SELECT, 'SELECT'),
-            Token(Type.STR, '*'),
-            Token(Type.FROM, 'FROM'),
-            Token(Type.STR, 'my_table'),
+            Token(Token.FROM, 'From'),
+            Token(Token.IDENTIFIER, 'x'),
+            Token(Token.IDENTIFIER, 't'),
+            Token(Token.COMMA, ','),
+            Token(Token.IDENTIFIER, 'r'),
+            Token(Token.AS, 'As'),
+            Token(Token.IDENTIFIER, 'z'),
         ],
         statements=[
-            Select('SELECT', statements=[Identifier('*')]),
-            From('FROM', statements=[Identifier('my_table')]),
+            From('From', values=[
+                Identifier('x', alias='t'),
+                Identifier('r', as_='As', alias='z')])
         ],
         style=[
-            'SELECT',
-            '    *',
             'FROM',
-            '    my_table',
-            ''
+            '    x t,',
+            '    r AS z'
         ])
 
 
 @fixture
-def select_with_multiple_columns():
+def from_4():
     return Data(
-        sql='SELECT a, b, c',
+        sql='From x t join r As z on t4.id1=z4.id2',
         tokens=[
-            Token(Type.SELECT, 'SELECT'),
-            Token(Type.STR, 'a'),
-            Token(Type.PUNCTUATION, ','),
-            Token(Type.STR, 'b'),
-            Token(Type.PUNCTUATION, ','),
-            Token(Type.STR, 'c'),
+            Token(Token.FROM, 'From'),
+            Token(Token.IDENTIFIER, 'x'),
+            Token(Token.IDENTIFIER, 't'),
+            Token(Token.JOIN, 'join'),
+            Token(Token.IDENTIFIER, 'r'),
+            Token(Token.AS, 'As'),
+            Token(Token.IDENTIFIER, 'z'),
+            Token(Token.ON, 'on'),
+            Token(Token.IDENTIFIER, 't4.id1'),
+            Token(Token.COMPARE, '='),
+            Token(Token.IDENTIFIER, 'z4.id2'),
         ],
         statements=[
-            Select('SELECT', statements=[
-                Identifier('a'),
-                Comma(','),
-                Identifier('b'),
-                Comma(','),
-                Identifier('c'),
-            ])
-        ],
-        style=[
-            'SELECT',
-            '    a,',
-            '    b,',
-            '    c',
-            ''
-        ])
-
-
-@fixture
-def select_with_where():
-    return Data(
-        sql='',
-        tokens=[
-            Token(Type.SELECT, 'SELECT'),
-            Token(Type.STR, '*'),
-            Token(Type.FROM, 'FROM'),
-            Token(Type.STR, 'my_table2'),
-            Token(Type.WHERE, 'WHERE'),
-            Token(Type.STR, 't'),
-            Token(Type.COMPARE, '='),
-            Token(Type.STR, '3'),
-        ],
-        statements=[
-            Select('SELECT', statements=[Identifier('*')]),
-            From('FROM', statements=[Identifier('my_table2')]),
-            Where('WHERE', statements=[Compare('t = 3')]),
-        ],
-        style=[
-            'SELECT',
-            '    *',
-            'FROM',
-            '    my_table2',
-            'WHERE',
-            '    t = 3',
-            ''
-        ])
-
-
-@fixture
-def select_with_where_filters():
-    return Data(
-        sql='SELECT * FROM tab1 WHERE id1 = value1 OR id2 = value2',
-        tokens=[
-            Token(Type.SELECT, 'SELECT'),
-            Token(Type.STR, '*'),
-            Token(Type.FROM, 'FROM'),
-            Token(Type.STR, 'tab1'),
-            Token(Type.WHERE, 'WHERE'),
-            Token(Type.STR, 'id1'),
-            Token(Type.COMPARE, '='),
-            Token(Type.STR, 'value1'),
-            Token(Type.LINK, 'OR'),
-            Token(Type.STR, 'id2'),
-            Token(Type.COMPARE, '='),
-            Token(Type.STR, 'value2'),
-        ],
-        statements=[
-            Select('SELECT', statements=[Identifier('*')]),
-            From('FROM', statements=[Identifier('tab1')]),
-            Where('WHERE', statements=[
-                Compare('id1 = value1'),
-                Link('OR'),
-                Compare('id2 = value2'),
-            ]),
-        ],
-        style=[
-            'SELECT',
-            '    *',
-            'FROM',
-            '    tab1',
-            'WHERE',
-            '    id1 = value1',
-            '    OR id2 = value2',
-            ''
-        ])
-
-
-@fixture
-def select_with_join():
-    return Data(
-        sql='SELECT * FROM tab1 RIGHT JOIN tab2',
-        tokens=[
-            Token(Type.SELECT, 'SELECT'),
-            Token(Type.STR, '*'),
-            Token(Type.FROM, 'FROM'),
-            Token(Type.STR, 'tab1'),
-            Token(Type.JOIN, 'RIGHT JOIN'),
-            Token(Type.STR, 'tab2'),
-        ],
-        statements=[
-            Select('SELECT', statements=[Identifier('*')]),
-            From('FROM', statements=[
-                Identifier('tab1'),
-                Join('RIGHT JOIN'),
-                Identifier('tab2'),
-            ]),
-        ],
-        style=[
-            'SELECT',
-            '    *',
-            'FROM',
-            '    tab1',
-            '    RIGHT JOIN tab2',
-            ''
-        ])
-
-
-@fixture
-def select_with_join_and_on():
-    return Data(
-        sql='SELECT * FROM tab1 INNER JOIN tab2 ON tab1.id = tab2.id',
-        tokens=[
-            Token(Type.SELECT, 'SELECT'),
-            Token(Type.STR, '*'),
-            Token(Type.FROM, 'FROM'),
-            Token(Type.STR, 'tab1'),
-            Token(Type.JOIN, 'INNER JOIN'),
-            Token(Type.STR, 'tab2'),
-            Token(Type.KEYWORD, 'ON'),
-            Token(Type.STR, 'tab1.id'),
-            Token(Type.COMPARE, '='),
-            Token(Type.STR, 'tab2.id'),
-        ],
-        statements=[
-            Select('SELECT', statements=[Identifier('*')]),
-            From('FROM', statements=[
-                Identifier('tab1'),
-                Join('INNER JOIN'),
-                Identifier('tab2'),
-                Key('ON'),
-                Compare('tab1.id = tab2.id'),
-            ]),
-        ],
-        style=[
-            'SELECT',
-            '    *',
-            'FROM',
-            '    tab1',
-            '    INNER JOIN tab2',
-            '        ON tab1.id = tab2.id',
-            ''
-        ])
-
-
-@fixture
-def select_with_join_and_nested_filters():
-    return Data(
-        sql='',
-        tokens='',
-        statements=[
-            Select('SELECT', statements=[Identifier('*')]),
-            From('FROM', statements=[Identifier('tab1')]),
-            Where('WHERE', statements=[
-                Compare('id1 = value1'),
-                Link('AND'),
-                Sub('(', statements=[
-                    Compare('tab1.id = tab2.id'),
-                    Link('OR'),
-                    Compare('tab1.id2 = tab2.id2'),
-                ])
-            ]),
-        ],
-        style=[
-            'SELECT',
-            '    *',
-            'FROM',
-            '    tab1',
-            'WHERE',
-            '    id1 = value1',
-            '    AND (',
-            '        tab1.id = tab2.id',
-            '        OR tab1.id2 = tab2.id2)',
-            ''
-        ])
-
-
-@fixture
-def join_with_nested_on():
-    return Data(
-        sql='',
-        tokens=[
-            Token(Type.SELECT, 'SELECT'),
-            Token(Type.STR, '*'),
-            Token(Type.FROM, 'FROM'),
-            Token(Type.STR, 'tab1'),
-            Token(Type.JOIN, 'INNER JOIN'),
-            Token(Type.STR, 'tab2'),
-            Token(Type.KEYWORD, 'ON'),
-            Token(Type.PUNCTUATION, '('),
-            Token(Type.STR, 'tab1.id'),
-            Token(Type.COMPARE, '='),
-            Token(Type.STR, 'tab2.id'),
-            Token(Type.LINK, 'AND'),
-            Token(Type.STR, 'tab1.id2'),
-            Token(Type.COMPARE, '='),
-            Token(Type.STR, 'tab2.id2'),
-            Token(Type.PUNCTUATION, ')'),
-        ],
-        statements=[
-            Select('SELECT', statements=[Identifier('*')]),
-            From('FROM', statements=[
-                Identifier('tab1'),
-                Join('INNER JOIN'),
-                Identifier('tab2'),
-                Key('ON'),
-                Sub('(', statements=[
-                    Compare('tab1.id = tab2.id'),
-                    Link('AND'),
-                    Compare('tab1.id2 = tab2.id2'),
-                ])
-            ]),
-        ],
-        style=[
-            'SELECT',
-            '    *',
-            'FROM',
-            '    tab1',
-            '    INNER JOIN tab2',
-            '        ON (',
-            '            tab1.id = tab2.id',
-            '            AND tab1.id2 = tab2.id2)',
-            ''
-        ])
-
-
-@fixture
-def select_with_filter_in_list():
-    return Data(
-        sql='SELECT x3 FROM tab1 WHERE x IN ("78", "d")',
-        tokens=[
-            Token(Type.SELECT, 'SELECT'),
-            Token(Type.STR, 'x3'),
-            Token(Type.FROM, 'FROM'),
-            Token(Type.STR, 'tab1'),
-            Token(Type.WHERE, 'WHERE'),
-            Token(Type.STR, 'x'),
-            Token(Type.COMPARE, 'IN'),
-            Token(Type.PUNCTUATION, '('),
-            Token(Type.STR, '"78"'),
-            Token(Type.PUNCTUATION, ','),
-            Token(Type.STR, '"d"'),
-            Token(Type.PUNCTUATION, ')'),
-        ],
-        statements=[
-            Select('SELECT', statements=[Identifier('x3')]),
-            From('FROM', statements=[Identifier('tab1')]),
-            Where('WHERE', statements=[
-                Compare('x IN', statements=[
-                    Sub('(', statements=[
-                        Identifier('"78"'),
-                        Comma(','),
-                        Identifier('"d"'),
-                    ])
+            From('From', values=[
+                Identifier('x', alias='t'),
+                Join('join'),
+                Identifier('r', as_='As', alias='z'),
+                On('on', values=[
+                    Condition([Identifier('t4.id1'),
+                               Operator('='),
+                               Identifier('z4.id2')])
                 ])
             ])
         ],
         style=[
-            'SELECT',
-            '    x3',
             'FROM',
-            '    tab1',
+            '    x t',
+            '    JOIN r AS z ON',
+            '        t4.id1 = z4.id2'
+        ])
+
+
+@fixture
+def from_5():
+    return Data(
+        sql='From x t join r As z on t.id1=z.id2 And t.id2=z.id3',
+        tokens=[
+            Token(Token.FROM, 'From'),
+            Token(Token.IDENTIFIER, 'x'),
+            Token(Token.IDENTIFIER, 't'),
+            Token(Token.JOIN, 'join'),
+            Token(Token.IDENTIFIER, 'r'),
+            Token(Token.AS, 'As'),
+            Token(Token.IDENTIFIER, 'z'),
+            Token(Token.ON, 'on'),
+            Token(Token.IDENTIFIER, 't.id1'),
+            Token(Token.COMPARE, '='),
+            Token(Token.IDENTIFIER, 'z.id2'),
+            Token(Token.LINK, 'And'),
+            Token(Token.IDENTIFIER, 't.id2'),
+            Token(Token.COMPARE, '='),
+            Token(Token.IDENTIFIER, 'z.id3'),
+        ],
+        statements=[
+            From('From', values=[
+                Identifier('x', alias='t'),
+                Join('join'),
+                Identifier('r', as_='As', alias='z'),
+                On('on', values=[
+                    Condition([Identifier('t.id1'),
+                               Operator('='),
+                               Identifier('z.id2')]),
+                    Link('And'),
+                    Condition([Identifier('t.id2'),
+                               Operator('='),
+                               Identifier('z.id3')])
+                ])
+            ])
+        ],
+        style=[
+            'FROM',
+            '    x t',
+            '    JOIN r AS z ON',
+            '        t.id1 = z.id2',
+            '        AND t.id2 = z.id3',
+        ])
+
+
+@fixture
+def from_6():
+    return Data(
+        sql='From x t join r As z',
+        tokens=[
+            Token(Token.FROM, 'From'),
+            Token(Token.IDENTIFIER, 'x'),
+            Token(Token.IDENTIFIER, 't'),
+            Token(Token.JOIN, 'join'),
+            Token(Token.IDENTIFIER, 'r'),
+            Token(Token.AS, 'As'),
+            Token(Token.IDENTIFIER, 'z'),
+        ],
+        statements=[
+            From('From', values=[
+                Identifier('x', alias='t'),
+                Join('join'),
+                Identifier('r', as_='As', alias='z')
+            ])
+        ],
+        style=[
+            'FROM',
+            '    x t',
+            '    JOIN r AS z',
+        ])
+
+
+@fixture
+def func_1():
+    return Data(
+        sql='CONCAT(last_name,", ",first_name)',
+        tokens=[
+            Token(Token.FUNC, 'CONCAT'),
+            Token(Token.PARENTHESIS_OPEN, '('),
+            Token(Token.IDENTIFIER, 'last_name'),
+            Token(Token.COMMA, ','),
+            Token(Token.STR,  '", "'),
+            Token(Token.COMMA, ','),
+            Token(Token.IDENTIFIER, 'first_name'),
+            Token(Token.PARENTHESIS_CLOSE, ')'),
+        ],
+        statements=[
+            Func('CONCAT', args=[Identifier('last_name'),
+                                 Str('", "'),
+                                 Identifier('first_name')]),
+        ],
+        style=[
+            'CONCAT(last_name, ", ", first_name)'
+        ])
+
+
+@fixture
+def func_2():
+    return Data(
+        sql='distinct(count(1))',
+        tokens=[
+            Token(Token.FUNC, 'distinct'),
+            Token(Token.PARENTHESIS_OPEN, '('),
+            Token(Token.FUNC, 'count'),
+            Token(Token.PARENTHESIS_OPEN, '('),
+            Token(Token.NUMBER, '1'),
+            Token(Token.PARENTHESIS_CLOSE, ')'),
+            Token(Token.PARENTHESIS_CLOSE, ')'),
+        ],
+        statements=[
+            Func('distinct', [
+                Func('count', [Number('1')])
+            ]),
+        ],
+        style=[
+            'DISTINCT(COUNT(1))'
+        ])
+
+
+@fixture
+def func_3():
+    return Data(
+        sql='distinct(min(1, 3), max(0, 1))',
+        tokens=[
+            Token(Token.FUNC, 'distinct'),
+            Token(Token.PARENTHESIS_OPEN, '('),
+            Token(Token.FUNC, 'min'),
+            Token(Token.PARENTHESIS_OPEN, '('),
+            Token(Token.NUMBER, '1'),
+            Token(Token.COMMA, ','),
+            Token(Token.NUMBER, '3'),
+            Token(Token.PARENTHESIS_CLOSE, ')'),
+            Token(Token.COMMA, ','),
+            Token(Token.FUNC, 'max'),
+            Token(Token.PARENTHESIS_OPEN, '('),
+            Token(Token.NUMBER, '0'),
+            Token(Token.COMMA, ','),
+            Token(Token.NUMBER, '1'),
+            Token(Token.PARENTHESIS_CLOSE, ')'),
+            Token(Token.PARENTHESIS_CLOSE, ')'),
+        ],
+        statements=[
+            Func('distinct', [
+                Func('min', [Number('1'), Number('3')]),
+                Func('max', [Number('0'), Number('1')]),
+            ]),
+        ],
+        style=[
+            'DISTINCT(MIN(1, 3), MAX(0, 1))'
+        ])
+
+
+@fixture
+def func_4():
+    return Data(
+        sql='Sum(price) as Summ',
+        tokens=[
+            Token(Token.FUNC, 'Sum'),
+            Token(Token.PARENTHESIS_OPEN, '('),
+            Token(Token.IDENTIFIER, 'price'),
+            Token(Token.PARENTHESIS_CLOSE, ')'),
+            Token(Token.AS, 'as'),
+            Token(Token.IDENTIFIER, 'Summ')
+        ],
+        statements=[
+            Func('Sum', args=[Identifier('price')], as_='as', alias='Summ'),
+        ],
+        style=[
+            'SUM(price) AS Summ'
+        ])
+
+
+@fixture
+def group_by_1():
+    return Data(
+        sql='Group by col1',
+        tokens=[
+            Token(Token.GROUP_BY, 'Group by'),
+            Token(Token.IDENTIFIER, 'col1'),
+        ],
+        statements=[
+            GroupBy(values=[Identifier('col1')]),
+        ],
+        style=[
+            'GROUP BY',
+            '    col1'
+        ])
+
+
+@fixture
+def group_by_2():
+    return Data(
+        sql='Group by 1',
+        tokens=[
+            Token(Token.GROUP_BY, 'Group by'),
+            Token(Token.NUMBER, '1'),
+        ],
+        statements=[
+            GroupBy(values=[Number('1')]),
+        ],
+        style=[
+            'GROUP BY',
+            '    1'
+        ])
+
+
+@fixture
+def group_by_3():
+    return Data(
+        sql='Group by 1,col1',
+        tokens=[
+            Token(Token.GROUP_BY, 'Group by'),
+            Token(Token.NUMBER, '1'),
+            Token(Token.COMMA, ','),
+            Token(Token.IDENTIFIER, 'col1'),
+        ],
+        statements=[
+            GroupBy(values=[Number('1'), Identifier('col1')]),
+        ],
+        style=[
+            'GROUP BY',
+            '    1,',
+            '    col1'
+        ])
+
+
+@fixture
+def group_by_4():
+    return Data(
+        sql='Group by 1,col1 with rollup',
+        tokens=[
+            Token(Token.GROUP_BY, 'Group by'),
+            Token(Token.NUMBER, '1'),
+            Token(Token.COMMA, ','),
+            Token(Token.IDENTIFIER, 'col1'),
+            Token(Token.WITH_ROLLUP, 'with rollup'),
+        ],
+        statements=[
+            GroupBy(values=[Number('1'), Identifier('col1')],
+                    with_rollup='with rollup'),
+        ],
+        style=[
+            'GROUP BY',
+            '    1,',
+            '    col1',
+            '    WITH ROLLUP'
+        ])
+
+
+@fixture
+def having_1():
+    return Data(
+        sql='having col1 !=1',
+        tokens=[
+            Token(Token.HAVING, 'having'),
+            Token(Token.IDENTIFIER, 'col1'),
+            Token(Token.COMPARE, '!='),
+            Token(Token.NUMBER, '1'),
+        ],
+        statements=[
+            Having('having',
+                   [Condition([Identifier('col1'),
+                               Operator('!='),
+                               Number('1')])])
+        ],
+        style=[
+            'HAVING',
+            '    col1 != 1'
+        ])
+
+
+@fixture
+def having_2():
+    return Data(
+        sql='having not count(1) !=1',
+        tokens=[
+            Token(Token.HAVING, 'having'),
+            Token(Token.NOT, 'not'),
+            Token(Token.FUNC, 'count'),
+            Token(Token.PARENTHESIS_OPEN, '('),
+            Token(Token.NUMBER, '1'),
+            Token(Token.PARENTHESIS_CLOSE, ')'),
+            Token(Token.COMPARE, '!='),
+            Token(Token.NUMBER, '1'),
+        ],
+        statements=[
+            Having('having',
+                   [Condition([Not('not'),
+                               Func('count', [Number('1')]),
+                               Operator('!='),
+                               Number('1')])])
+        ],
+        style=[
+            'HAVING',
+            '    NOT COUNT(1) != 1'
+        ])
+
+
+@fixture
+def limit_1():
+    return Data(
+        sql='LIMIT 65',
+        tokens=[
+            Token(Token.LIMIT, 'LIMIT'),
+            Token(Token.NUMBER, '65'),
+        ],
+        statements=[
+            Limit(row_count=Number('65')),
+        ],
+        style=[
+            'LIMIT 65',
+        ])
+
+
+@fixture
+def limit_2():
+    return Data(
+        sql='LIMIT 65,66',
+        tokens=[
+            Token(Token.LIMIT, 'LIMIT'),
+            Token(Token.NUMBER, '65'),
+            Token(Token.COMMA, ','),
+            Token(Token.NUMBER, '66'),
+        ],
+        statements=[
+            Limit(row_count=Number('66'), offset=Number('65')),
+        ],
+        style=[
+            'LIMIT 65, 66',
+        ])
+
+
+@fixture
+def limit_3():
+    return Data(
+        sql='LIMIT 65 offset 66',
+        tokens=[
+            Token(Token.LIMIT, 'LIMIT'),
+            Token(Token.NUMBER, '65'),
+            Token(Token.IDENTIFIER, 'offset'),
+            Token(Token.NUMBER, '66'),
+        ],
+        statements=[
+            Limit(row_count=Number('65'), offset=Number('66'),
+                  offset_keyword='offset'),
+        ],
+        style=[
+            'LIMIT 65 OFFSET 66',
+        ])
+
+
+@fixture
+def order_by_1():
+    return Data(
+        sql='order by 6',
+        tokens=[
+            Token(Token.ORDER_BY, 'order by'),
+            Token(Token.NUMBER, '6'),
+        ],
+        statements=[
+            OrderBy(values=[Number('6')]),
+        ],
+        style=[
+            'ORDER BY',
+            '    6'
+        ])
+
+
+@fixture
+def order_by_2():
+    return Data(
+        sql='order by 6 Asc',
+        tokens=[
+            Token(Token.ORDER_BY, 'order by'),
+            Token(Token.NUMBER, '6'),
+            Token(Token.ASC, 'Asc'),
+        ],
+        statements=[
+            OrderBy(values=[Number('6', sort='Asc')]),
+        ],
+        style=[
+            'ORDER BY',
+            '    6 ASC'
+        ])
+
+
+@fixture
+def order_by_3():
+    return Data(
+        sql='order by 6 DESC',
+        tokens=[
+            Token(Token.ORDER_BY, 'order by'),
+            Token(Token.NUMBER, '6'),
+            Token(Token.DESC, 'DESC'),
+        ],
+        statements=[
+            OrderBy(values=[Number('6', sort='DESC')]),
+        ],
+        style=[
+            'ORDER BY',
+            '    6 DESC'
+        ])
+
+
+@fixture
+def order_by_4():
+    return Data(
+        sql='order by 6 DESC,col2 ASC',
+        tokens=[
+            Token(Token.ORDER_BY, 'order by'),
+            Token(Token.NUMBER, '6'),
+            Token(Token.DESC, 'DESC'),
+            Token(Token.COMMA, ','),
+            Token(Token.IDENTIFIER, 'col2'),
+            Token(Token.ASC, 'ASC'),
+        ],
+        statements=[
+            OrderBy(values=[Number('6', sort='DESC'),
+                            Identifier('col2', sort='ASC')])
+        ],
+        style=[
+            'ORDER BY',
+            '    6 DESC,',
+            '    col2 ASC'
+        ])
+
+
+@fixture
+def select_1():
+    return Data(
+        sql='Select 1',
+        tokens=[
+            Token(Token.SELECT, 'Select'),
+            Token(Token.NUMBER, '1'),
+        ],
+        statements=[
+            Select('Select', [Number('1')]),
+        ],
+        style=[
+            'SELECT',
+            '    1'
+        ])
+
+
+@fixture
+def select_2():
+    return Data(
+        sql='Select 1, col1',
+        tokens=[
+            Token(Token.SELECT, 'Select'),
+            Token(Token.NUMBER, '1'),
+            Token(Token.COMMA, ','),
+            Token(Token.IDENTIFIER, 'col1'),
+        ],
+        statements=[
+            Select('Select', [Number('1'), Identifier('col1')]),
+        ],
+        style=[
+            'SELECT',
+            '    1,',
+            '    col1'
+        ])
+
+
+@fixture
+def select_3():
+    return Data(
+        sql='Select 1, col1,min(3,4)',
+        tokens=[
+            Token(Token.SELECT, 'Select'),
+            Token(Token.NUMBER, '1'),
+            Token(Token.COMMA, ','),
+            Token(Token.IDENTIFIER, 'col1'),
+            Token(Token.COMMA, ','),
+            Token(Token.FUNC, 'min'),
+            Token(Token.PARENTHESIS_OPEN, '('),
+            Token(Token.NUMBER, '3'),
+            Token(Token.COMMA, ','),
+            Token(Token.NUMBER, '4'),
+            Token(Token.PARENTHESIS_CLOSE, ')'),
+        ],
+        statements=[
+            Select('Select', [
+                Number('1'),
+                Identifier('col1'),
+                Func('min', [Number('3'), Number('4')])
+            ]),
+        ],
+        style=[
+            'SELECT',
+            '    1,',
+            '    col1,',
+            '    MIN(3, 4)',
+        ])
+
+
+@fixture
+def where_1():
+    return Data(
+        sql='where x= 1',
+        tokens=[
+            Token(Token.WHERE, 'where'),
+            Token(Token.IDENTIFIER, 'x'),
+            Token(Token.COMPARE, '='),
+            Token(Token.NUMBER, '1')
+        ],
+        statements=[
+            Where('where',
+                  [Condition([Identifier('x'),
+                              Operator('='),
+                              Number('1')])])
+        ],
+        style=[
+            'WHERE',
+            '    x = 1'
+        ])
+
+
+@fixture
+def where_2():
+    return Data(
+        sql='where not x= 1',
+        tokens=[
+            Token(Token.WHERE, 'where'),
+            Token(Token.NOT, 'not'),
+            Token(Token.IDENTIFIER, 'x'),
+            Token(Token.COMPARE, '='),
+            Token(Token.NUMBER, '1')
+        ],
+        statements=[
+            Where('where', [
+                Condition(
+                    [
+                        Not('not'),
+                        Identifier('x'),
+                        Operator('='),
+                        Number('1')
+                    ]
+                )])
+        ],
+        style=[
+            'WHERE',
+            '    NOT x = 1'
+        ])
+
+
+@fixture
+def where_3():
+    return Data(
+        sql='where not x= 1 and x != 3',
+        tokens=[
+            Token(Token.WHERE, 'where'),
+            Token(Token.NOT, 'not'),
+            Token(Token.IDENTIFIER, 'x'),
+            Token(Token.COMPARE, '='),
+            Token(Token.NUMBER, '1'),
+            Token(Token.LINK, 'and'),
+            Token(Token.IDENTIFIER, 'x'),
+            Token(Token.COMPARE, '!='),
+            Token(Token.NUMBER, '3'),
+        ],
+        statements=[
+            Where('where', [Condition([Not('not'),
+                                       Identifier('x'),
+                                       Operator('='),
+                                       Number('1'),
+                                       ]),
+                            Link('and'),
+                            Condition([Identifier('x'),
+                                       Operator('!='),
+                                       Number('3'),
+                                       ]),
+                            ])
+        ],
+        style=[
+            'WHERE',
+            '    NOT x = 1',
+            '    AND x != 3'
+        ])
+
+
+@fixture
+def where_4():
+    return Data(
+        sql='where x in (1, "3")',
+        tokens=[
+            Token(Token.WHERE, 'where'),
+            Token(Token.IDENTIFIER, 'x'),
+            Token(Token.IN, 'in'),
+            Token(Token.PARENTHESIS_OPEN, '('),
+            Token(Token.NUMBER, '1'),
+            Token(Token.COMMA, ','),
+            Token(Token.STR, '"3"'),
+            Token(Token.PARENTHESIS_CLOSE, ')'),
+        ],
+        statements=[
+            Where('where',
+                  [
+                      Condition(
+                          [
+                              Identifier('x'),
+                              Operator('in'),
+                              [
+                                  Number('1'),
+                                  Str('"3"')
+                              ]
+                          ])
+                  ])
+        ],
+        style=[
             'WHERE',
             '    x IN (',
-            '        "78",',
-            '        "d")',
-            ''
+            '        1,',
+            '        "3")'
         ])
 
 
 @fixture
-def select_with_group_and_having():
+def where_5():
     return Data(
-        sql='SELECT country FROM sales GROUP BY country, product HAVING product > 0',
+        sql='where x in (select * from k)',
         tokens=[
-            Token(Type.SELECT, 'SELECT'),
-            Token(Type.STR, 'country'),
-            Token(Type.FROM, 'FROM'),
-            Token(Type.STR, 'sales'),
-            Token(Type.GROUP, 'GROUP BY'),
-            Token(Type.STR, 'country'),
-            Token(Type.PUNCTUATION, ','),
-            Token(Type.STR, 'product'),
-            Token(Type.HAVING, 'HAVING'),
-            Token(Type.STR, 'product'),
-            Token(Type.COMPARE, '>'),
-            Token(Type.STR, '0'),
+            Token(Token.WHERE, 'where'),
+            Token(Token.IDENTIFIER, 'x'),
+            Token(Token.IN, 'in'),
+            Token(Token.PARENTHESIS_OPEN, '('),
+            Token(Token.SELECT, 'select'),
+            Token(Token.IDENTIFIER, '*'),
+            Token(Token.FROM, 'from'),
+            Token(Token.IDENTIFIER, 'k'),
+            Token(Token.PARENTHESIS_CLOSE, ')'),
         ],
         statements=[
-            Select('SELECT', statements=[Identifier('country')]),
-            From('FROM', statements=[Identifier('sales')]),
-            Group('GROUP BY', statements=[
-                Identifier('country'),
-                Comma(','),
-                Identifier('product')
-            ]),
-            Having('HAVING', statements=[Compare('product > 0')])
+            Where('where',
+                  [
+                      Condition(
+                          [
+                              Identifier('x'),
+                              Operator('in'),
+                              SubSelect([Select('select', [Identifier('*')]),
+                                         From('from', [Identifier('k')]
+                                              )
+                                         ])
+                          ])
+                  ])
         ],
         style=[
-            'SELECT',
-            '    country',
-            'FROM',
-            '    sales',
-            'GROUP BY',
-            '    country,',
-            '    product',
-            'HAVING',
-            '    product > 0',
-            ''
-        ])
-
-
-@fixture
-def select_with_join_with_and():
-    return Data(
-        sql='',
-        tokens=[
-            Token(Type.SELECT, 'SELECT'),
-            Token(Type.STR, '*'),
-            Token(Type.FROM, 'FROM'),
-            Token(Type.STR, 'tab1'),
-            Token(Type.JOIN, 'INNER JOIN'),
-            Token(Type.STR, 'tab2'),
-            Token(Type.KEYWORD, 'ON'),
-            Token(Type.STR, 'tab1.id'),
-            Token(Type.COMPARE, '='),
-            Token(Type.STR, 'tab2.id'),
-            Token(Type.LINK, 'AND'),
-            Token(Type.STR, 'tab1.id2'),
-            Token(Type.COMPARE, '='),
-            Token(Type.STR, 'tab2.id2'),
-        ],
-        statements=[
-            Select('SELECT', statements=[Identifier('*')]),
-            From('FROM', statements=[
-                Identifier('tab1'),
-                Join('INNER JOIN'),
-                Identifier('tab2'),
-                Key('ON'),
-                Compare('tab1.id = tab2.id'),
-                Link('AND'),
-                Compare('tab1.id2 = tab2.id2'),
-            ]),
-        ],
-        style=[
-            'SELECT',
-            '    *',
-            'FROM',
-            '    tab1',
-            '    INNER JOIN tab2',
-            '        ON tab1.id = tab2.id',
-            '        AND tab1.id2 = tab2.id2',
-            ''
-        ])
-
-
-@fixture
-def select_with_complex_filter():
-    return Data(
-        sql='SELECT * FROM mart AS q WHERE m_id = "14" AND (qt IS NULL OR qt = 0)',
-        tokens=[
-            Token(Type.SELECT, 'SELECT'),
-            Token(Type.STR, '*'),
-            Token(Type.FROM, 'FROM'),
-            Token(Type.STR, 'mart AS q'),
-            Token(Type.WHERE, 'WHERE'),
-            Token(Type.STR, 'm_id'),
-            Token(Type.COMPARE, '='),
-            Token(Type.STR, '"14"'),
-            Token(Type.LINK, 'AND'),
-            Token(Type.PUNCTUATION, '('),
-            Token(Type.STR, 'qt'),
-            Token(Type.COMPARE, 'IS'),
-            Token(Type.KEYWORD, 'NULL'),
-            Token(Type.LINK, 'OR'),
-            Token(Type.STR, 'qt'),
-            Token(Type.COMPARE, '='),
-            Token(Type.STR, '0'),
-            Token(Type.PUNCTUATION, ')'),
-        ],
-        statements=[
-            Select('SELECT', statements=[Identifier('*')]),
-            From('FROM', statements=[Identifier('mart AS q')]),
-            Where('WHERE', statements=[
-                Compare('m_id = "14"'),
-                Link('AND'),
-                Sub('(', statements=[
-                    Compare('qt IS NULL'),
-                    Link('OR'),
-                    Compare('qt = 0'),
-                ])
-            ])
-        ],
-        style=[
-            'SELECT',
-            '    *',
-            'FROM',
-            '    mart AS q',
             'WHERE',
-            '    m_id = "14"',
-            '    AND (',
-            '        qt IS NULL',
-            '        OR qt = 0)',
-            ''
+            '    x IN (',
+            '        SELECT',
+            '            *',
+            '        FROM',
+            '            k)'
         ])
 
 
 @fixture
-def select_with_sub_select_in_filter():
+def where_6():
     return Data(
-        sql='SELECT name, some_par1  FROM my_table WHERE  some_par1 IN (SELECT some_par1 FROM some_special_table)',
+        sql='where x in (select max(1) from k)',
         tokens=[
-            Token(Type.SELECT, 'SELECT'),
-            Token(Type.STR, 'name'),
-            Token(Type.PUNCTUATION, ','),
-            Token(Type.STR, 'some_par1'),
-            Token(Type.FROM, 'FROM'),
-            Token(Type.STR, 'my_table'),
-            Token(Type.WHERE, 'WHERE'),
-            Token(Type.STR, 'some_par1'),
-            Token(Type.COMPARE, 'IN'),
-            Token(Type.PUNCTUATION, '('),
-            Token(Type.SELECT, 'SELECT'),
-            Token(Type.STR, 'some_par1'),
-            Token(Type.FROM, 'FROM'),
-            Token(Type.STR, 'some_special_table'),
-            Token(Type.PUNCTUATION, ')'),
+            Token(Token.WHERE, 'where'),
+            Token(Token.IDENTIFIER, 'x'),
+            Token(Token.IN, 'in'),
+            Token(Token.PARENTHESIS_OPEN, '('),
+            Token(Token.SELECT, 'select'),
+            Token(Token.FUNC, 'max'),
+            Token(Token.PARENTHESIS_OPEN, '('),
+            Token(Token.NUMBER, '1'),
+            Token(Token.PARENTHESIS_CLOSE, ')'),
+            Token(Token.FROM, 'from'),
+            Token(Token.IDENTIFIER, 'k'),
+            Token(Token.PARENTHESIS_CLOSE, ')'),
         ],
         statements=[
-            Select('SELECT', statements=[
-                Identifier('name'),
-                Comma(','),
-                Identifier('some_par1')
-            ]),
-            From('FROM', statements=[Identifier('my_table')]),
-            Where('WHERE', statements=[
-                Compare('some_par1 IN', statements=[
-                    Sub('(', statements=[
-                        Select('SELECT', statements=[Identifier('some_par1')]),
-                        From('FROM',
-                             statements=[Identifier('some_special_table')])
-                    ]),
-                ])
-            ])
+            Where('where',
+                  [
+                      Condition(
+                          [
+                              Identifier('x'),
+                              Operator('in'),
+                              SubSelect([
+                                  Select('select',
+                                         [Func('max', args=[Number('1')])]),
+                                  From('from', [Identifier('k')])
+                              ])
+                          ])
+                  ])
         ],
         style=[
-            'SELECT',
-            '    name,',
-            '    some_par1',
-            'FROM',
-            '    my_table',
             'WHERE',
-            '    some_par1 IN (',
+            '    x IN (',
             '        SELECT',
-            '            some_par1',
+            '            MAX(1)',
             '        FROM',
-            '            some_special_table)',
-            ''
+            '            k)'
         ])
 
 
 @fixture
-def select_with_complex_having():
+def where_7():
     return Data(
-        sql='SELECT * FROM uiop AS s INNER JOIN rag AS r ON s.r_id = r.id GROUP BY s.id HAVING cnt > 0 AND NOT (min_number = 1 AND max_number = cnt)',
+        sql='where x in (select * from k) Or c = 3',
         tokens=[
-            Token(Type.SELECT, 'SELECT'),
-            Token(Type.STR, '*'),
-            Token(Type.FROM, 'FROM'),
-            Token(Type.STR, 'uiop AS s'),
-            Token(Type.JOIN, 'INNER JOIN'),
-            Token(Type.STR, 'rag AS r'),
-            Token(Type.KEYWORD, 'ON'),
-            Token(Type.STR, 's.r_id'),
-            Token(Type.COMPARE, '='),
-            Token(Type.STR, 'r.id'),
-            Token(Type.GROUP, 'GROUP BY'),
-            Token(Type.STR, 's.id'),
-            Token(Type.HAVING, 'HAVING'),
-            Token(Type.STR, 'cnt'),
-            Token(Type.COMPARE, '>'),
-            Token(Type.STR, '0'),
-            Token(Type.LINK, 'AND'),
-            Token(Type.KEYWORD, 'NOT'),
-            Token(Type.PUNCTUATION, '('),
-            Token(Type.STR, 'min_number'),
-            Token(Type.COMPARE, '='),
-            Token(Type.STR, '1'),
-            Token(Type.LINK, 'AND'),
-            Token(Type.STR, 'max_number'),
-            Token(Type.COMPARE, '='),
-            Token(Type.STR, 'cnt'),
-            Token(Type.PUNCTUATION, ')'),
+            Token(Token.WHERE, 'where'),
+            Token(Token.IDENTIFIER, 'x'),
+            Token(Token.IN, 'in'),
+            Token(Token.PARENTHESIS_OPEN, '('),
+            Token(Token.SELECT, 'select'),
+            Token(Token.IDENTIFIER, '*'),
+            Token(Token.FROM, 'from'),
+            Token(Token.IDENTIFIER, 'k'),
+            Token(Token.PARENTHESIS_CLOSE, ')'),
+            Token(Token.LINK, 'Or'),
+            Token(Token.IDENTIFIER, 'c'),
+            Token(Token.COMPARE, '='),
+            Token(Token.NUMBER, '3'),
         ],
         statements=[
-            Select('SELECT', statements=[Identifier('*')]),
-            From('FROM', statements=[
-                Identifier('uiop AS s'),
-                Join('INNER JOIN'),
-                Identifier('rag AS r'),
-                Key('ON'),
-                Compare('s.r_id = r.id'),
-            ]),
-            Group('GROUP BY', statements=[Identifier('s.id')]),
-            Having('HAVING', statements=[
-                Compare('cnt > 0'),
-                Link('AND'),
-                Key('NOT'),
-                Sub('(', statements=[
-                    Compare('min_number = 1'),
-                    Link('AND'),
-                    Compare('max_number = cnt')
-                ])
-            ])
+            Where('where',
+                  [
+                      Condition(
+                          [
+                              Identifier('x'),
+                              Operator('in'),
+                              SubSelect([Select('select', [Identifier('*')]),
+                                         From('from', [Identifier('k')])
+                                         ])
+                          ]),
+                      Link('Or'),
+                      Condition([Identifier('c'),
+                                 Operator('='),
+                                 Number('3')])])
         ],
         style=[
-            'SELECT',
-            '    *',
-            'FROM',
-            '    uiop AS s',
-            '    INNER JOIN rag AS r',
-            '        ON s.r_id = r.id',
-            'GROUP BY',
-            '    s.id',
-            'HAVING',
-            '    cnt > 0',
-            '    AND NOT (',
-            '        min_number = 1',
-            '        AND max_number = cnt)',
-            ''
-        ])
-
-
-@fixture
-def select_with_not_in_compare():
-    return Data(
-        sql='SELECT q FROM mart WHERE q IS NULL',
-        tokens=[
-            Token(Type.SELECT, 'SELECT'),
-            Token(Type.STR, 'q'),
-            Token(Type.FROM, 'FROM'),
-            Token(Type.STR, 'mart'),
-            Token(Type.WHERE, 'WHERE'),
-            Token(Type.STR, 'q'),
-            Token(Type.COMPARE, 'IS'),
-            Token(Type.KEYWORD, 'NULL'),
-        ],
-        statements=[
-            Select('SELECT', statements=[Identifier('q')]),
-            From('FROM', statements=[Identifier('mart')]),
-            Where('WHERE', statements=[Compare('q IS NULL')])
-        ],
-        style=[
-            'SELECT',
-            '    q',
-            'FROM',
-            '    mart',
             'WHERE',
-            '    q IS NULL',
-            ''
-        ])
-
-
-@fixture
-def select_with_multiple_joins():
-    return Data(
-        sql='SELECT * FROM tab1 JOIN tab2 ON tab1.id = tab2.id JOIN tab3 ON tab2.id = tab3.id',
-        tokens=[
-            Token(Type.SELECT, 'SELECT'),
-            Token(Type.STR, '*'),
-            Token(Type.FROM, 'FROM'),
-            Token(Type.STR, 'tab1'),
-            Token(Type.JOIN, 'JOIN'),
-            Token(Type.STR, 'tab2'),
-            Token(Type.KEYWORD, 'ON'),
-            Token(Type.STR, 'tab1.id'),
-            Token(Type.COMPARE, '='),
-            Token(Type.STR, 'tab2.id'),
-            Token(Type.JOIN, 'JOIN'),
-            Token(Type.STR, 'tab3'),
-            Token(Type.KEYWORD, 'ON'),
-            Token(Type.STR, 'tab2.id'),
-            Token(Type.COMPARE, '='),
-            Token(Type.STR, 'tab3.id'),
-        ],
-        statements=[
-            Select('SELECT', statements=[Identifier('*')]),
-            From('FROM', statements=[
-                Identifier('tab1'),
-                Join('JOIN'),
-                Identifier('tab2'),
-                Key('ON'),
-                Compare('tab1.id = tab2.id'),
-                Join('JOIN'),
-                Identifier('tab3'),
-                Key('ON'),
-                Compare('tab2.id = tab3.id')
-            ])
-        ],
-        style=[
-            'SELECT',
-            '    *',
-            'FROM',
-            '    tab1',
-            '    JOIN tab2',
-            '        ON tab1.id = tab2.id',
-            '    JOIN tab3',
-            '        ON tab2.id = tab3.id',
-            ''
-        ])
-
-
-@fixture
-def select_in_from():
-    return Data(
-        sql='SELECT * FROM (SELECT x FROM tab1) AS t',
-        tokens=[
-            Token(Type.SELECT, 'SELECT'),
-            Token(Type.STR, '*'),
-            Token(Type.FROM, 'FROM'),
-            Token(Type.PUNCTUATION, '('),
-            Token(Type.SELECT, 'SELECT'),
-            Token(Type.STR, 'x'),
-            Token(Type.FROM, 'FROM'),
-            Token(Type.STR, 'tab1'),
-            Token(Type.PUNCTUATION, ')'),
-            Token(Type.STR, 'AS t')
-        ],
-        statements=[
-            Select('SELECT', statements=[Identifier('*')]),
-            From('FROM', statements=[
-                Sub('(', statements=[
-                    Select('SELECT', statements=[Identifier('x')]),
-                    From('FROM', statements=[Identifier('tab1')])
-                ]),
-                Identifier('AS t')
-            ])
-        ],
-        style=[
-            'SELECT',
-            '    *',
-            'FROM',
-            '    (',
+            '    x IN (',
             '        SELECT',
-            '            x',
+            '            *',
             '        FROM',
-            '            tab1) AS t',
-            ''
+            '            k)',
+            '    OR c = 3'
         ])
 
 
 @fixture
-def select_in_from_and_join():
+def composition_1():
     return Data(
-        sql='SELECT * FROM (SELECT x FROM tab1) AS t JOIN tab2 ON t.id = tab.id',
+        sql='select * from k',
         tokens=[
-            Token(Type.SELECT, 'SELECT'),
-            Token(Type.STR, '*'),
-            Token(Type.FROM, 'FROM'),
-            Token(Type.PUNCTUATION, '('),
-            Token(Type.SELECT, 'SELECT'),
-            Token(Type.STR, 'x'),
-            Token(Type.FROM, 'FROM'),
-            Token(Type.STR, 'tab1'),
-            Token(Type.PUNCTUATION, ')'),
-            Token(Type.STR, 'AS t'),
-            Token(Type.JOIN, 'JOIN'),
-            Token(Type.STR, 'tab2'),
-            Token(Type.KEYWORD, 'ON'),
-            Token(Type.STR, 't.id'),
-            Token(Type.COMPARE, '='),
-            Token(Type.STR, 'tab.id')
+            Token(Token.SELECT, 'select'),
+            Token(Token.IDENTIFIER, '*'),
+            Token(Token.FROM, 'from'),
+            Token(Token.IDENTIFIER, 'k')
         ],
         statements=[
-            Select('SELECT', statements=[Identifier('*')]),
-            From('FROM', statements=[
-                Sub('(', statements=[
-                    Select('SELECT', statements=[Identifier('x')]),
-                    From('FROM', statements=[Identifier('tab1')])
-                ]),
-                Identifier('AS t'),
-                Join('JOIN'),
-                Identifier('tab2'),
-                Key('ON'),
-                Compare('t.id = tab.id')
-            ])
+            Select('select', [Identifier('*')]),
+            From('from', [Identifier('k')])
         ],
         style=[
             'SELECT',
             '    *',
             'FROM',
-            '    (',
-            '        SELECT',
-            '            x',
-            '        FROM',
-            '            tab1) AS t',
-            '    JOIN tab2',
-            '        ON t.id = tab.id',
-            ''
-        ])
+            '    k'
+        ]
+    )
 
 
 @fixture
-def select_with_single_order_value():
+def composition_2():
     return Data(
-        sql='SELECT * FROM tab1 ORDER BY some_column',
+        sql='select * from k;',
         tokens=[
-            Token(Type.SELECT, 'SELECT'),
-            Token(Type.STR, '*'),
-            Token(Type.FROM, 'FROM'),
-            Token(Type.STR, 'tab1'),
-            Token(Type.ORDER, 'ORDER BY'),
-            Token(Type.STR, 'some_column')
+            Token(Token.SELECT, 'select'),
+            Token(Token.IDENTIFIER, '*'),
+            Token(Token.FROM, 'from'),
+            Token(Token.IDENTIFIER, 'k'),
+            Token(Token.SEMICOLON, ';'),
         ],
         statements=[
-            Select('SELECT', statements=[Identifier('*')]),
-            From('FROM', statements=[Identifier('tab1')]),
-            Order('ORDER BY', statements=[Identifier('some_column')])
+            Select('select', [Identifier('*')]),
+            From('from', [Identifier('k')]),
+            Semicolon(';'),
         ],
         style=[
             'SELECT',
             '    *',
             'FROM',
-            '    tab1',
-            'ORDER BY',
-            '    some_column',
-            ''
-        ])
-
-
-@fixture
-def select_with_order_values():
-    return Data(
-        sql='SELECT * FROM tab1 ORDER BY some_column, second_column DESC',
-        tokens=[
-            Token(Type.SELECT, 'SELECT'),
-            Token(Type.STR, '*'),
-            Token(Type.FROM, 'FROM'),
-            Token(Type.STR, 'tab1'),
-            Token(Type.ORDER, 'ORDER BY'),
-            Token(Type.STR, 'some_column'),
-            Token(Type.PUNCTUATION, ','),
-            Token(Type.STR, 'second_column DESC')
-        ],
-        statements=[
-            Select('SELECT', statements=[Identifier('*')]),
-            From('FROM', statements=[Identifier('tab1')]),
-            Order('ORDER BY', statements=[
-                Identifier('some_column'),
-                Comma(','),
-                Identifier('second_column DESC')
-            ])
-        ],
-        style=[
-            'SELECT',
-            '    *',
-            'FROM',
-            '    tab1',
-            'ORDER BY',
-            '    some_column,',
-            '    second_column DESC',
-            ''
-        ])
-
-
-@fixture
-def select_with_single_sub_on():
-    return Data(
-        sql='',
-        tokens=[],
-        statements=[
-            Select('SELECT', statements=[Identifier('*')]),
-            From('FROM', statements=[
-                Identifier('tab1'),
-                Join('INNER JOIN'),
-                Identifier('tab2'),
-                Key('ON'),
-                Sub('(', statements=[
-                    Compare('tab1.id2 = tab2.id2'),
-                ])
-            ]),
-        ],
-        style=[
-            'SELECT',
-            '    *',
-            'FROM',
-            '    tab1',
-            '    INNER JOIN tab2',
-            '        ON (tab1.id2 = tab2.id2)',
-            ''
-        ])
+            '    k;',
+        ]
+    )

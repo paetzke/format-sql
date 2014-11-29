@@ -1,18 +1,20 @@
 # -*- coding: utf-8 -*-
 """
 format-sql
+Makes your SQL readable.
 
 Copyright (c) 2014, Friedrich Paetzke (paetzke@fastmail.fm)
 All rights reserved.
 
 """
 import pytest
-from format_sql.main import _get_args, main
+from format_sql.main import _get_args, handle_py_file, handle_sql_file, main
+from mock import call, patch
 
 try:
-    from unittest.mock import call, patch
+    from itertools import zip_longest
 except ImportError:
-    from mock import call, patch
+    from itertools import izip_longest as zip_longest
 
 
 @pytest.mark.parametrize('args, expected_paths, expected_types', [
@@ -30,51 +32,70 @@ def test_get_args(args, expected_paths, expected_types):
     assert not args.recursive
 
 
-def test_args_recursive_is_active():
-    args = 'file1 -r'.split()
-    args = _get_args(args)
+def test_find_sql_in_directory(test_data):
+    args = '%s -r --types sql' % test_data.get_path('test_00')
+    args = args.split()
 
-    assert args.paths == ['file1']
-    assert args.types == ['py']
-    assert args.recursive
-
-
-def test_args_has_no_semicolon():
-    args = 'file1 --no-semicolon'.split()
-    args = _get_args(args)
-
-    assert args.no_semicolon
-
-
-def test_args_default_has_semicolon():
-    args = 'file1'.split()
-    args = _get_args(args)
-
-    assert not args.no_semicolon
-
-
-def test_main_args():
-    args = 'file1 file2 --types sql'.split()
-
-    with patch('format_sql.main._get_file_in_path') as mocked_get_file:
+    with patch('format_sql.main.handle_sql_file') as mocked_handle_sql_file:
         main(args)
-        assert mocked_get_file.call_args_list == [call('file1', 'sql', False),
-                                                  call('file2', 'sql', False)]
+
+        assert mocked_handle_sql_file.call_count == 3
+        arguments = sorted([
+            mocked_handle_sql_file.call_args_list[0][0][0],
+            mocked_handle_sql_file.call_args_list[1][0][0],
+            mocked_handle_sql_file.call_args_list[2][0][0],
+        ])
+
+    expected_paths = ['one.sql', 'two.sql', 'sub_dir/four.sql']
+
+    for path, expected in zip_longest(arguments, sorted(expected_paths)):
+        assert path.endswith('format-sql/tests/data/test_00/%s' % expected)
 
 
-@pytest.mark.parametrize('args, file_content, expected_output', [
-    ('file1 --types sql', 'select * from tabl',
-     'SELECT\n    *\nFROM\n    tabl\n'),
-    ('file1', 'a = """select * from tabl;"""',
-     'a = """\n    SELECT\n        *\n    FROM\n        tabl\n    ; """'),
+def test_find_py_in_directory(test_data):
+    args = '%s -r --types py' % test_data.get_path('test_00')
+    args = args.split()
+
+    with patch('format_sql.main.handle_py_file') as mocked_handle_py_file:
+        main(args)
+
+        assert mocked_handle_py_file.call_count == 2
+        arguments = sorted([
+            mocked_handle_py_file.call_args_list[0][0][0],
+            mocked_handle_py_file.call_args_list[1][0][0],
+        ])
+
+    expected_paths = ['three.py', 'sub_dir/five.py']
+
+    for path, expected in zip_longest(arguments, sorted(expected_paths)):
+        assert path.endswith('format-sql/tests/data/test_00/%s' % expected)
+
+
+@pytest.mark.parametrize(('filename', 'expected_sql'), [
+    ('test_01/test_00.sql', 'SELECT\n    x\nFROM\n    k'),
+    ('test_01/test_01.sql', 'SELECT\n    x\nFROM\n    k;'),
 ])
-@patch('format_sql.main._get_file_in_path')
-@patch('format_sql.file_handling.load_from_file')
-@patch('format_sql.file_handling.write_file')
-def test_main_args3(mocked_write_file, mocked_load_from_file, mocked_get_file, args, file_content, expected_output):
-    mocked_get_file.return_value = ['file1']
-    mocked_load_from_file.return_value = file_content
+def test_sql_file_formatting(test_data, filename, expected_sql):
+    test_filename = test_data.get_path(filename)
 
-    main(args.split())
-    mocked_load_from_file.assert_called_once()
-    mocked_write_file.assert_called_once_with('file1', expected_output)
+    with patch('format_sql.main._write_back') as mocked_write_back:
+        handle_sql_file(test_filename)
+
+        assert mocked_write_back.call_args[0][1] == expected_sql
+
+
+@pytest.mark.parametrize(('filename', 'expected_filename'), [
+    ('test_02/test_00.py', 'test_02/test_00_expected.py'),
+    ('test_02/test_01.py', 'test_02/test_01_expected.py'),
+    ('test_02/test_02.py', 'test_02/test_02_expected.py'),
+    ('test_02/test_03.py', 'test_02/test_03_expected.py'),
+])
+def test_py_file_formatting(test_data, filename, expected_filename):
+    test_filename = test_data.get_path(filename)
+    expected_filename = test_data.get_path(expected_filename)
+
+    with patch('format_sql.main._write_back') as mocked_write_back:
+        handle_py_file(test_filename)
+
+        with open(expected_filename) as f:
+            assert mocked_write_back.call_args[0][1] == f.read()

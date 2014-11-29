@@ -1,162 +1,163 @@
 # -*- coding: utf-8 -*-
 """
 format-sql
+Makes your SQL readable.
 
 Copyright (c) 2014, Friedrich Paetzke (paetzke@fastmail.fm)
 All rights reserved.
 
 """
 import re
-from itertools import chain
-
-import sqlparse
-
-ADDITIONAL = ('FROM', 'WHERE', 'LIMIT', 'GROUP BY', 'HAVING', 'ORDER BY')
-COMPARES = ('=', '!=', 'IN', '<>', '>', '<', 'IS', 'LIKE BINARY', 'LIKE')
-JOINS = ('JOIN', 'INNER JOIN', 'FULL OUTER JOIN', 'LEFT OUTER JOIN',
-         'LEFT JOIN',  'RIGHT OUTER JOIN', 'RIGHT JOIN')
-KEYWORDS = ('ON', 'NULL', 'NOT')
-LINKS = ('AND', 'OR')
-SELECTS = ('SELECT DISTINCT', 'SELECT SQL_NO_CACHE', 'SELECT')
-PUNCTUATIONS = (',', ')', '(')
+from collections import OrderedDict
 
 
-STRS = [
-    r'\w+\(.*?\)',
-    r'".*?"',
-    r'[\w\d%]+\([_\w\d\.`%]+\)[\w\d]*',
-    r'[_\w\d\.`%]+',
-    r"'.*?'"
-]
-IGNORABLE = ['\s+', '.+?']
-TOKENS_RE = re.compile('|'.join('(%s)' % x for x in chain(STRS, IGNORABLE)))
-
-
-class Type:
-    COMPARE = 'COMPARE'
-    FROM = 'FROM'
-    GROUP = 'GROUP'
-    HAVING = 'HAVING'
-    JOIN = 'JOIN'
-    KEYWORD = 'KEYWORD'
-    LIMIT = 'LIMIT'
-    LINK = 'LINK'
-    PUNCTUATION = 'PUNCTUATION'
-    SELECT = 'SELECT'
-    STR = 'STR'
-    WHERE = 'WHERE'
-    ORDER = 'ORDER'
+class StringNotTerminated(Exception):
+    pass
 
 
 class Token:
+    AS = 'AS'
+    ASC = 'ASC'
+    COMMA = ','
+    COMPARE = 'compare'
+    DESC = 'DESC'
+    FROM = 'FROM'
+    FUNC = 'func'
+    GROUP_BY = 'GROUP'
+    IDENTIFIER = 'identifier'
+    IN = 'IN'
+    ON = 'ON'
+    HAVING = 'HAVING'
+    JOIN = 'join'
+    LIMIT = 'LIMIT'
+    LINK = 'link'
+    NOT = 'NOT'
+    NUMBER = 'number'
+    ORDER_BY = 'ORDER'
+    PARENTHESIS_CLOSE = ')'
+    PARENTHESIS_OPEN = '('
+    SEMICOLON = ';'
+    SELECT = 'SELECT'
+    STR = 'str'
+    WITH_ROLLUP = 'WITH'
+    WHERE = 'WHERE'
 
-    def __init__(self, token_type, value):
+    def __init__(self, token_type, token_value):
         self._type = token_type
-        self.value = value
+        self._value = token_value
 
-    def __str__(self):
-        return '<Token %s: %s>' % (self._type, self.value)
+    def __repr__(self):
+        return '<%s: %s>' % (self._type, self._value)
 
-    def is_closing_parenthesis(self):
-        return self._type == Type.PUNCTUATION and self.value == ')'
+    @staticmethod
+    def get_token(value):
+        normalized = value.split()[0].upper()
 
-    def is_opening_parenthesis(self):
-        return self._type == Type.PUNCTUATION and self.value == '('
+        if normalized in TOKEN_RES.keys():
+            return normalized
 
-    def is_comma(self):
-        return self._type == Type.PUNCTUATION and self.value == ','
+        normalized = value.split()[-1].upper()
+        if normalized == 'JOIN':
+            return Token.JOIN
 
-    @classmethod
-    def from_value(cls, value):
-        value = value.strip()
-        if not value:
-            return None
-
-        if value in ADDITIONAL:
-            token_type = {
-                'FROM': Type.FROM,
-                'GROUP BY': Type.GROUP,
-                'HAVING': Type.HAVING,
-                'LIMIT': Type.LIMIT,
-                'ORDER BY': Type.ORDER,
-                'WHERE': Type.WHERE,
-            }[value]
-            return cls(token_type, value)
-
-        token_types = {
-            COMPARES: Type.COMPARE,
-            JOINS: Type.JOIN,
-            KEYWORDS: Type.KEYWORD,
-            LINKS: Type.LINK,
-            SELECTS: Type.SELECT,
-            PUNCTUATIONS: Type.PUNCTUATION,
-        }
-        for values, token_type in token_types.items():
-            if value in values:
-                return cls(token_type, value)
-
-        return cls(Type.STR, value)
+        return None
 
 
-def normalize_sql(sql_str):
-    normalized = sqlparse.format(sql_str, keyword_case='upper')
-    has_semicolon = normalized.endswith(';')
-    if has_semicolon:
-        normalized = normalized[:-1]
-    return str(normalized), has_semicolon
+TOKEN_RES = OrderedDict([
+    (Token.IN, [r'\bin\b']),
+    (Token.ON, [r'\bon\b']),
+    (Token.ASC, [r'\basc\b']),
+    (Token.AS, [r'\bas\b']),
+    (Token.SEMICOLON, [r';']),
+    (Token.COMMA, [r',']),
+    (Token.COMPARE, [r'=', r'!=', r'>=', r'<=', r'<>', r'<', r'>']),
+    (Token.DESC, [r'\bdesc\b']),
+    (Token.FROM, [r'\bfrom\b']),
+    (Token.GROUP_BY, [r'\bgroup\s+by']),
+    (Token.HAVING, [r'\bhaving\b']),
+    (Token.SELECT, [r'\bselect\s+distinct\b',
+                    r'\bselect\s+sql_no_cache\b',
+                    r'\bselect\b']),
+    (Token.LIMIT, [r'\blimit\b']),
+    (Token.LINK, [r'\band\b', r'\bor\b']),
+    (Token.NOT, [r'\bnot\b']),
+    (Token.ORDER_BY, [r'\border\s+by\b']),
+    (Token.PARENTHESIS_CLOSE, [r'\(']),
+    (Token.PARENTHESIS_OPEN, [r'\)']),
+    (Token.WITH_ROLLUP, [r'\bwith\s+rollup\b']),
+    (Token.WHERE, [r'\bwhere\b']),
+    (Token.FUNC, [r'\b\w+\b\s*\(']),
+    (Token.JOIN, [r'\bleft\s+outer\s+join\b', r'\bleft\s+join\b',
+                  r'\bright\s+outer\s+join\b', r'\bright\s+join\b',
+                  r'\bnatural\s+join\b', r'\binner\s+join\b',
+                  r'\bjoin\b']),
+])
 
 
-def _create_str_token(str_tokens):
-    return Token(Type.STR, value=' '.join(tk.value for tk in str_tokens))
+token_res = []
+for res in TOKEN_RES.values():
+    token_res.extend(res)
 
 
-def _merge_str_tokens(tokens):
-    str_tokens = []
+token_res.append(r'[-+]?\d+\.?\d*')
+token_res.append(r'`\w+`\.`\w+`')  # `t1`.`t2`
+token_res.append(r'`\w+`')
+token_res.append(r'\b\w+\.\w+\b')
+token_res.append(r'\b\w+\.\*')
+token_res.append(r'\b\w+\b')
 
-    for token in tokens:
-        if token._type == Type.STR:
-            str_tokens.append(token)
+token_res.append(r'%\(\w+\)s')  # %(arg)s
+token_res.append(r'%s')  # %s
+token_res.append(r'\*')
+
+
+reg_ex = r'|'.join(r'(%s)' % s for s in token_res)
+sql_re = re.compile(reg_ex, re.IGNORECASE)
+
+
+STR_STARTERS = ('"', "'")
+
+
+def cutter(s):
+    while s:
+        if s.startswith(STR_STARTERS):
+            starter = s[0]
+            for i, c in enumerate(s[1:]):
+                if c == starter:
+                    value = s[:i + 2]
+                    offset = len(value)
+                    yield value
+                    break
+            else:
+                raise StringNotTerminated(s)
         else:
-            if str_tokens:
-                yield _create_str_token(str_tokens)
-                str_tokens = []
-            yield token
 
-    if str_tokens:
-        yield _create_str_token(str_tokens)
+            match = sql_re.match(s)
+            if match:
+                value = match.group(0)
+                offset = len(value)
+                yield value
+            else:
+                offset = 1
 
-
-def _startswith_and_is_not_partial(s, word):
-    if s.startswith(word):
-        if len(s) <= len(word) or s[len(word)] == ' ':
-            return True
-    return False
+        s = s[offset:]
 
 
-def _tokenize(sql_str):
-    kwords = list(chain(ADDITIONAL, COMPARES, JOINS, KEYWORDS, LINKS, SELECTS,
-                        PUNCTUATIONS))
-
-    i = 0
-    while i < len(sql_str):
-        sub_str = sql_str[i:]
-
-        for kw in kwords:
-            if _startswith_and_is_not_partial(sub_str, kw):
-                val = kw
-                break
+def tokenize(s):
+    for word in cutter(s):
+        token_type = Token.get_token(word)
+        if token_type:
+            yield Token(token_type, word)
+        elif word[0].isdigit() or word.startswith(('+', '-')):
+            yield Token(Token.NUMBER, word)
+        elif word.endswith('('):
+            yield Token(Token.FUNC, word[:-1].strip())
+            yield Token(Token.PARENTHESIS_OPEN, '(')
+        elif word.startswith(STR_STARTERS):
+            yield Token(Token.STR, word)
+        elif word in ('=', '<>', '<', '>', '!=', '>=', '<='):
+            yield Token(Token.COMPARE, word)
+        elif word.upper() in ('AND', 'OR'):
+            yield Token(Token.LINK, word)
         else:
-            mat = re.match(TOKENS_RE, sub_str)
-            if mat:
-                val = mat.group(0)
-
-        token = Token.from_value(val)
-        if token:
-            yield token
-
-        i += len(val)
-
-
-def tokenize(sql_str):
-    tokens = _tokenize(sql_str)
-    return list(_merge_str_tokens(tokens))
+            yield Token(Token.IDENTIFIER, word)

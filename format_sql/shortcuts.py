@@ -1,21 +1,19 @@
 # -*- coding: utf-8 -*-
 """
 format-sql
+Makes your SQL readable.
 
 Copyright (c) 2014, Friedrich Paetzke (paetzke@fastmail.fm)
 All rights reserved.
 
 """
-from .parser import parse
-from .styler import style
-from .tokenizer import normalize_sql, tokenize
+from format_sql.parser import parse
+from format_sql.styler import style
+from format_sql.tokenizer import tokenize
 
 
-def format_sql(sql):
-    sql, has_semicolon = normalize_sql(sql)
-    tokens = tokenize(sql)
+def format_sql(s):
+    tokens = list(tokenize(s))
     parsed = parse(tokens)
     styled = style(parsed)
-    if has_semicolon:
-        styled += ';'
     return styled
