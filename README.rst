@@ -64,31 +64,3 @@ You can then just call ``format-sql`` with files and directories:
 
 You can try format-sql online: `http://paetzke.me/format-sql <http://paetzke.me/format-sql>`_.
 
-Changes
--------
-
-0.2.2
-~~~~~
-
-* Fix an issue with passing ``--types`` command line argument.
-
-0.2.1
-~~~~~
-
-* Fix an issue with passing command line arguments.
-
-0.2
-~~~
-
-* Add handling for unknown token sequences.
-* Fix detecting special words. Word boundaries have been ignored.
-* Single comparison in joins are printed on one line.
-* Support ``LIKE`` and ``LIKE BINARY`` for comparison.
-
-0.1
-~~~
-
-* Add parameter ``--no-semicolon`` to enable taking SQL queries without semicolon into account.
-
-Copyright (c) 2014, Friedrich Paetzke (paetzke@fastmail.fm). All rights reserved.
-
