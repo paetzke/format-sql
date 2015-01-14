@@ -3,7 +3,7 @@
 format-sql
 Makes your SQL readable.
 
-Copyright (c) 2014, Friedrich Paetzke (paetzke@fastmail.fm)
+Copyright (c) 2014-2015, Friedrich Paetzke (paetzke@fastmail.fm)
 All rights reserved.
 
 """
@@ -528,9 +528,10 @@ def _parse_conditions(tokens):
     while i < len(tokens):
         if len(tokens) > 3 + i and all([
                 tokens[i + 0]._type == Token.NOT,
-                tokens[i + 1]._type in (Token.IDENTIFIER, Token.NUMBER),
+                tokens[
+                    i + 1]._type in (Token.IDENTIFIER, Token.NUMBER, Token.STR),
                 tokens[i + 2]._type == Token.COMPARE,
-                tokens[i + 3]._type in (Token.IDENTIFIER, Token.NUMBER)]):
+                tokens[i + 3]._type in (Token.IDENTIFIER, Token.NUMBER, Token.STR)]):
 
             condition = Condition([Not(tokens[i]._value),
                                    _get_simple_object(tokens[i + 1]),
@@ -540,9 +541,10 @@ def _parse_conditions(tokens):
             i += 4
 
         elif len(tokens) > 2 + i and all([
-                tokens[i + 0]._type in (Token.IDENTIFIER, Token.NUMBER),
+                tokens[
+                    i + 0]._type in (Token.IDENTIFIER, Token.NUMBER, Token.STR),
                 tokens[i + 1]._type == Token.COMPARE,
-                tokens[i + 2]._type in (Token.IDENTIFIER, Token.NUMBER)]):
+                tokens[i + 2]._type in (Token.IDENTIFIER, Token.NUMBER, Token.STR)]):
 
             condition = Condition([_get_simple_object(tokens[i]),
                                    Operator(tokens[i + 1]._value),
