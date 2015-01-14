@@ -3,14 +3,15 @@
 format-sql
 Makes your SQL readable.
 
-Copyright (c) 2014, Friedrich Paetzke (paetzke@fastmail.fm)
+Copyright (c) 2014-2015, Friedrich Paetzke (paetzke@fastmail.fm)
 All rights reserved.
 
 """
-import pytest
 from format_sql.parser import (_parse_identifier, Identifier, InvalidCondition,
                                InvalidIdentifier, InvalidLimit, Number, parse)
 from format_sql.tokenizer import Token
+
+import pytest
 
 
 def assert_statements(tokens1, statements2):
@@ -181,6 +182,14 @@ def test_parse_where_6(where_6):
 
 def test_parse_where_7(where_7):
     assert_statements(where_7.tokens, where_7.statements)
+
+
+def test_parse_where_8(where_8):
+    assert_statements(where_8.tokens, where_8.statements)
+
+
+def test_parse_where_9(where_9):
+    assert_statements(where_9.tokens, where_9.statements)
 
 
 def test_parse_composition_1(composition_1):

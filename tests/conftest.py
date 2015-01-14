@@ -3,7 +3,7 @@
 format-sql
 Makes your SQL readable.
 
-Copyright (c) 2014, Friedrich Paetzke (paetzke@fastmail.fm)
+Copyright (c) 2014-2015, Friedrich Paetzke (paetzke@fastmail.fm)
 All rights reserved.
 
 """
@@ -15,6 +15,7 @@ from format_sql.parser import (Condition, From, Func, GroupBy, Having,
                                Operator, OrderBy, Select, Semicolon, Str,
                                SubSelect, Where)
 from format_sql.tokenizer import Token
+
 from pytest import fixture
 
 Data = namedtuple('Data', ['sql', 'tokens', 'statements', 'style'])
@@ -871,6 +872,52 @@ def where_7():
             '        FROM',
             '            k)',
             '    OR c = 3'
+        ])
+
+
+@fixture
+def where_8():
+    return Data(
+        sql='where x = "abc"',
+        tokens=[
+            Token(Token.WHERE, 'where'),
+            Token(Token.IDENTIFIER, 'x'),
+            Token(Token.COMPARE, '='),
+            Token(Token.STR, '"abc"')
+        ],
+        statements=[
+            Where('where',
+                  [Condition([Identifier('x'),
+                              Operator('='),
+                              Str('"abc"')])])
+        ],
+        style=[
+            'WHERE',
+            '    x = "abc"'
+        ])
+
+
+@fixture
+def where_9():
+    return Data(
+        sql='where not x = "abc"',
+        tokens=[
+            Token(Token.WHERE, 'where'),
+            Token(Token.NOT, 'not'),
+            Token(Token.IDENTIFIER, 'x'),
+            Token(Token.COMPARE, '='),
+            Token(Token.STR, '"abc"')
+        ],
+        statements=[
+            Where('where',
+                  [Condition([Not('not'),
+                              Identifier('x'),
+                              Operator('='),
+                              Str('"abc"')])])
+        ],
+        style=[
+            'WHERE',
+            '    NOT x = "abc"'
         ])
 
 

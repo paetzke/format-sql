@@ -3,7 +3,7 @@
 format-sql
 Makes your SQL readable.
 
-Copyright (c) 2014, Friedrich Paetzke (paetzke@fastmail.fm)
+Copyright (c) 2014-2015, Friedrich Paetzke (paetzke@fastmail.fm)
 All rights reserved.
 
 """
@@ -152,6 +152,14 @@ def test_where_6(where_6):
 
 def test_where_7(where_7):
     assert_style(where_7.statements, where_7.style)
+
+
+def test_where_8(where_8):
+    assert_style(where_8.statements, where_8.style)
+
+
+def test_where_9(where_9):
+    assert_style(where_9.statements, where_9.style)
 
 
 def test_composition_1(composition_1):
