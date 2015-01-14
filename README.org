@@ -61,4 +61,4 @@ optional arguments:
   --no-semicolon    Try to detect SQL queries with no trailing semicolon.
 #+END_SRC
 
-You can try format-sql online: [[http://paetzke.me/format-sql]].
+You can try format-sql online: [[https://paetzke.me/format-sql]].
