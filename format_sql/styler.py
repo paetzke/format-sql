@@ -3,7 +3,7 @@
 format-sql
 Makes your SQL readable.
 
-Copyright (c) 2014, Friedrich Paetzke (paetzke@fastmail.fm)
+Copyright (c) 2014-2015, Friedrich Paetzke (paetzke@fastmail.fm)
 All rights reserved.
 
 """
@@ -204,19 +204,13 @@ def _style_where(where, liner, indent):
             condition.values.pop(0)
 
         if len(condition.values) == 3 and all([
-                isinstance(condition.values[0], Identifier),
+                isinstance(condition.values[0], (Identifier, Number, Str)),
                 isinstance(condition.values[1], Operator),
-                isinstance(condition.values[2], Number)]):
-            liner.add_to_line(' '.join('%s' % x for x in condition.values))
-            i += 1
-        if len(condition.values) == 3 and all([
-                isinstance(condition.values[0], Identifier),
-                isinstance(condition.values[1], Operator),
-                isinstance(condition.values[2], Identifier)]):
+                isinstance(condition.values[2], (Identifier, Number, Str))]):
             liner.add_to_line(' '.join('%s' % x for x in condition.values))
             i += 1
         elif len(condition.values) == 3 and all([
-                isinstance(condition.values[0], Identifier),
+                isinstance(condition.values[0], (Identifier, Number, Str)),
                 isinstance(condition.values[1], Operator),
                 isinstance(condition.values[2], list)]):
 

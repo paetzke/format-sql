@@ -3,12 +3,13 @@
 format-sql
 Makes your SQL readable.
 
-Copyright (c) 2014, Friedrich Paetzke (paetzke@fastmail.fm)
+Copyright (c) 2014-2015, Friedrich Paetzke (paetzke@fastmail.fm)
 All rights reserved.
 
 """
-import pytest
 from format_sql.tokenizer import StringNotTerminated, Token, tokenize
+
+import pytest
 
 try:
     from itertools import zip_longest
@@ -337,6 +338,14 @@ def test_tokenize_where_6(where_6):
 
 def test_tokenize_where_7(where_7):
     assert_tokens(where_7.tokens, tokenize(where_7.sql))
+
+
+def test_tokenize_where_8(where_8):
+    assert_tokens(where_8.tokens, tokenize(where_8.sql))
+
+
+def test_tokenize_where_9(where_9):
+    assert_tokens(where_9.tokens, tokenize(where_9.sql))
 
 
 def test_tokenize_composition_1(composition_1):
