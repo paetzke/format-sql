@@ -13,13 +13,6 @@ from format_sql.parser import (Condition, From, Func, GroupBy, Having,
                                Semicolon, Str, SubSelect, Where)
 
 
-def _is_type(instance, classes):
-    for cls in classes:
-        if isinstance(instance, cls):
-            return True
-    return False
-
-
 class Liner:
 
     def __init__(self):
@@ -249,7 +242,7 @@ def _style_func(func, liner, end_line=True):
     liner.add_to_line('(')
 
     for i, arg in enumerate(func.args):
-        if _is_type(arg, (Identifier, Str, Number)):
+        if isinstance(arg, (Identifier, Str, Number)):
             liner.add_to_line(arg)
         elif isinstance(arg, Func):
             _style_func(arg, liner, end_line=False)
@@ -271,7 +264,7 @@ def _style_select(select, liner, indent):
 
     for i, value in enumerate(select.values):
         liner.add_to_line('    ' * (indent + 1))
-        if _is_type(value, (Identifier, Str, Number)):
+        if isinstance(value, (Identifier, Str, Number)):
             liner.add_to_line(str(value))
         elif isinstance(value, Func):
             _style_func(value, liner, end_line=False)
