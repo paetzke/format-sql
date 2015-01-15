@@ -967,3 +967,40 @@ def composition_2():
             '    k;',
         ]
     )
+
+
+@fixture
+def multiple_statements_1():
+    return Data(
+        sql='select t1.* from t1; select t2.* from t2',
+        tokens=[
+            Token(Token.SELECT, 'select'),
+            Token(Token.IDENTIFIER, 't1.*'),
+            Token(Token.FROM, 'from'),
+            Token(Token.IDENTIFIER, 't1'),
+            Token(Token.SEMICOLON, ';'),
+            Token(Token.SELECT, 'select'),
+            Token(Token.IDENTIFIER, 't2.*'),
+            Token(Token.FROM, 'from'),
+            Token(Token.IDENTIFIER, 't2'),
+        ],
+        statements=[
+            Select('select', [Identifier('t1.*')]),
+            From('from', [Identifier('t1')]),
+            Semicolon(';'),
+            Select('select', [Identifier('t2.*')]),
+            From('from', [Identifier('t2')]),
+        ],
+        style=[
+            'SELECT',
+            '    t1.*',
+            'FROM',
+            '    t1;',
+            '',
+            '',
+            'SELECT',
+            '    t2.*',
+            'FROM',
+            '    t2',
+        ]
+    )

@@ -198,3 +198,8 @@ def test_parse_composition_1(composition_1):
 
 def test_parse_composition_2(composition_2):
     assert_statements(composition_2.tokens, composition_2.statements)
+
+
+def test_parse_multiple_statements_1(multiple_statements_1):
+    assert_statements(multiple_statements_1.tokens,
+                      multiple_statements_1.statements)

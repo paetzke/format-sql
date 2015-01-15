@@ -3,12 +3,13 @@
 format-sql
 Makes your SQL readable.
 
-Copyright (c) 2014, Friedrich Paetzke (paetzke@fastmail.fm)
+Copyright (c) 2014-2015, Friedrich Paetzke (paetzke@fastmail.fm)
 All rights reserved.
 
 """
-import pytest
 from format_sql.main import _get_args, handle_py_file, handle_sql_file, main
+
+import pytest
 from mock import call, patch
 
 try:
@@ -99,3 +100,20 @@ def test_py_file_formatting(test_data, filename, expected_filename):
 
         with open(expected_filename) as f:
             assert mocked_write_back.call_args[0][1] == f.read()
+
+
+@pytest.mark.parametrize(('filename', 'expected_filename'), [
+    ('test_03/before.sql', 'test_03/after.sql'),
+])
+def test_multiple_statements_per_sql_file(test_data, filename, expected_filename):
+    test_filename = test_data.get_path(filename)
+    expected_filename = test_data.get_path(expected_filename)
+
+    with patch('format_sql.main._write_back') as mocked_write_back:
+        handle_sql_file(test_filename)
+
+        with open(expected_filename) as f:
+            expected_data = f.read()
+
+        assert mocked_write_back.call_count == 1
+        assert mocked_write_back.call_args[0][1] == expected_data
