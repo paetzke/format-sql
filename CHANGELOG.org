@@ -2,6 +2,7 @@
 
 ** next
 - =Where= conditions with string comparison are now processed correctly.
+- Multiple statements in one SQL file can now be processed.
 
 ** 0.3
 - Package rewritten.
