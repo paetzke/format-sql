@@ -26,6 +26,11 @@ class Liner:
         self.add_to_line(val)
         self.end_line()
 
+    def add_empty_lines(self, count=1):
+        self.end_line()
+        for _ in range(count):
+            self.lines.append('')
+
     def end_line(self):
         line = ''.join(self.line)
         if line:
@@ -293,12 +298,16 @@ def style(statements, indent=0, keyword_upper=True, liner=None):
         Where.name: _style_where,
     }
 
-    for statement in statements:
+    for i, statement in enumerate(statements):
         func = structures[statement.name]
         try:
             func(statement, liner=liner, indent=indent)
         except IndexError:
             raise InvalidSQL()
+
+        if isinstance(statement, Semicolon) and len(statements) > i + 1:
+            # statements holds multiple separate statements
+            liner.add_empty_lines(count=2)
 
     liner.end_line()
     return liner.lines
