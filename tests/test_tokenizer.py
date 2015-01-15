@@ -354,3 +354,8 @@ def test_tokenize_composition_1(composition_1):
 
 def test_tokenize_composition_2(composition_2):
     assert_tokens(composition_2.tokens, tokenize(composition_2.sql))
+
+
+def test_tokenize_multiple_statements1(multiple_statements_1):
+    assert_tokens(multiple_statements_1.tokens,
+                  tokenize(multiple_statements_1.sql))

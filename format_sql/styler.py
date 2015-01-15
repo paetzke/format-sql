@@ -13,13 +13,6 @@ from format_sql.parser import (Condition, From, Func, GroupBy, Having,
                                Semicolon, Str, SubSelect, Where)
 
 
-def _is_type(instance, classes):
-    for cls in classes:
-        if isinstance(instance, cls):
-            return True
-    return False
-
-
 class Liner:
 
     def __init__(self):
@@ -32,6 +25,11 @@ class Liner:
     def add_line(self, val):
         self.add_to_line(val)
         self.end_line()
+
+    def add_empty_lines(self, count=1):
+        self.end_line()
+        for _ in range(count):
+            self.lines.append('')
 
     def end_line(self):
         line = ''.join(self.line)
@@ -249,7 +247,7 @@ def _style_func(func, liner, end_line=True):
     liner.add_to_line('(')
 
     for i, arg in enumerate(func.args):
-        if _is_type(arg, (Identifier, Str, Number)):
+        if isinstance(arg, (Identifier, Str, Number)):
             liner.add_to_line(arg)
         elif isinstance(arg, Func):
             _style_func(arg, liner, end_line=False)
@@ -271,7 +269,7 @@ def _style_select(select, liner, indent):
 
     for i, value in enumerate(select.values):
         liner.add_to_line('    ' * (indent + 1))
-        if _is_type(value, (Identifier, Str, Number)):
+        if isinstance(value, (Identifier, Str, Number)):
             liner.add_to_line(str(value))
         elif isinstance(value, Func):
             _style_func(value, liner, end_line=False)
@@ -300,12 +298,16 @@ def style(statements, indent=0, keyword_upper=True, liner=None):
         Where.name: _style_where,
     }
 
-    for statement in statements:
+    for i, statement in enumerate(statements):
         func = structures[statement.name]
         try:
             func(statement, liner=liner, indent=indent)
         except IndexError:
             raise InvalidSQL()
+
+        if isinstance(statement, Semicolon) and len(statements) > i + 1:
+            # statements holds multiple separate statements
+            liner.add_empty_lines(count=2)
 
     liner.end_line()
     return liner.lines
