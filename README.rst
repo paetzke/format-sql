@@ -62,5 +62,17 @@ You can then just call ``format-sql`` with files and directories:
       -r, --recursive   Process files found in subdirectories.
       --no-semicolon    Try to detect SQL queries with no trailing semicolon.
 
+For example:
+
+.. code:: bash
+
+    $ format-sql my-file.py
+
+Or recursively with directory:
+
+.. code:: bash
+
+    $ format-sql -r my-directory/
+
 You can try format-sql online: `https://paetzke.me/format-sql <https://paetzke.me/format-sql>`_.
 

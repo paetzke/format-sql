@@ -61,4 +61,16 @@ optional arguments:
   --no-semicolon    Try to detect SQL queries with no trailing semicolon.
 #+END_SRC
 
+For example:
+
+#+BEGIN_SRC bash
+$ format-sql my-file.py
+#+END_SRC
+
+Or recursively with directory:
+
+#+BEGIN_SRC bash
+$ format-sql -r my-directory/
+#+END_SRC
+
 You can try format-sql online: [[https://paetzke.me/format-sql]].
