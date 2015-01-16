@@ -4,7 +4,7 @@
 format-sql
 Makes your SQL readable.
 
-Copyright (c) 2014, Friedrich Paetzke (paetzke@fastmail.fm)
+Copyright (c) 2014-2015, Friedrich Paetzke (paetzke@fastmail.fm)
 All rights reserved.
 
 """
@@ -101,7 +101,8 @@ def handle_py_file(filename):
             continue
 
         for line in fmt:
-            fs.append(indent + line.rstrip())
+            s = '%s%s' % (indent, line)
+            fs.append(s.rstrip())
 
         lines = lines.replace(old_query, '\n%s ' % '\n'.join(fs))
 
