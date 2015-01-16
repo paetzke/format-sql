@@ -117,3 +117,17 @@ def test_multiple_statements_per_sql_file(test_data, filename, expected_filename
 
         assert mocked_write_back.call_count == 1
         assert mocked_write_back.call_args[0][1] == expected_data
+
+
+def test_multiple_statements_in_python_string(test_data):
+    test_filename = test_data.get_path('test_04/before.py')
+    expected_filename = test_data.get_path('test_04/after.py')
+
+    with patch('format_sql.main._write_back') as mocked_write_back:
+        handle_py_file(test_filename)
+
+        with open(expected_filename) as f:
+            expected_data = f.read()
+
+        assert mocked_write_back.call_count == 1
+        assert mocked_write_back.call_args[0][1] == expected_data
