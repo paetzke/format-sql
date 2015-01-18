@@ -22,8 +22,10 @@ except ImportError:
     ('file1 file2 --types sql --types py', ['file1', 'file2'], ['sql', 'py']),
     ('file1 --types py --types sql', ['file1'], ['py', 'sql']),
     ('file1 file2 --types sql', ['file1', 'file2'], ['sql']),
-    ('file1 file2', ['file1', 'file2'], ['py']),
+    ('file1 file2', ['file1', 'file2'], []),
     ('--types sql file2 file1', ['file2', 'file1'], ['sql']),
+    ('file1.el', ['file1.el'], []),
+    ('file1.el --types el', ['file1.el'], ['el']),
 ])
 def test_get_args(args, expected_paths, expected_types):
     args = _get_args(args.split())
