@@ -48,17 +48,16 @@ You can then just call =format-sql= with files and directories:
 
 #+BEGIN_SRC bash
 $ format-sql -h
-usage: format-sql [-h] [--types {py,sql}] [-r] [--no-semicolon]
-                  paths [paths ...]
+usage: format-sql [-h] [--types TYPES] [-r] [--no-semicolon] paths [paths ...]
 
 positional arguments:
   paths
 
 optional arguments:
-  -h, --help        show this help message and exit
-  --types {py,sql}  Process given file types. Default value is "py".
-  -r, --recursive   Process files found in subdirectories.
-  --no-semicolon    Try to detect SQL queries with no trailing semicolon.
+  -h, --help       show this help message and exit
+  --types TYPES    Only process these given file types.
+  -r, --recursive  Process files found in subdirectories.
+  --no-semicolon   Try to detect SQL queries with no trailing semicolon.
 #+END_SRC
 
 For example:
