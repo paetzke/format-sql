@@ -24,9 +24,8 @@ def _get_args(call_args):
     parser = ArgumentParser('format-sql')
 
     parser.add_argument('--types', dest='types', type=str,
-                        choices=['py', 'sql'],
                         action='append',
-                        help='Process given file types. Default value is "py".')
+                        help='Only process these given file types.')
     parser.add_argument('paths', type=str, nargs='+')
     parser.add_argument('-r', '--recursive', dest='recursive',
                         action='store_true', default=False,
@@ -36,7 +35,7 @@ def _get_args(call_args):
 
     args, _unused_unknown_args = parser.parse_known_args(call_args)
     if not args.types:
-        args.types = ['py']
+        args.types = []
 
     return args
 
@@ -61,14 +60,16 @@ def _get_filenames(paths, recursive):
 
 def main(args=sys.argv[1:]):
     args = _get_args(args)
-    all_filenames = _get_filenames(args.paths, args.recursive)
-    filenames = filter(lambda fn: fn.endswith(tuple(args.types)), all_filenames)
+    filenames = _get_filenames(args.paths, args.recursive)
+
+    if args.types:
+        filenames = filter(lambda fn: fn.endswith(tuple(args.types)), filenames)
 
     for filename in filenames:
         print(filename)
         if filename.lower().endswith('.py'):
             handle_py_file(filename)
-        elif filename.lower().endswith('.sql'):
+        else:
             handle_sql_file(filename)
 
 
