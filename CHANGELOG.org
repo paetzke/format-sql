@@ -1,5 +1,9 @@
 * CHANGELOG
 
+** next
+- All given non-Python files are handled as SQL files.
+  The =--types= parameter can be used to exclude certain file types.
+
 ** 0.4
 - =Where= conditions with string comparison are now processed correctly.
 - Multiple statements in one SQL file can now be processed.
