@@ -32,6 +32,8 @@ def _get_args(call_args):
                         help='Process files found in subdirectories.')
     parser.add_argument('--no-semicolon', action='store_true', default=False,
                         help='Try to detect SQL queries with no trailing semicolon.')
+    parser.add_argument('--version', action='version',
+                        version='format-sql 0.4.0')
 
     args, _unused_unknown_args = parser.parse_known_args(call_args)
     if not args.types:
