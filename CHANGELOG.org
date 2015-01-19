@@ -3,6 +3,7 @@
 ** next
 - All given non-Python files are handled as SQL files.
   The =--types= parameter can be used to exclude certain file types.
+- Added command line parameter =--version= to echo the current version.
 
 ** 0.4
 - =Where= conditions with string comparison are now processed correctly.
