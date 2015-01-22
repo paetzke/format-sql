@@ -34,7 +34,7 @@ def _get_args(call_args):
     parser.add_argument('--no-semicolon', action='store_true', default=False,
                         help='Try to detect SQL queries with no trailing semicolon.')
     parser.add_argument('--version', action='version',
-                        version='format-sql 0.4.0')
+                        version='format-sql 0.5.0')
     parser.add_argument('--debug', dest='debug', action='store_true', default=False,
                         help='Print available debug information.')
 
