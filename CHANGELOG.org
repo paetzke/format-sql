@@ -1,6 +1,6 @@
 * CHANGELOG
 
-** next
+** 0.5
 - All given non-Python files are handled as SQL files.
   The =--types= parameter can be used to exclude certain file types.
 - Added command line parameter =--version= to echo the current version.
