@@ -50,7 +50,9 @@ You can then just call ``format-sql`` with files and directories:
 .. code:: bash
 
     $ format-sql -h
-    usage: format-sql [-h] [--types TYPES] [-r] [--no-semicolon] paths [paths ...]
+    usage: format-sql [-h] [--types TYPES] [-r] [--no-semicolon] [--version]
+                      [--debug]
+                      paths [paths ...]
     
     positional arguments:
       paths
@@ -60,6 +62,8 @@ You can then just call ``format-sql`` with files and directories:
       --types TYPES    Only process these given file types.
       -r, --recursive  Process files found in subdirectories.
       --no-semicolon   Try to detect SQL queries with no trailing semicolon.
+      --version        show program's version number and exit
+      --debug          Print available debug information.
 
 For example:
 
