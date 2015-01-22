@@ -120,6 +120,9 @@ class Str(Value):
 class Semicolon(Value):
     name = 'SEMICOLON'
 
+    def __repr__(self):
+        return 'Semicolon(%s)' % self.value
+
 
 class GroupBy:
     name = 'GROUP BY'
