@@ -18,6 +18,7 @@ from glob import glob
 
 from format_sql.parser import InvalidSQL
 from format_sql.shortcuts import format_sql
+from format_sql.util import print_debug
 
 
 def _get_args(call_args):
@@ -34,6 +35,8 @@ def _get_args(call_args):
                         help='Try to detect SQL queries with no trailing semicolon.')
     parser.add_argument('--version', action='version',
                         version='format-sql 0.4.0')
+    parser.add_argument('--debug', dest='debug', action='store_true', default=False,
+                        help='Print available debug information.')
 
     args, _unused_unknown_args = parser.parse_known_args(call_args)
     if not args.types:
@@ -69,13 +72,15 @@ def main(args=sys.argv[1:]):
 
     for filename in filenames:
         print(filename)
+
+        print(args.debug)
         if filename.lower().endswith('.py'):
-            handle_py_file(filename)
+            handle_py_file(filename, args.debug)
         else:
-            handle_sql_file(filename)
+            handle_sql_file(filename, args.debug)
 
 
-def handle_py_file(filename):
+def handle_py_file(filename, debug=False):
     with open(filename) as f:
         lines = f.read()
 
@@ -95,10 +100,13 @@ def handle_py_file(filename):
         if not first in ['select']:
             continue
 
+        if debug:
+            print_debug('Found query: %s' % query)
+
         fs = []
 
         try:
-            fmt = format_sql(query)
+            fmt = format_sql(query, debug)
         except InvalidSQL as e:
             print(e, file=sys.stderr)
             continue
@@ -112,12 +120,12 @@ def handle_py_file(filename):
     _write_back(filename, lines)
 
 
-def handle_sql_file(filename):
+def handle_sql_file(filename, debug=False):
     with open(filename) as f:
         lines = f.read()
 
     try:
-        sql = format_sql(lines)
+        sql = format_sql(lines, debug)
     except InvalidSQL as e:
         print(e, file=sys.stderr)
         return
