@@ -80,13 +80,10 @@ def main(args=sys.argv[1:]):
             handle_sql_file(filename, args.debug)
 
 
-def handle_py_file(filename, debug=False):
-    with open(filename) as f:
-        lines = f.read()
-
-    regex = r'(\s*)[_\w\d\.]*\s*=*\s*[_\w\d\.]*\s*\(*"{3}(\s*.*?;*\s*)"{3}'
+def get_statements(lines):
+    regex = r'(\s*)[_\w\d\.]*\s*=*\s*[_\w\d\.]*\s*\(*("""|\'\'\')(\s*.*?;*\s*)\2'
     queries = re.findall(regex, lines, re.DOTALL)
-    for indent, query in queries:
+    for indent, query_quote_start, query in queries:
         indent = indent.strip('\n')
         indent += ' ' * 4
         old_query = query
@@ -100,10 +97,16 @@ def handle_py_file(filename, debug=False):
         if not first in ['select']:
             continue
 
+        yield old_query, query, indent
+
+
+def handle_py_file(filename, debug=False):
+    with open(filename) as f:
+        lines = f.read()
+
+    for old_query, query, indent in get_statements(lines):
         if debug:
             print_debug('Found query: %s' % query)
-
-        fs = []
 
         try:
             fmt = format_sql(query, debug)
@@ -111,6 +114,7 @@ def handle_py_file(filename, debug=False):
             print(e, file=sys.stderr)
             continue
 
+        fs = []
         for line in fmt:
             s = '%s%s' % (indent, line)
             fs.append(s.rstrip())
