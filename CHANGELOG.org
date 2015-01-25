@@ -1,5 +1,13 @@
 * CHANGELOG
 
+** next
+- Enabled single quotes as SQL string wrapper.
+  So you can format double and single quoted SQL strings.
+  #+BEGIN_SRC python
+      sql = """ select x from y """
+      sql = ''' select x from y '''
+  #+END_SRC
+
 ** 0.5
 - All given non-Python files are handled as SQL files.
   The =--types= parameter can be used to exclude certain file types.
