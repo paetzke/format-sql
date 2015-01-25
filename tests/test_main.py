@@ -7,7 +7,8 @@ Copyright (c) 2014-2015, Friedrich Paetzke (paetzke@fastmail.fm)
 All rights reserved.
 
 """
-from format_sql.main import _get_args, handle_py_file, handle_sql_file, main
+from format_sql.main import (_get_args, get_statements, handle_py_file,
+                             handle_sql_file, main)
 
 import pytest
 from mock import call, patch
@@ -133,3 +134,22 @@ def test_multiple_statements_in_python_string(test_data):
 
         assert mocked_write_back.call_count == 1
         assert mocked_write_back.call_args[0][1] == expected_data
+
+
+@pytest.mark.parametrize(('input_', 'expected_output'), [
+    ('s = """ select x """', ' select x '),
+    ('s = """ select x where t = "1" """', ' select x where t = "1" '),
+    ("s = ''' select x where t = '1' '''", " select x where t = '1' "),
+])
+def test_query_recognition_in_python_string(input_, expected_output):
+    old_query, query, indent = next(get_statements(input_))
+    assert old_query == expected_output
+    assert indent == ' ' * 4
+
+
+@pytest.mark.parametrize(('input_'), [
+    ("s = ''' select x where t = '1' \"\"\""),
+])
+def test_query_recognition_in_python_should_fail(input_):
+    with pytest.raises(StopIteration):
+        next(get_statements(input_))
