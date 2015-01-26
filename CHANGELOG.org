@@ -7,6 +7,7 @@
       sql = """ select x from y """
       sql = ''' select x from y '''
   #+END_SRC
+- Fixed: Don't print =--debug= parameter value.
 
 ** 0.5
 - All given non-Python files are handled as SQL files.
