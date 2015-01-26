@@ -7,6 +7,7 @@
 
 Makes your SQL readable.
 
+[[https://paetzke.me/static/images/format-sql.gif]]
 
 An example:
 
