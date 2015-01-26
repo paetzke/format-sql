@@ -73,7 +73,6 @@ def main(args=sys.argv[1:]):
     for filename in filenames:
         print(filename)
 
-        print(args.debug)
         if filename.lower().endswith('.py'):
             handle_py_file(filename, args.debug)
         else:
