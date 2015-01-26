@@ -10,6 +10,8 @@ format-sql
 
 Makes your SQL readable.
 
+`https://paetzke.me/static/images/format-sql.gif <https://paetzke.me/static/images/format-sql.gif>`_
+
 An example:
 
 .. code:: python
