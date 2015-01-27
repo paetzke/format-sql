@@ -28,6 +28,10 @@ def test_data():
         def get_path(self, path):
             return os.path.join(os.path.join(os.path.dirname(__file__), 'data'), path)
 
+        def get_content(self, path):
+            with open(self.get_path(path)) as f:
+                return f.read()
+
     return TestData()
 
 

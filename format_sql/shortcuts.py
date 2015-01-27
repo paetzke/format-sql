@@ -10,17 +10,17 @@ All rights reserved.
 from format_sql.parser import parse
 from format_sql.styler import style
 from format_sql.tokenizer import tokenize
-from format_sql.util import print_debug
+from format_sql.util import print_non_data
 
 
 def format_sql(s, debug=False):
     tokens = list(tokenize(s))
     if debug:
-        print_debug('Tokens: %s' % tokens)
+        print_non_data('Tokens: %s' % tokens)
     parsed = list(parse(tokens))
     if debug:
-        print_debug('Statements: %s' % parsed)
+        print_non_data('Statements: %s' % parsed)
     styled = style(parsed)
     if debug:
-        print_debug('Output: %s' % styled)
+        print_non_data('Output: %s' % styled)
     return styled

@@ -34,13 +34,16 @@ def test_get_args(args, expected_paths, expected_types):
     assert args.paths == expected_paths
     assert args.types == expected_types
     assert not args.recursive
+    assert not args.dry_run
 
 
 def test_find_sql_in_directory(test_data):
     args = '%s -r --types sql' % test_data.get_path('test_00')
     args = args.split()
 
-    with patch('format_sql.main.handle_sql_file') as mocked_handle_sql_file:
+    with patch('format_sql.main.handle_sql_file') as mocked_handle_sql_file, \
+            patch('format_sql.main._write_back') as mocked_write_back:
+
         main(args)
 
         assert mocked_handle_sql_file.call_count == 3
@@ -49,6 +52,8 @@ def test_find_sql_in_directory(test_data):
             mocked_handle_sql_file.call_args_list[1][0][0],
             mocked_handle_sql_file.call_args_list[2][0][0],
         ])
+
+        assert mocked_write_back.call_count == 3
 
     expected_paths = ['one.sql', 'two.sql', 'sub_dir/four.sql']
 
@@ -60,7 +65,9 @@ def test_find_py_in_directory(test_data):
     args = '%s -r --types py' % test_data.get_path('test_00')
     args = args.split()
 
-    with patch('format_sql.main.handle_py_file') as mocked_handle_py_file:
+    with patch('format_sql.main.handle_py_file') as mocked_handle_py_file, \
+            patch('format_sql.main._write_back') as mocked_write_back:
+
         main(args)
 
         assert mocked_handle_py_file.call_count == 2
@@ -68,6 +75,8 @@ def test_find_py_in_directory(test_data):
             mocked_handle_py_file.call_args_list[0][0][0],
             mocked_handle_py_file.call_args_list[1][0][0],
         ])
+
+        assert mocked_write_back.call_count == 2
 
     expected_paths = ['three.py', 'sub_dir/five.py']
 
@@ -81,11 +90,8 @@ def test_find_py_in_directory(test_data):
 ])
 def test_sql_file_formatting(test_data, filename, expected_sql):
     test_filename = test_data.get_path(filename)
-
-    with patch('format_sql.main._write_back') as mocked_write_back:
-        handle_sql_file(test_filename)
-
-        assert mocked_write_back.call_args[0][1] == expected_sql
+    result = handle_sql_file(test_filename)
+    assert result == expected_sql
 
 
 @pytest.mark.parametrize(('filename', 'expected_filename'), [
@@ -98,11 +104,10 @@ def test_py_file_formatting(test_data, filename, expected_filename):
     test_filename = test_data.get_path(filename)
     expected_filename = test_data.get_path(expected_filename)
 
-    with patch('format_sql.main._write_back') as mocked_write_back:
-        handle_py_file(test_filename)
+    result = handle_py_file(test_filename)
 
-        with open(expected_filename) as f:
-            assert mocked_write_back.call_args[0][1] == f.read()
+    with open(expected_filename) as f:
+        assert result == f.read()
 
 
 @pytest.mark.parametrize(('filename', 'expected_filename'), [
@@ -112,28 +117,24 @@ def test_multiple_statements_per_sql_file(test_data, filename, expected_filename
     test_filename = test_data.get_path(filename)
     expected_filename = test_data.get_path(expected_filename)
 
-    with patch('format_sql.main._write_back') as mocked_write_back:
-        handle_sql_file(test_filename)
+    result = handle_sql_file(test_filename)
 
-        with open(expected_filename) as f:
-            expected_data = f.read()
+    with open(expected_filename) as f:
+        expected_data = f.read()
 
-        assert mocked_write_back.call_count == 1
-        assert mocked_write_back.call_args[0][1] == expected_data
+    assert result == expected_data
 
 
 def test_multiple_statements_in_python_string(test_data):
     test_filename = test_data.get_path('test_04/before.py')
     expected_filename = test_data.get_path('test_04/after.py')
 
-    with patch('format_sql.main._write_back') as mocked_write_back:
-        handle_py_file(test_filename)
+    result = handle_py_file(test_filename)
 
-        with open(expected_filename) as f:
-            expected_data = f.read()
+    with open(expected_filename) as f:
+        expected_data = f.read()
 
-        assert mocked_write_back.call_count == 1
-        assert mocked_write_back.call_args[0][1] == expected_data
+    assert result == expected_data
 
 
 @pytest.mark.parametrize(('input_', 'expected_output'), [
@@ -153,3 +154,13 @@ def test_query_recognition_in_python_string(input_, expected_output):
 def test_query_recognition_in_python_should_fail(input_):
     with pytest.raises(StopIteration):
         next(get_statements(input_))
+
+
+def test_dry_run(test_data):
+    expected_content = test_data.get_content('test_04/after.py')
+    args = '%s --dry-run' % test_data.get_path('test_04/before.py')
+
+    with patch('format_sql.main.print_data') as mocked_print_data:
+        main(args.split())
+
+        assert mocked_print_data.call_args_list == [call(expected_content)]

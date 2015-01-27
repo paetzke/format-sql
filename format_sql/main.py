@@ -18,7 +18,7 @@ from glob import glob
 
 from format_sql.parser import InvalidSQL
 from format_sql.shortcuts import format_sql
-from format_sql.util import print_debug
+from format_sql.util import print_data, print_non_data
 
 
 def _get_args(call_args):
@@ -37,6 +37,8 @@ def _get_args(call_args):
                         version='format-sql 0.5.0')
     parser.add_argument('--debug', dest='debug', action='store_true', default=False,
                         help='Print available debug information.')
+    parser.add_argument('--dry-run', dest='dry_run', action='store_true', default=False,
+                        help='Print the alterate output and do not change the file.')
 
     args, _unused_unknown_args = parser.parse_known_args(call_args)
     if not args.types:
@@ -71,12 +73,14 @@ def main(args=sys.argv[1:]):
         filenames = filter(lambda fn: fn.endswith(tuple(args.types)), filenames)
 
     for filename in filenames:
-        print(filename)
+        print_non_data(filename)
 
         if filename.lower().endswith('.py'):
-            handle_py_file(filename, args.debug)
+            lines = handle_py_file(filename, args.debug)
         else:
-            handle_sql_file(filename, args.debug)
+            lines = handle_sql_file(filename, args.debug)
+
+        _write_back(filename, lines, args.dry_run)
 
 
 def get_statements(lines):
@@ -105,12 +109,12 @@ def handle_py_file(filename, debug=False):
 
     for old_query, query, indent in get_statements(lines):
         if debug:
-            print_debug('Found query: %s' % query)
+            print_non_data('Found query: %s' % query)
 
         try:
             fmt = format_sql(query, debug)
         except InvalidSQL as e:
-            print(e, file=sys.stderr)
+            print_non_data(e)
             continue
 
         fs = []
@@ -119,8 +123,7 @@ def handle_py_file(filename, debug=False):
             fs.append(s.rstrip())
 
         lines = lines.replace(old_query, '\n%s ' % '\n'.join(fs))
-
-    _write_back(filename, lines)
+    return lines
 
 
 def handle_sql_file(filename, debug=False):
@@ -130,16 +133,19 @@ def handle_sql_file(filename, debug=False):
     try:
         sql = format_sql(lines, debug)
     except InvalidSQL as e:
-        print(e, file=sys.stderr)
+        print_non_data(e)
         return
 
     lines = '\n'.join(sql)
-    _write_back(filename, lines)
+    return lines
 
 
-def _write_back(filename, lines):
-    with open(filename, 'w') as f:
-        f.write(lines)
+def _write_back(filename, lines, dry_run=False):
+    if dry_run:
+        print_data(lines)
+    else:
+        with open(filename, 'w') as f:
+            f.write(lines)
 
 
 if __name__ == '__main__':
