@@ -53,7 +53,7 @@ You can then just call ``format-sql`` with files and directories:
 
     $ format-sql -h
     usage: format-sql [-h] [--types TYPES] [-r] [--no-semicolon] [--version]
-                      [--debug]
+                      [--debug] [--dry-run]
                       paths [paths ...]
     
     positional arguments:
@@ -66,6 +66,7 @@ You can then just call ``format-sql`` with files and directories:
       --no-semicolon   Try to detect SQL queries with no trailing semicolon.
       --version        show program's version number and exit
       --debug          Print available debug information.
+      --dry-run        Print the altered output and do not change the file.
 
 For example:
 
