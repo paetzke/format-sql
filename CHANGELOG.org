@@ -8,6 +8,8 @@
       sql = ''' select x from y '''
   #+END_SRC
 - Fixed: Don't print =--debug= parameter value.
+- Added =--dry-run= parameter.
+  If =--dry-run= is set, no file will be altered but printed to STDOUT.
 
 ** 0.5
 - All given non-Python files are handled as SQL files.
