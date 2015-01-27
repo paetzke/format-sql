@@ -38,7 +38,7 @@ def _get_args(call_args):
     parser.add_argument('--debug', dest='debug', action='store_true', default=False,
                         help='Print available debug information.')
     parser.add_argument('--dry-run', dest='dry_run', action='store_true', default=False,
-                        help='Print the alterate output and do not change the file.')
+                        help='Print the altered output and do not change the file.')
 
     args, _unused_unknown_args = parser.parse_known_args(call_args)
     if not args.types:
