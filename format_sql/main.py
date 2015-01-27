@@ -18,7 +18,7 @@ from glob import glob
 
 from format_sql.parser import InvalidSQL
 from format_sql.shortcuts import format_sql
-from format_sql.util import print_debug
+from format_sql.util import print_data, print_non_data
 
 
 def _get_args(call_args):
@@ -71,7 +71,7 @@ def main(args=sys.argv[1:]):
         filenames = filter(lambda fn: fn.endswith(tuple(args.types)), filenames)
 
     for filename in filenames:
-        print(filename)
+        print_non_data(filename)
 
         if filename.lower().endswith('.py'):
             handle_py_file(filename, args.debug)
@@ -105,12 +105,12 @@ def handle_py_file(filename, debug=False):
 
     for old_query, query, indent in get_statements(lines):
         if debug:
-            print_debug('Found query: %s' % query)
+            print_non_data('Found query: %s' % query)
 
         try:
             fmt = format_sql(query, debug)
         except InvalidSQL as e:
-            print(e, file=sys.stderr)
+            print_non_data(e)
             continue
 
         fs = []
@@ -130,7 +130,7 @@ def handle_sql_file(filename, debug=False):
     try:
         sql = format_sql(lines, debug)
     except InvalidSQL as e:
-        print(e, file=sys.stderr)
+        print_non_data(e)
         return
 
     lines = '\n'.join(sql)
