@@ -569,7 +569,7 @@ def _parse_conditions(tokens):
 
         elif len(tokens) > 4 + i and all([
                 tokens[i + 0]._type in (Token.IDENTIFIER, Token.NUMBER),
-                tokens[i + 1]._type == Token.IN,
+                tokens[i + 1]._type in (Token.IN, Token.COMPARE),
                 tokens[i + 2]._type == Token.PARENTHESIS_OPEN]):
 
             condition = Condition([_get_simple_object(tokens[i]),
