@@ -7,8 +7,8 @@ Copyright (c) 2014-2015, Friedrich Paetzke (paetzke@fastmail.fm)
 All rights reserved.
 
 """
-from format_sql.parser import (_parse_identifier, Identifier, InvalidCondition,
-                               InvalidIdentifier, InvalidLimit, Number, parse)
+from format_sql.parser import (Identifier, InvalidCondition, InvalidIdentifier,
+                               InvalidLimit, Number, _parse_identifier, parse)
 from format_sql.tokenizer import Token
 
 import pytest
@@ -190,6 +190,10 @@ def test_parse_where_8(where_8):
 
 def test_parse_where_9(where_9):
     assert_statements(where_9.tokens, where_9.statements)
+
+
+def test_parse_where_10(where_10):
+    assert_statements(where_10.tokens, where_10.statements)
 
 
 def test_parse_composition_1(composition_1):

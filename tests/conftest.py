@@ -926,6 +926,46 @@ def where_9():
 
 
 @fixture
+def where_10():
+    return Data(
+        sql='where x = (select max(*) from k)',
+        tokens=[
+            Token(Token.WHERE, 'where'),
+            Token(Token.IDENTIFIER, 'x'),
+            Token(Token.COMPARE, '='),
+            Token(Token.PARENTHESIS_OPEN, '('),
+            Token(Token.SELECT, 'select'),
+            Token(Token.FUNC, 'max'),
+            Token(Token.PARENTHESIS_OPEN, '('),
+            Token(Token.IDENTIFIER, '*'),
+            Token(Token.PARENTHESIS_CLOSE, ')'),
+            Token(Token.FROM, 'from'),
+            Token(Token.IDENTIFIER, 'k'),
+            Token(Token.PARENTHESIS_CLOSE, ')'),
+        ],
+        statements=[
+            Where('where', [
+                Condition([
+                    Identifier('x'),
+                    Operator('='),
+                    SubSelect([
+                        Select('select', [Func('max', args=[Identifier('*')])]),
+                        From('from', [Identifier('k')])
+                    ])
+                ])
+            ])
+        ],
+        style=[
+            'WHERE',
+            '    x = (',
+            '        SELECT',
+            '            MAX(*)',
+            '        FROM',
+            '            k)'
+        ])
+
+
+@fixture
 def composition_1():
     return Data(
         sql='select * from k',
