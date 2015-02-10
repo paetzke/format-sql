@@ -10,6 +10,10 @@
 - Fixed: Don't print =--debug= parameter value.
 - Added =--dry-run= parameter.
   If =--dry-run= is set, no file will be altered but printed to STDOUT.
+- Allow comparison of scalar with sub-select
+  #+BEGIN_SRC python
+      sql = """ where x = (select max(*) from k) """
+  #+END_SRC
 
 ** 0.5
 - All given non-Python files are handled as SQL files.
