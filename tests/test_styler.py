@@ -9,7 +9,7 @@ All rights reserved.
 """
 from __future__ import unicode_literals
 
-from format_sql.styler import _style_func, Liner, style
+from format_sql.styler import Liner, _style_func, style
 
 
 def assert_func_style(statements1, styled2):
@@ -160,6 +160,10 @@ def test_where_8(where_8):
 
 def test_where_9(where_9):
     assert_style(where_9.statements, where_9.style)
+
+
+def test_where_10(where_10):
+    assert_style(where_10.statements, where_10.style)
 
 
 def test_composition_1(composition_1):
