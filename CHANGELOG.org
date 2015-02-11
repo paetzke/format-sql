@@ -1,6 +1,6 @@
 * CHANGELOG
 
-** next
+** 0.6
 - Enabled single quotes as SQL string wrapper.
   So you can format double and single quoted SQL strings.
   #+BEGIN_SRC python
