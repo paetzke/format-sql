@@ -1,8 +1,8 @@
 * format-sql
 
 [[https://travis-ci.org/paetzke/format-sql][https://travis-ci.org/paetzke/format-sql.svg?branch=master]]
-[[https://coveralls.io/r/paetzke/format-sql?branch=master][https://coveralls.io/repos/paetzke/format-sql/badge.png?branch=master]]
-[[https://pypi.python.org/pypi/format-sql/][https://pypip.in/v/format-sql/badge.png]]
+[[https://coveralls.io/r/paetzke/format-sql?branch=master][https://coveralls.io/repos/paetzke/format-sql/badge.svg?branch=master]]
+[[https://pypi.python.org/pypi/format-sql/][https://badge.fury.io/py/format-sql.svg]]
 
 
 Makes your SQL readable.

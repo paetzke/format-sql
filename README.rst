@@ -3,9 +3,9 @@ format-sql
 
 .. image:: https://travis-ci.org/paetzke/format-sql.svg?branch=master
   :target: https://travis-ci.org/paetzke/format-sql
-.. image:: https://coveralls.io/repos/paetzke/format-sql/badge.png?branch=master
+.. image:: https://coveralls.io/repos/paetzke/format-sql/badge.svg?branch=master
   :target: https://coveralls.io/r/paetzke/format-sql?branch=master
-.. image:: https://pypip.in/v/format-sql/badge.png
+.. image:: https://badge.fury.io/py/format-sql.svg
   :target: https://pypi.python.org/pypi/format-sql/
 
 Makes your SQL readable.
