@@ -1,5 +1,11 @@
 * CHANGELOG
 
+** 0.7
+- Allow aliases in selects.
+  #+BEGIN_SRC python
+      sql = """ select x as y """
+  #+END_SRC
+
 ** 0.6
 - Enabled single quotes as SQL string wrapper.
   So you can format double and single quoted SQL strings.
