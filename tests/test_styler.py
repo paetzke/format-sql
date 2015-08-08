@@ -126,6 +126,10 @@ def test_select_3(select_3):
     assert_style(select_3.statements, select_3.style)
 
 
+def test_select_4(select_4):
+    assert_style(select_4.statements, select_4.style)
+
+
 def test_where_1(where_1):
     assert_style(where_1.statements, where_1.style)
 

@@ -631,6 +631,26 @@ def select_3():
 
 
 @fixture
+def select_4():
+    return Data(
+        sql='Select 1 as 2',
+        tokens=[
+            Token(Token.SELECT, 'Select'),
+            Token(Token.NUMBER, '1'),
+            Token(Token.AS, 'as'),
+            Token(Token.NUMBER, '2'),
+        ],
+        statements=[
+            Select('Select',
+                   [Number('1', as_='as', alias='2')])
+        ],
+        style=[
+            'SELECT',
+            '    1 AS 2'
+        ])
+
+
+@fixture
 def where_1():
     return Data(
         sql='where x= 1',
