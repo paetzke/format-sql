@@ -312,6 +312,10 @@ def test_tokenize_select_3(select_3):
     assert_tokens(select_3.tokens, tokenize(select_3.sql))
 
 
+def test_tokenize_select_4(select_4):
+    assert_tokens(select_4.tokens, tokenize(select_4.sql))
+
+
 def test_tokenize_where_1(where_1):
     assert_tokens(where_1.tokens, tokenize(where_1.sql))
 

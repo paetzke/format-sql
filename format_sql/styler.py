@@ -270,7 +270,7 @@ def _style_select(select, liner, indent):
     for i, value in enumerate(select.values):
         liner.add_to_line('    ' * (indent + 1))
         if isinstance(value, (Identifier, Str, Number)):
-            liner.add_to_line(str(value))
+            _style_identifier(value, liner, end_line=False)
         elif isinstance(value, Func):
             _style_func(value, liner, end_line=False)
 

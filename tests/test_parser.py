@@ -156,6 +156,10 @@ def test_parse_select_3(select_3):
     assert_statements(select_3.tokens, select_3.statements)
 
 
+def test_parse_select_4(select_4):
+    assert_statements(select_4.tokens, select_4.statements)
+
+
 def test_parse_where_1(where_1):
     assert_statements(where_1.tokens, where_1.statements)
 
