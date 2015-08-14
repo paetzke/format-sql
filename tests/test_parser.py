@@ -203,6 +203,10 @@ def test_parse_where_11(where_11):
     assert_statements(where_11.tokens, where_11.statements)
 
 
+def test_parse_where_12(where_12):
+    assert_statements(where_12.tokens, where_12.statements)
+
+
 def test_parse_composition_1(composition_1):
     assert_statements(composition_1.tokens, composition_1.statements)
 

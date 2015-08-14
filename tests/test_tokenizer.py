@@ -359,6 +359,10 @@ def test_tokenize_where_11(where_11):
     assert_tokens(where_11.tokens, tokenize(where_11.sql))
 
 
+def test_tokenize_where_12(where_12):
+    assert_tokens(where_12.tokens, tokenize(where_12.sql))
+
+
 def test_tokenize_composition_1(composition_1):
     assert_tokens(composition_1.tokens, tokenize(composition_1.sql))
 
