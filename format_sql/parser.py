@@ -10,16 +10,42 @@ All rights reserved.
 from format_sql.tokenizer import Token
 
 
+def types_match(tokens, types_list):
+    if len(tokens) < len(types_list):
+        return False
+
+    for token, types in zip(tokens, types_list):
+        if types is None:
+            continue
+        if not isinstance(types, tuple):
+            types = (types,)
+
+        if token._type not in types:
+            return False
+
+    return True
+
+
 def _get_simple_object(token, **kwargs):
-    if token._type == Token.IDENTIFIER:
-        return Identifier(token._value, **kwargs)
-    if token._type == Token.NUMBER:
-        return Number(token._value, **kwargs)
-    if token._type == Token.STR:
-        return Str(token._value, **kwargs)
-    if token._type == Token.NOT:
-        return Not(token._value)
-    raise ValueError()
+    clazz = {
+        Token.IDENTIFIER: Identifier,
+        Token.NUMBER: Number,
+        Token.STR: Str,
+        Token.NOT: Not,
+    }[token._type]
+    return clazz(token._value, **kwargs)
+
+
+def _eq(self, other, attrs):
+    if not isinstance(other, self.__class__):
+        return False
+
+    for attr in attrs:
+        equal = getattr(self, attr) == getattr(other, attr)
+        if not equal:
+            return False
+
+    return True
 
 
 class InvalidSQL(Exception):
@@ -64,8 +90,7 @@ class SingleValue:
         self.value = value
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) \
-            and self.value == other.value
+        return _eq(self, other, ['value'])
 
 
 class SingleAndListValue:
@@ -75,9 +100,7 @@ class SingleAndListValue:
         self.values = values
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) \
-            and all([self.value == other.value,
-                     self.values == other.values])
+        return _eq(self, other, ['value', 'values'])
 
 
 class Value:
@@ -89,11 +112,7 @@ class Value:
         self.kwargs = kwargs
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) \
-            and all([self.value == other.value,
-                     self.alias == other.alias,
-                     self.as_ == other.as_,
-                     self.kwargs == other.kwargs])
+        return _eq(self, other, ['value', 'alias', 'as_', 'kwargs'])
 
     def __str__(self):
         return '%s' % self.value
@@ -146,9 +165,7 @@ class GroupBy:
         self.with_rollup = with_rollup
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) \
-            and all([self.values == other.values,
-                     self.with_rollup == other.with_rollup])
+        return _eq(self, other, ['values', 'with_rollup'])
 
     def __repr__(self):
         return 'GroupBy(with_rollup=%s, values=%s)' % (self.with_rollup, self.values)
@@ -171,11 +188,7 @@ class Func:
         self.alias = alias
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) \
-            and all([self.name == other.name,
-                     self.args == other.args,
-                     self.as_ == other.as_,
-                     self.alias == other.alias])
+        return _eq(self, other, ['name', 'args', 'as_', 'alias'])
 
 
 class Having:
@@ -186,9 +199,7 @@ class Having:
         self.values = values
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) \
-            and all([self.value == other.value,
-                     self.values == other.values])
+        return _eq(self, other, ['value', 'values'])
 
     def __repr__(self):
         return 'Having(%s, %s)' % (self.value, self.values)
@@ -209,10 +220,7 @@ class Limit:
         self.offset_keyword = offset_keyword
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) \
-            and all([self.row_count == other.row_count,
-                     self.offset == other.offset,
-                     self.offset_keyword == other.offset_keyword])
+        return _eq(self, other, ['row_count', 'offset', 'offset_keyword'])
 
     def __repr__(self):
         return 'Limit(row_count=%s, offset=%s)' % (self.row_count, self.offset)
@@ -256,8 +264,7 @@ class OrderBy:
         self.values = values
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) \
-            and self.values == other.values
+        return _eq(self, other, ['values'])
 
     def __repr__(self):
         return 'OrderBy(values=%s)' % self.values
@@ -270,8 +277,7 @@ class Condition:
         self.values = values
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) \
-            and self.values == other.values
+        return _eq(self, other, ['values'])
 
     def __repr__(self):
         return 'Condition(%s)' % self.values
@@ -290,8 +296,7 @@ class SubSelect:
         self.values = values
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) \
-            and self.values == other.values
+        return _eq(self, other, ['values'])
 
 
 class Where:
@@ -302,9 +307,7 @@ class Where:
         self.conditions = conditions
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) \
-            and all([self.value == other.value,
-                     self.conditions == other.conditions])
+        return _eq(self, other, ['value', 'conditions'])
 
     def __repr__(self):
         return 'Where(%s, %s)' % (self.value, self.conditions)
@@ -371,11 +374,7 @@ def _parse_from(tokens):
             vals = []
 
             while len(tokens) > i:
-                if len(tokens) > 2 + i and all([
-                        tokens[i + 0]._type == Token.IDENTIFIER,
-                        tokens[i + 1]._type == Token.COMPARE,
-                        tokens[i + 2]._type == Token.IDENTIFIER]):
-
+                if types_match(tokens[i:], [Token.IDENTIFIER, Token.COMPARE, Token.IDENTIFIER]):
                     condition = Condition([Identifier(tokens[i + 0]._value),
                                            Operator(tokens[i + 1]._value),
                                            Identifier(tokens[i + 2]._value)])
@@ -410,9 +409,7 @@ def _parse_alias(tokens):
         result['as'] = tokens[i]._value
         i += 1
 
-    if len(tokens) > i and tokens[i]._type in (Token.IDENTIFIER,
-                                               Token.STR,
-                                               Token.NUMBER):
+    if types_match(tokens[i:], [(Token.IDENTIFIER, Token.STR, Token.NUMBER)]):
         result['alias'] = tokens[i]._value
         i += 1
     return result, i
@@ -452,26 +449,19 @@ def _parse_having(tokens):
 
 def _parse_limit(tokens):
     if len(tokens) > 3:
-        if all([tokens[0]._type == Token.LIMIT,
-                tokens[1]._type == Token.NUMBER,
-                tokens[2]._type == Token.COMMA,
-                tokens[3]._type == Token.NUMBER]):
 
+        if types_match(tokens, [Token.LIMIT, Token.NUMBER, Token.COMMA, Token.NUMBER]):
             return Limit(row_count=Number(tokens[3]._value),
                          offset=Number(tokens[1]._value)), 4
 
-        if all([tokens[0]._type == Token.LIMIT,
-                tokens[1]._type == Token.NUMBER,
-                tokens[2]._type == Token.IDENTIFIER,
-                tokens[2]._value.upper() == 'OFFSET',
-                tokens[3]._type == Token.NUMBER]):
+        if types_match(tokens, [Token.LIMIT, Token.NUMBER, Token.IDENTIFIER, Token.NUMBER]):
+            if tokens[2]._value.upper() == 'OFFSET':
 
-            return Limit(row_count=Number(tokens[1]._value),
-                         offset=Number(tokens[3]._value),
-                         offset_keyword=tokens[2]._value), 4
+                return Limit(row_count=Number(tokens[1]._value),
+                             offset=Number(tokens[3]._value),
+                             offset_keyword=tokens[2]._value), 4
 
-    if len(tokens) > 1 and all([tokens[0]._type == Token.LIMIT,
-                                tokens[1]._type == Token.NUMBER]):
+    if types_match(tokens, [Token.LIMIT, Token.NUMBER]):
         return Limit(row_count=Number(tokens[1]._value)), 2
 
     raise InvalidLimit('%s' % tokens)
@@ -485,7 +475,7 @@ def _parse_order_by(tokens):
         if not tokens[i]._type in (Token.IDENTIFIER, Token.NUMBER):
             raise InvalidOrderBy()
 
-        if len(tokens) > i + 1 and tokens[i + 1]._type in (Token.ASC, Token.DESC):
+        if types_match(tokens[i:], [None, (Token.ASC, Token.DESC)]):
             value = _get_simple_object(tokens[i], sort=tokens[i + 1]._value)
             values.append(value)
             i += 2
@@ -494,7 +484,7 @@ def _parse_order_by(tokens):
             values.append(value)
             i += 1
 
-        if len(tokens) > i and tokens[i]._type == Token.COMMA:
+        if types_match(tokens[i:], [Token.COMMA]):
             i += 1
         else:
             break
@@ -543,12 +533,11 @@ def _parse_conditions(tokens):
 
     i = 0
     while i < len(tokens):
-        if len(tokens) > 3 + i and all([
-                tokens[i + 0]._type == Token.NOT,
-                tokens[
-                    i + 1]._type in (Token.IDENTIFIER, Token.NUMBER, Token.STR),
-                tokens[i + 2]._type == Token.COMPARE,
-                tokens[i + 3]._type in (Token.IDENTIFIER, Token.NUMBER, Token.STR)]):
+
+        if types_match(tokens[i:], [Token.NOT,
+                                    (Token.IDENTIFIER, Token.NUMBER, Token.STR),
+                                    Token.COMPARE,
+                                    (Token.IDENTIFIER, Token.NUMBER, Token.STR)]):
 
             condition = Condition([Not(tokens[i]._value),
                                    _get_simple_object(tokens[i + 1]),
@@ -557,37 +546,28 @@ def _parse_conditions(tokens):
             conditions.append(condition)
             i += 4
 
-        elif len(tokens) > 2 + i and all([
-                tokens[
-                    i + 0]._type in (Token.IDENTIFIER, Token.NUMBER, Token.STR),
-                tokens[i + 1]._type == Token.COMPARE,
-                tokens[i + 2]._type in (Token.IDENTIFIER, Token.NUMBER, Token.STR)]):
-
+        elif types_match(tokens[i:], [(Token.IDENTIFIER, Token.NUMBER, Token.STR),
+                                      Token.COMPARE,
+                                      (Token.IDENTIFIER, Token.NUMBER, Token.STR)]):
             condition = Condition([_get_simple_object(tokens[i]),
                                    Operator(tokens[i + 1]._value),
                                    _get_simple_object(tokens[i + 2])])
             conditions.append(condition)
             i += 3
 
-        elif len(tokens) > 2 + i and all([
-                tokens[
-                    i + 0]._type in (Token.IDENTIFIER, Token.NUMBER, Token.STR),
-                tokens[i + 1]._type == Token.IS,
-                tokens[i + 2]._type == Token.NULL]):
-
+        elif types_match(tokens[i:], [(Token.IDENTIFIER, Token.NUMBER, Token.STR),
+                                      Token.IS,
+                                      Token.NULL]):
             condition = Condition([_get_simple_object(tokens[i]),
                                    Is(tokens[i + 1]._value),
                                    Null(tokens[i + 2]._value)])
             conditions.append(condition)
             i += 3
 
-        elif len(tokens) > 3 + i and all([
-                tokens[
-                    i + 0]._type in (Token.IDENTIFIER, Token.NUMBER, Token.STR),
-                tokens[i + 1]._type == Token.IS,
-                tokens[i + 2]._type == Token.NOT,
-                tokens[i + 3]._type == Token.NULL]):
-
+        elif types_match(tokens[i:], [(Token.IDENTIFIER, Token.NUMBER, Token.STR),
+                                      Token.IS,
+                                      Token.NOT,
+                                      Token.NULL]):
             condition = Condition([_get_simple_object(tokens[i]),
                                    Is(tokens[i + 1]._value),
                                    Not(tokens[i + 2]._value),
@@ -595,10 +575,7 @@ def _parse_conditions(tokens):
             conditions.append(condition)
             i += 4
 
-        elif len(tokens) > 5 + i and all([
-                tokens[i + 0]._type == Token.NOT,
-                tokens[i + 1]._type in Token.FUNC]):
-
+        elif types_match(tokens[i:], [Token.NOT, Token.FUNC, None, None, None, None]):
             func, j = _parse_func(tokens[i + 1:])
             condition = Condition([Not(tokens[i]._value),
                                    func,
@@ -607,11 +584,11 @@ def _parse_conditions(tokens):
             conditions.append(condition)
             i += j
 
-        elif len(tokens) > 4 + i and all([
-                tokens[i + 0]._type in (Token.IDENTIFIER, Token.NUMBER),
-                tokens[i + 1]._type in (Token.IN, Token.COMPARE),
-                tokens[i + 2]._type == Token.PARENTHESIS_OPEN]):
-
+        elif types_match(tokens, [(Token.IDENTIFIER, Token.NUMBER),
+                                  (Token.IN, Token.COMPARE),
+                                  Token.PARENTHESIS_OPEN,
+                                  None,
+                                  None]):
             condition = Condition([_get_simple_object(tokens[i]),
                                    Operator(tokens[i + 1]._value)])
             i += 3
@@ -650,9 +627,8 @@ def _parse_conditions(tokens):
 
 def _parse_identifier(tokens):
     count = 0
-    if len(tokens) > 0 and tokens[0]._type in (Token.IDENTIFIER,
-                                               Token.STR,
-                                               Token.NUMBER):
+
+    if types_match(tokens, [(Token.IDENTIFIER, Token.STR, Token.NUMBER)]):
         if tokens[0]._type == Token.IDENTIFIER:
             cls = Identifier
         elif tokens[0]._type == Token.NUMBER:
