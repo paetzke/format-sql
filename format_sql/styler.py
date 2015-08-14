@@ -13,6 +13,16 @@ from format_sql.parser import (Condition, From, Func, GroupBy, Having,
                                Semicolon, Str, SubSelect, Where)
 
 
+def types_match(condition, types_list):
+    if len(condition.values) != len(types_list):
+        return False
+
+    for value, types in zip(condition.values, types_list):
+        if not isinstance(value, types):
+            return False
+    return True
+
+
 class Liner:
 
     def __init__(self):
@@ -161,19 +171,13 @@ def _style_having(having, liner, indent):
             i += 1
 
         condition = having.values[i]
-        if len(condition.values) == 3 and all([
-                isinstance(condition.values[0], Identifier),
-                isinstance(condition.values[1], Operator),
-                isinstance(condition.values[2], Number)]):
+
+        if types_match(condition, [Identifier, Operator, Number]):
             liner.add_to_line(' '.join('%s' % x for x in condition.values))
             i += 1
             liner.end_line()
 
-        if len(condition.values) == 4 and all([
-                isinstance(condition.values[0], Not),
-                isinstance(condition.values[1], Func),
-                isinstance(condition.values[2], Operator),
-                isinstance(condition.values[3], Number)]):
+        if types_match(condition, [Not, Func, Operator, Number]):
             liner.add_to_line('NOT')
             liner.add_to_line(' ')
             _style_func(condition.values[1], liner, end_line=False)
@@ -197,28 +201,22 @@ def _style_where(where, liner, indent):
             i += 1
 
         condition = where.conditions[i]
+
         if len(condition.values) == 4 and isinstance(condition.values[0], Not):
             liner.add_to_line('NOT ')
             condition.values.pop(0)
 
-        if len(condition.values) == 3 and all([
-                isinstance(condition.values[0], (Identifier, Number, Str)),
-                isinstance(condition.values[1], Operator),
-                isinstance(condition.values[2], (Identifier, Number, Str))]):
+        if types_match(condition, [(Identifier, Number, Str),
+                                   Operator,
+                                   (Identifier, Number, Str)]):
             liner.add_to_line(' '.join('%s' % x for x in condition.values))
             i += 1
 
-        elif len(condition.values) == 3 and all([
-                isinstance(condition.values[0], (Identifier, Number, Str)),
-                isinstance(condition.values[1], Is),
-                isinstance(condition.values[2], Null)]):
+        elif types_match(condition, [(Identifier, Number, Str), Is, Null]):
             liner.add_to_line('%s IS NULL' % condition.values[0])
             i += 1
-        elif len(condition.values) == 3 and all([
-                isinstance(condition.values[0], (Identifier, Number, Str)),
-                isinstance(condition.values[1], Operator),
-                isinstance(condition.values[2], list)]):
 
+        elif types_match(condition, [(Identifier, Number, Str), Operator, list]):
             liner.add_to_line('%s IN (' % condition.values[0])
             liner.end_line()
 
@@ -234,11 +232,8 @@ def _style_where(where, liner, indent):
                 liner.end_line()
 
             i += 1
-        elif len(condition.values) == 3 and all([
-                isinstance(condition.values[0], Identifier),
-                isinstance(condition.values[1], Operator),
-                isinstance(condition.values[2], SubSelect)]):
 
+        elif types_match(condition, [Identifier, Operator, SubSelect]):
             liner.add_to_line('%s %s (' % (condition.values[0],
                                            str(condition.values[1]).upper()))
             liner.end_line()
