@@ -8,8 +8,8 @@ All rights reserved.
 
 """
 from format_sql.parser import (Condition, From, Func, GroupBy, Having,
-                               Identifier, InvalidSQL, Join, Limit, Link, Not,
-                               Number, On, Operator, OrderBy, Select,
+                               Identifier, InvalidSQL, Is, Join, Limit, Link,
+                               Not, Null, Number, On, Operator, OrderBy, Select,
                                Semicolon, Str, SubSelect, Where)
 
 
@@ -206,6 +206,13 @@ def _style_where(where, liner, indent):
                 isinstance(condition.values[1], Operator),
                 isinstance(condition.values[2], (Identifier, Number, Str))]):
             liner.add_to_line(' '.join('%s' % x for x in condition.values))
+            i += 1
+
+        elif len(condition.values) == 3 and all([
+                isinstance(condition.values[0], (Identifier, Number, Str)),
+                isinstance(condition.values[1], Is),
+                isinstance(condition.values[2], Null)]):
+            liner.add_to_line('%s IS NULL' % condition.values[0])
             i += 1
         elif len(condition.values) == 3 and all([
                 isinstance(condition.values[0], (Identifier, Number, Str)),

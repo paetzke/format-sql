@@ -11,11 +11,10 @@ import os
 from collections import namedtuple
 
 from format_sql.parser import (Condition, From, Func, GroupBy, Having,
-                               Identifier, Join, Limit, Link, Not, Number, On,
-                               Operator, OrderBy, Select, Semicolon, Str,
-                               SubSelect, Where)
+                               Identifier, Is, Join, Limit, Link, Not, Null,
+                               Number, On, Operator, OrderBy, Select, Semicolon,
+                               Str, SubSelect, Where)
 from format_sql.tokenizer import Token
-
 from pytest import fixture
 
 Data = namedtuple('Data', ['sql', 'tokens', 'statements', 'style'])
@@ -982,6 +981,28 @@ def where_10():
             '            MAX(*)',
             '        FROM',
             '            k)'
+        ])
+
+
+@fixture
+def where_11():
+    return Data(
+        sql='where x is null',
+        tokens=[
+            Token(Token.WHERE, 'where'),
+            Token(Token.IDENTIFIER, 'x'),
+            Token(Token.IS, 'is'),
+            Token(Token.NULL, 'null'),
+        ],
+        statements=[
+            Where('where',
+                  [Condition([Identifier('x'),
+                              Is('is'),
+                              Null('null')])])
+        ],
+        style=[
+            'WHERE',
+            '    x IS NULL'
         ])
 
 
