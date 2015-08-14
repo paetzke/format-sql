@@ -11,15 +11,13 @@ from format_sql.tokenizer import Token
 
 
 def _get_simple_object(token, **kwargs):
-    if token._type == Token.IDENTIFIER:
-        return Identifier(token._value, **kwargs)
-    if token._type == Token.NUMBER:
-        return Number(token._value, **kwargs)
-    if token._type == Token.STR:
-        return Str(token._value, **kwargs)
-    if token._type == Token.NOT:
-        return Not(token._value)
-    raise ValueError()
+    clazz = {
+        Token.IDENTIFIER: Identifier,
+        Token.NUMBER: Number,
+        Token.STR: Str,
+        Token.NOT: Not,
+    }[token._type]
+    return clazz(token._value, **kwargs)
 
 
 def _eq(self, other, attrs):
