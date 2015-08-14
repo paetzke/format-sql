@@ -22,6 +22,18 @@ def _get_simple_object(token, **kwargs):
     raise ValueError()
 
 
+def _eq(self, other, attrs):
+    if not isinstance(other, self.__class__):
+        return False
+
+    for attr in attrs:
+        equal = getattr(self, attr) == getattr(other, attr)
+        if not equal:
+            return False
+
+    return True
+
+
 class InvalidSQL(Exception):
     pass
 
@@ -64,8 +76,7 @@ class SingleValue:
         self.value = value
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) \
-            and self.value == other.value
+        return _eq(self, other, ['value'])
 
 
 class SingleAndListValue:
@@ -75,9 +86,7 @@ class SingleAndListValue:
         self.values = values
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) \
-            and all([self.value == other.value,
-                     self.values == other.values])
+        return _eq(self, other, ['value', 'values'])
 
 
 class Value:
@@ -89,11 +98,7 @@ class Value:
         self.kwargs = kwargs
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) \
-            and all([self.value == other.value,
-                     self.alias == other.alias,
-                     self.as_ == other.as_,
-                     self.kwargs == other.kwargs])
+        return _eq(self, other, ['value', 'alias', 'as_', 'kwargs'])
 
     def __str__(self):
         return '%s' % self.value
@@ -146,9 +151,7 @@ class GroupBy:
         self.with_rollup = with_rollup
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) \
-            and all([self.values == other.values,
-                     self.with_rollup == other.with_rollup])
+        return _eq(self, other, ['values', 'with_rollup'])
 
     def __repr__(self):
         return 'GroupBy(with_rollup=%s, values=%s)' % (self.with_rollup, self.values)
@@ -171,11 +174,7 @@ class Func:
         self.alias = alias
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) \
-            and all([self.name == other.name,
-                     self.args == other.args,
-                     self.as_ == other.as_,
-                     self.alias == other.alias])
+        return _eq(self, other, ['name', 'args', 'as_', 'alias'])
 
 
 class Having:
@@ -186,9 +185,7 @@ class Having:
         self.values = values
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) \
-            and all([self.value == other.value,
-                     self.values == other.values])
+        return _eq(self, other, ['value', 'values'])
 
     def __repr__(self):
         return 'Having(%s, %s)' % (self.value, self.values)
@@ -209,10 +206,7 @@ class Limit:
         self.offset_keyword = offset_keyword
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) \
-            and all([self.row_count == other.row_count,
-                     self.offset == other.offset,
-                     self.offset_keyword == other.offset_keyword])
+        return _eq(self, other, ['row_count', 'offset', 'offset_keyword'])
 
     def __repr__(self):
         return 'Limit(row_count=%s, offset=%s)' % (self.row_count, self.offset)
@@ -256,8 +250,7 @@ class OrderBy:
         self.values = values
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) \
-            and self.values == other.values
+        return _eq(self, other, ['values'])
 
     def __repr__(self):
         return 'OrderBy(values=%s)' % self.values
@@ -270,8 +263,7 @@ class Condition:
         self.values = values
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) \
-            and self.values == other.values
+        return _eq(self, other, ['values'])
 
     def __repr__(self):
         return 'Condition(%s)' % self.values
@@ -290,8 +282,7 @@ class SubSelect:
         self.values = values
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) \
-            and self.values == other.values
+        return _eq(self, other, ['values'])
 
 
 class Where:
@@ -302,9 +293,7 @@ class Where:
         self.conditions = conditions
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) \
-            and all([self.value == other.value,
-                     self.conditions == other.conditions])
+        return _eq(self, other, ['value', 'conditions'])
 
     def __repr__(self):
         return 'Where(%s, %s)' % (self.value, self.conditions)
