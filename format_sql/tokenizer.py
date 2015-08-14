@@ -3,7 +3,7 @@
 format-sql
 Makes your SQL readable.
 
-Copyright (c) 2014, Friedrich Paetzke (paetzke@fastmail.fm)
+Copyright (c) 2014-2015, Friedrich Paetzke (paetzke@fastmail.fm)
 All rights reserved.
 
 """
@@ -26,7 +26,9 @@ class Token:
     GROUP_BY = 'GROUP'
     IDENTIFIER = 'identifier'
     IN = 'IN'
+    IS = 'IS'
     ON = 'ON'
+    NULL = 'NULL'
     HAVING = 'HAVING'
     JOIN = 'join'
     LIMIT = 'LIMIT'
@@ -68,6 +70,8 @@ TOKEN_RES = OrderedDict([
     (Token.ON, [r'\bon\b']),
     (Token.ASC, [r'\basc\b']),
     (Token.AS, [r'\bas\b']),
+    (Token.IS, [r'\bis\b']),
+    (Token.NULL, [r'\bnull\b']),
     (Token.SEMICOLON, [r';']),
     (Token.COMMA, [r',']),
     (Token.COMPARE, [r'=', r'!=', r'>=', r'<=', r'<>', r'<', r'>']),
