@@ -174,6 +174,10 @@ def test_where_11(where_11):
     assert_style(where_11.statements, where_11.style)
 
 
+def test_where_12(where_12):
+    assert_style(where_12.statements, where_12.style)
+
+
 def test_composition_1(composition_1):
     assert_style(composition_1.statements, composition_1.style)
 

@@ -1007,6 +1007,30 @@ def where_11():
 
 
 @fixture
+def where_12():
+    return Data(
+        sql='where x is not null',
+        tokens=[
+            Token(Token.WHERE, 'where'),
+            Token(Token.IDENTIFIER, 'x'),
+            Token(Token.IS, 'is'),
+            Token(Token.NOT, 'not'),
+            Token(Token.NULL, 'null'),
+        ],
+        statements=[
+            Where('where',
+                  [Condition([Identifier('x'),
+                              Is('is'),
+                              Not('not'),
+                              Null('null')])])
+        ],
+        style=[
+            'WHERE',
+            '    x IS NOT NULL'
+        ])
+
+
+@fixture
 def composition_1():
     return Data(
         sql='select * from k',

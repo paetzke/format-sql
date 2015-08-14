@@ -216,6 +216,10 @@ def _style_where(where, liner, indent):
             liner.add_to_line('%s IS NULL' % condition.values[0])
             i += 1
 
+        elif types_match(condition, [(Identifier, Number, Str), Is, Not, Null]):
+            liner.add_to_line('%s IS NOT NULL' % condition.values[0])
+            i += 1
+
         elif types_match(condition, [(Identifier, Number, Str), Operator, list]):
             liner.add_to_line('%s IN (' % condition.values[0])
             liner.end_line()

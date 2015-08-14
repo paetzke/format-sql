@@ -125,11 +125,17 @@ class Semicolon(Value):
 
 
 class Is(SingleValue):
-    pass
+    name = 'IS'
+
+    def __repr__(self):
+        return 'Is(%s)' % self.value
 
 
 class Null(SingleValue):
-    pass
+    name = 'NULL'
+
+    def __repr__(self):
+        return 'Null(%s)' % self.value
 
 
 class GroupBy:
@@ -574,6 +580,20 @@ def _parse_conditions(tokens):
                                    Null(tokens[i + 2]._value)])
             conditions.append(condition)
             i += 3
+
+        elif len(tokens) > 3 + i and all([
+                tokens[
+                    i + 0]._type in (Token.IDENTIFIER, Token.NUMBER, Token.STR),
+                tokens[i + 1]._type == Token.IS,
+                tokens[i + 2]._type == Token.NOT,
+                tokens[i + 3]._type == Token.NULL]):
+
+            condition = Condition([_get_simple_object(tokens[i]),
+                                   Is(tokens[i + 1]._value),
+                                   Not(tokens[i + 2]._value),
+                                   Null(tokens[i + 3]._value)])
+            conditions.append(condition)
+            i += 4
 
         elif len(tokens) > 5 + i and all([
                 tokens[i + 0]._type == Token.NOT,
