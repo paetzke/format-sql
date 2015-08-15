@@ -80,5 +80,5 @@ Or recursively with directory:
 
     $ format-sql -r my-directory/
 
-You can try format-sql online: `https://paetzke.me/format-sql <https://paetzke.me/format-sql>`_.
+You can try format-sql online: `http://format-sql.de <http://format-sql.de>`_.
 

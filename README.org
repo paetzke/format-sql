@@ -78,4 +78,4 @@ Or recursively with directory:
 $ format-sql -r my-directory/
 #+END_SRC
 
-You can try format-sql online: [[https://paetzke.me/format-sql]].
+You can try format-sql online: [[http://format-sql.de]].
