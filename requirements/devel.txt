@@ -2,6 +2,6 @@
 
 bumpversion
 ipdb
-orgco
+orgco==0.2.0
 tox
 wheel

@@ -10,7 +10,7 @@ format-sql
 
 Makes your SQL readable.
 
-`https://paetzke.me/static/images/format-sql.gif <https://paetzke.me/static/images/format-sql.gif>`_
+.. image:: https://paetzke.me/static/images/format-sql.gif
 
 An example:
 
