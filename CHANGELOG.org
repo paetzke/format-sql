@@ -1,5 +1,15 @@
 * CHANGELOG
 
+** 0.8
+- Parse =IS NOT NULL= comparisions.
+  #+BEGIN_SRC python
+      sql = """ WHERE x IS NOT NULL """
+  #+END_SRC
+- Parse =IS NULL= comparisions.
+  #+BEGIN_SRC python
+      sql = """ WHERE x IS NULL """
+  #+END_SRC
+
 ** 0.7
 - Allow aliases in selects.
   #+BEGIN_SRC python
