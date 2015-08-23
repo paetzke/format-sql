@@ -26,6 +26,7 @@ class Token:
     GROUP_BY = 'GROUP'
     IDENTIFIER = 'identifier'
     IN = 'IN'
+    INSERT = 'INSERT'
     IS = 'IS'
     ON = 'ON'
     NULL = 'NULL'
@@ -43,6 +44,7 @@ class Token:
     STR = 'str'
     WITH_ROLLUP = 'WITH'
     WHERE = 'WHERE'
+    VALUES = 'VALUES'
 
     def __init__(self, token_type, token_value):
         self._type = token_type
@@ -66,6 +68,8 @@ class Token:
 
 
 TOKEN_RES = OrderedDict([
+    (Token.INSERT, [r'\binsert\s+into\b']),
+    (Token.VALUES, [r'\bvalues\b']),
     (Token.IN, [r'\bin\b']),
     (Token.ON, [r'\bon\b']),
     (Token.ASC, [r'\basc\b']),
@@ -95,6 +99,7 @@ TOKEN_RES = OrderedDict([
                   r'\bright\s+outer\s+join\b', r'\bright\s+join\b',
                   r'\bnatural\s+join\b', r'\binner\s+join\b',
                   r'\bjoin\b']),
+
 ])
 
 
@@ -148,20 +153,32 @@ def cutter(s):
 
 
 def tokenize(s):
+    last_type = None
     for word in cutter(s):
         token_type = Token.get_token(word)
         if token_type:
+            last_type = token_type
             yield Token(token_type, word)
+
         elif word[0].isdigit() or word.startswith(('+', '-')):
             yield Token(Token.NUMBER, word)
+
         elif word.endswith('('):
-            yield Token(Token.FUNC, word[:-1].strip())
+            if last_type == Token.INSERT:
+                token_type = Token.IDENTIFIER
+            else:
+                token_type = Token.FUNC
+            yield Token(token_type, word[:-1].strip())
             yield Token(Token.PARENTHESIS_OPEN, '(')
+
         elif word.startswith(STR_STARTERS):
             yield Token(Token.STR, word)
+
         elif word in ('=', '<>', '<', '>', '!=', '>=', '<='):
             yield Token(Token.COMPARE, word)
+
         elif word.upper() in ('AND', 'OR'):
             yield Token(Token.LINK, word)
+
         else:
             yield Token(Token.IDENTIFIER, word)

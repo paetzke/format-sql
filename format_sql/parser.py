@@ -211,6 +211,37 @@ class Join(SingleValue):
         return 'Join(%s)' % self.value
 
 
+class Insert:
+    name = 'INSERT'
+
+    def __init__(self, insert, table, values=None, cols=None, select=None):
+        self.insert = insert
+        self.table = table
+        self.values = values if values else []
+        self.select = select if select else []
+        self.cols = cols if cols else []
+
+    def __eq__(self, other):
+        return _eq(self, other, ['insert', 'table', 'cols', 'values', 'select'])
+
+    def __repr__(self):
+        return 'Insert(%s, %s, %s)' % (self.insert, self.table, self.values)
+
+
+class Values:
+    name = 'VALUES'
+
+    def __init__(self, value,  values):
+        self.value = value
+        self.values = values
+
+    def __eq__(self, other):
+        return _eq(self, other, ['value', 'values'])
+
+    def __repr__(self):
+        return 'Values(%s, %s)' % (self.value, self.values)
+
+
 class Limit:
     name = 'LIMIT'
 
@@ -492,6 +523,64 @@ def _parse_order_by(tokens):
     return OrderBy(values), i
 
 
+def _parse_insert(tokens):
+    assert tokens[1]._type == Token.IDENTIFIER
+
+    i = 2
+    columns = []
+    if tokens[i]._type == Token.PARENTHESIS_OPEN:
+        i += 1
+
+        while i < len(tokens):
+            if tokens[i]._type in (Token.NUMBER, Token.STR, Token.IDENTIFIER):
+                columns.append(_get_simple_object(tokens[i]))
+                i += 1
+
+            if tokens[i]._type == Token.COMMA:
+                i += 1
+            elif tokens[i]._type == Token.PARENTHESIS_CLOSE:
+                i += 1
+                break
+
+    value_val = tokens[i]._value
+    select = []
+    values = []
+    if types_match(tokens[i:], [Token.VALUES, Token.PARENTHESIS_OPEN]):
+        i += 2
+
+        values_list = []
+        while i < len(tokens):
+
+            if tokens[i]._type in (Token.IDENTIFIER, Token.NUMBER, Token.STR):
+                values.append(_get_simple_object(tokens[i]))
+                i += 1
+
+            if tokens[i]._type == Token.COMMA:
+                i += 1
+
+            elif types_match(tokens[i:], [Token.PARENTHESIS_CLOSE,
+                                          Token.COMMA,
+                                          Token.PARENTHESIS_OPEN]):
+                values_list.append(values)
+                values = []
+                i += 3
+
+            else:
+                break
+
+        assert tokens[i]._type == Token.PARENTHESIS_CLOSE
+
+        values_list.append(values)
+        values = Values(value_val, values_list)
+
+    elif tokens[i]._type == Token.SELECT:
+        for x, j in _parse(tokens[i:]):
+            select.append(x)
+            i += j
+
+    return Insert(tokens[0]._value, tokens[1]._value, values, cols=columns, select=select), i
+
+
 def _parse_select(tokens):
     values = []
 
@@ -653,6 +742,7 @@ def _parse(tokens):
         Token.FROM: _parse_from,
         Token.FUNC: _parse_func,
         Token.HAVING: _parse_having,
+        Token.INSERT: _parse_insert,
         Token.LIMIT: _parse_limit,
         Token.ORDER_BY: _parse_order_by,
         Token.SELECT: _parse_select,
