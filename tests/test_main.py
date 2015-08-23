@@ -7,10 +7,9 @@ Copyright (c) 2014-2015, Friedrich Paetzke (paetzke@fastmail.fm)
 All rights reserved.
 
 """
+import pytest
 from format_sql.main import (_get_args, get_statements, handle_py_file,
                              handle_sql_file, main)
-
-import pytest
 from mock import call, patch
 
 try:
@@ -99,6 +98,7 @@ def test_sql_file_formatting(test_data, filename, expected_sql):
     ('test_02/test_01.py', 'test_02/test_01_expected.py'),
     ('test_02/test_02.py', 'test_02/test_02_expected.py'),
     ('test_02/test_03.py', 'test_02/test_03_expected.py'),
+    ('test_02/test_04.py', 'test_02/test_04_expected.py'),
 ])
 def test_py_file_formatting(test_data, filename, expected_filename):
     test_filename = test_data.get_path(filename)
