@@ -218,3 +218,19 @@ def test_parse_composition_2(composition_2):
 def test_parse_multiple_statements_1(multiple_statements_1):
     assert_statements(multiple_statements_1.tokens,
                       multiple_statements_1.statements)
+
+
+def test_parse_insert_1(insert_1):
+    assert_statements(insert_1.tokens, insert_1.statements)
+
+
+def test_parse_insert_2(insert_2):
+    assert_statements(insert_2.tokens, insert_2.statements)
+
+
+def test_parse_insert_3(insert_3):
+    assert_statements(insert_3.tokens, insert_3.statements)
+
+
+def test_parse_insert_4(insert_4):
+    assert_statements(insert_4.tokens, insert_4.statements)

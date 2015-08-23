@@ -11,9 +11,9 @@ import os
 from collections import namedtuple
 
 from format_sql.parser import (Condition, From, Func, GroupBy, Having,
-                               Identifier, Is, Join, Limit, Link, Not, Null,
-                               Number, On, Operator, OrderBy, Select, Semicolon,
-                               Str, SubSelect, Where)
+                               Identifier, Insert, Is, Join, Limit, Link, Not,
+                               Null, Number, On, Operator, OrderBy, Select,
+                               Semicolon, Str, SubSelect, Values, Where)
 from format_sql.tokenizer import Token
 from pytest import fixture
 
@@ -1113,3 +1113,150 @@ def multiple_statements_1():
             '    t2',
         ]
     )
+
+
+@fixture
+def insert_1():
+    return Data(
+        sql='insert into table_name values ("value!", value2,3)',
+        tokens=[
+            Token(Token.INSERT, 'insert into'),
+            Token(Token.IDENTIFIER, 'table_name'),
+            Token(Token.VALUES, 'values'),
+            Token(Token.PARENTHESIS_OPEN, '('),
+            Token(Token.STR, '"value!"'),
+            Token(Token.COMMA, ','),
+            Token(Token.IDENTIFIER, 'value2'),
+            Token(Token.COMMA, ','),
+            Token(Token.NUMBER, '3'),
+            Token(Token.PARENTHESIS_CLOSE, ')'),
+        ],
+        statements=[
+            Insert('insert into',
+                   table='table_name',
+                   values=Values('values', [[Str('"value!"'),
+                                             Identifier('value2'),
+                                             Number('3')]]))
+        ],
+        style=[
+            'INSERT INTO',
+            '    table_name',
+            'VALUES',
+            '    ("value!", value2, 3)'
+        ])
+
+
+@fixture
+def insert_2():
+    return Data(
+        sql='insert into table_name values ("value!", value2,3), ("1"), ("2")',
+        tokens=[
+            Token(Token.INSERT, 'insert into'),
+            Token(Token.IDENTIFIER, 'table_name'),
+            Token(Token.VALUES, 'values'),
+            Token(Token.PARENTHESIS_OPEN, '('),
+            Token(Token.STR, '"value!"'),
+            Token(Token.COMMA, ','),
+            Token(Token.IDENTIFIER, 'value2'),
+            Token(Token.COMMA, ','),
+            Token(Token.NUMBER, '3'),
+            Token(Token.PARENTHESIS_CLOSE, ')'),
+            Token(Token.COMMA, ','),
+            Token(Token.PARENTHESIS_OPEN, '('),
+            Token(Token.STR, '"1"'),
+            Token(Token.PARENTHESIS_CLOSE, ')'),
+            Token(Token.COMMA, ','),
+            Token(Token.PARENTHESIS_OPEN, '('),
+            Token(Token.STR, '"2"'),
+            Token(Token.PARENTHESIS_CLOSE, ')'),
+        ],
+        statements=[
+            Insert('insert into',
+                   table='table_name',
+                   values=Values('values',
+                                 [[Str('"value!"'),
+                                   Identifier('value2'),
+                                   Number('3')],
+                                  [Str('"1"')],
+                                  [Str('"2"')]]))
+        ],
+        style=[
+            'INSERT INTO',
+            '    table_name',
+            'VALUES',
+            '    ("value!", value2, 3),',
+            '    ("1"),',
+            '    ("2")'
+        ])
+
+
+@fixture
+def insert_3():
+    return Data(
+        sql='insert into table_name (col1, col2, 3) values ("value!", value2,3)',
+        tokens=[
+            Token(Token.INSERT, 'insert into'),
+            Token(Token.IDENTIFIER, 'table_name'),
+            Token(Token.PARENTHESIS_OPEN, '('),
+            Token(Token.IDENTIFIER, 'col1'),
+            Token(Token.COMMA, ','),
+            Token(Token.IDENTIFIER, 'col2'),
+            Token(Token.COMMA, ','),
+            Token(Token.NUMBER, '3'),
+            Token(Token.PARENTHESIS_CLOSE, ')'),
+            Token(Token.VALUES, 'values'),
+            Token(Token.PARENTHESIS_OPEN, '('),
+            Token(Token.STR, '"value!"'),
+            Token(Token.COMMA, ','),
+            Token(Token.IDENTIFIER, 'value2'),
+            Token(Token.COMMA, ','),
+            Token(Token.NUMBER, '3'),
+            Token(Token.PARENTHESIS_CLOSE, ')'),
+        ],
+        statements=[
+            Insert('insert into',
+                   table='table_name',
+                   values=Values('values', [[Str('"value!"'),
+                                             Identifier('value2'),
+                                             Number('3')]]),
+                   cols=[Identifier('col1'),
+                         Identifier('col2'),
+                         Number('3')]
+                   )
+        ],
+        style=[
+            'INSERT INTO',
+            '    table_name (col1, col2, 3)',
+            'VALUES',
+            '    ("value!", value2, 3)'
+        ])
+
+
+@fixture
+def insert_4():
+    return Data(
+        sql='INSERT INTO spam SELECT * FROM eggs',
+        tokens=[
+            Token(Token.INSERT, 'INSERT INTO'),
+            Token(Token.IDENTIFIER, 'spam'),
+            Token(Token.SELECT, 'SELECT'),
+            Token(Token.IDENTIFIER, '*'),
+            Token(Token.FROM, 'FROM'),
+            Token(Token.IDENTIFIER, 'eggs'),
+        ],
+        statements=[
+            Insert('INSERT INTO',
+                   table='spam',
+                   select=[
+                       Select('SELECT', [Identifier('*')]),
+                       From('FROM', [Identifier('eggs')])
+                   ])
+        ],
+        style=[
+            'INSERT INTO',
+            '    spam',
+            'SELECT',
+            '    *',
+            'FROM',
+            '    eggs'
+        ])

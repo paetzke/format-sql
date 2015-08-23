@@ -97,7 +97,7 @@ def get_statements(lines):
             continue
 
         first = first[0].lower()
-        if not first in ['select']:
+        if not first in ['select', 'insert']:
             continue
 
         yield old_query, query, indent

@@ -8,9 +8,9 @@ All rights reserved.
 
 """
 from format_sql.parser import (Condition, From, Func, GroupBy, Having,
-                               Identifier, InvalidSQL, Is, Join, Limit, Link,
-                               Not, Null, Number, On, Operator, OrderBy, Select,
-                               Semicolon, Str, SubSelect, Where)
+                               Identifier, Insert, InvalidSQL, Is, Join, Limit,
+                               Link, Not, Null, Number, On, Operator, OrderBy,
+                               Select, Semicolon, Str, SubSelect, Where)
 
 
 def types_match(condition, types_list):
@@ -270,6 +270,25 @@ def _style_func(func, liner, end_line=True):
         liner.end_line()
 
 
+def _style_insert(insert, liner, indent):
+    liner.add_line('INSERT INTO')
+    liner.add_line('    %s' % insert.table)
+    if insert.cols:
+        liner.add_to_last_line(' (%s)' %
+                               ', '.join('%s' % x for x in insert.cols))
+
+    if insert.values:
+        liner.add_line('VALUES')
+        for i, values in enumerate(insert.values.values):
+            liner.add_line('    (%s)' % ', '.join('%s' % x for x in values))
+
+            if i < len(insert.values.values) - 1:
+                liner.add_to_last_line(',')
+
+    elif insert.select:
+        style(insert.select, liner=liner, indent=indent)
+
+
 def _style_select(select, liner, indent):
     liner.add_line('    ' * indent + select.value.upper())
 
@@ -297,6 +316,7 @@ def style(statements, indent=0, keyword_upper=True, liner=None):
         From.name: _style_from,
         GroupBy.name: _style_group_by,
         Having.name: _style_having,
+        Insert.name: _style_insert,
         Limit.name: _style_limit,
         OrderBy.name: _style_order_by,
         Select.name: _style_select,
