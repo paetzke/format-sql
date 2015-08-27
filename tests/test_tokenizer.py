@@ -247,6 +247,10 @@ def test_tokenize_func_4(func_4):
     assert_tokens(func_4.tokens, tokenize(func_4.sql))
 
 
+def test_tokenize_func_5(func_5):
+    assert_tokens(func_5.tokens, tokenize(func_5.sql))
+
+
 def test_tokenize_group_by_1(group_by_1):
     assert_tokens(group_by_1.tokens, tokenize(group_by_1.sql))
 

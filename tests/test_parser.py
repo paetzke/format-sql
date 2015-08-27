@@ -91,6 +91,10 @@ def test_parse_func_4(func_4):
     assert_statements(func_4.tokens, func_4.statements)
 
 
+def test_parse_func_5(func_5):
+    assert_statements(func_5.tokens, func_5.statements)
+
+
 def test_parse_group_by_1(group_by_1):
     assert_statements(group_by_1.tokens, group_by_1.statements)
 
