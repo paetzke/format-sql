@@ -361,7 +361,7 @@ def _parse_func(tokens):
             func, j = _parse_func(tokens[i:])
             args.append(func)
             i += j
-        else:
+        elif i != 2 and tokens[i]._type != Token.PARENTHESIS_CLOSE:
             raise InvalidFunc()
 
         if tokens[i]._type == Token.COMMA:
