@@ -1,5 +1,36 @@
 * CHANGELOG
 
+** 0.9
+- Parse INSERTs. This kind of INSERTs should work now:
+  #+BEGIN_SRC sql
+    INSERT INTO
+        spam
+    SELECT
+        *
+    FROM
+        eggs
+  #+END_SRC
+
+  #+BEGIN_SRC sql
+    INSERT INTO
+        table_name (col1, col2, 3)
+    VALUES
+        ("value!", value2, 3)
+  #+END_SRC
+
+  #+BEGIN_SRC sql
+    INSERT INTO
+        table_name
+    VALUES
+        ("value!", value2, 3),
+        ("1"),
+        ("2")
+  #+END_SRC
+- Parse functions with no arguments.
+  #+BEGIN_SRC python
+      sql = """ SELECT NOW() """
+  #+END_SRC
+
 ** 0.8
 - Parse =IS NOT NULL= comparisions.
   #+BEGIN_SRC python
