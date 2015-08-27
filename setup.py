@@ -12,7 +12,7 @@ from setuptools import find_packages, setup
 setup(name='format-sql',
       description='Makes your SQL readable.',
       long_description=(open('README.rst').read()),
-      version='0.8.0',
+      version='0.9.0',
       license='BSD',
       author='Friedrich Paetzke',
       author_email='paetzke@fastmail.fm',
