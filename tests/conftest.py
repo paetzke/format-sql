@@ -306,6 +306,24 @@ def func_4():
 
 
 @fixture
+def func_5():
+    return Data(
+        sql='Now()',
+        tokens=[
+            Token(Token.FUNC, 'Now'),
+            Token(Token.PARENTHESIS_OPEN, '('),
+
+            Token(Token.PARENTHESIS_CLOSE, ')')
+        ],
+        statements=[
+            Func('Now', args=[]),
+        ],
+        style=[
+            'NOW()'
+        ])
+
+
+@fixture
 def group_by_1():
     return Data(
         sql='Group by col1',

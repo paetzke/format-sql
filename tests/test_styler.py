@@ -62,6 +62,10 @@ def test_func_4(func_4):
     assert_func_style(func_4.statements, func_4.style)
 
 
+def test_func_5(func_5):
+    assert_func_style(func_5.statements, func_5.style)
+
+
 def test_group_by_1(group_by_1):
     assert_style(group_by_1.statements, group_by_1.style)
 
