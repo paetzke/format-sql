@@ -137,28 +137,24 @@ class Str(Value):
 
 
 class Semicolon(Value):
-    name = 'SEMICOLON'
 
     def __repr__(self):
         return 'Semicolon(%s)' % self.value
 
 
 class Is(SingleValue):
-    name = 'IS'
 
     def __repr__(self):
         return 'Is(%s)' % self.value
 
 
 class Null(SingleValue):
-    name = 'NULL'
 
     def __repr__(self):
         return 'Null(%s)' % self.value
 
 
 class GroupBy:
-    name = 'GROUP BY'
 
     def __init__(self, values, with_rollup=None):
         self.values = values
@@ -172,14 +168,12 @@ class GroupBy:
 
 
 class From(SingleAndListValue):
-    name = 'FROM'
 
     def __repr__(self):
         return 'From(%s, values=%s)' % (self.value, self.values)
 
 
 class Func:
-    name = 'FUNC'
 
     def __init__(self, name, args, as_=None, alias=None):
         self.name = name
@@ -192,7 +186,6 @@ class Func:
 
 
 class Having:
-    name = 'HAVING'
 
     def __init__(self, value, values):
         self.value = value
@@ -212,7 +205,6 @@ class Join(SingleValue):
 
 
 class Insert:
-    name = 'INSERT'
 
     def __init__(self, insert, table, values=None, cols=None, select=None):
         self.insert = insert
@@ -229,7 +221,6 @@ class Insert:
 
 
 class Values:
-    name = 'VALUES'
 
     def __init__(self, value,  values):
         self.value = value
@@ -243,7 +234,6 @@ class Values:
 
 
 class Limit:
-    name = 'LIMIT'
 
     def __init__(self, row_count, offset=None, offset_keyword=None):
         self.row_count = row_count
@@ -258,7 +248,6 @@ class Limit:
 
 
 class Link(SingleValue):
-    name = 'LINK'
 
     def __repr__(self):
         return 'Link(%s)' % self.value
@@ -268,18 +257,16 @@ class Link(SingleValue):
 
 
 class Not(SingleValue):
-    name = 'NOT'
+    pass
 
 
 class On(SingleAndListValue):
-    name = 'ON'
 
     def __repr__(self):
         return 'On(%s, %s)' % (self.value, self.values)
 
 
 class Operator(SingleValue):
-    name = 'OPERATOR'
 
     def __repr__(self):
         return 'Operator(%s)' % self.value
@@ -289,7 +276,6 @@ class Operator(SingleValue):
 
 
 class OrderBy:
-    name = 'ORDER BY'
 
     def __init__(self, values):
         self.values = values
@@ -302,7 +288,6 @@ class OrderBy:
 
 
 class Condition:
-    name = 'condition'
 
     def __init__(self, values):
         self.values = values
@@ -315,7 +300,6 @@ class Condition:
 
 
 class Select(SingleAndListValue):
-    name = 'SELECT'
 
     def __repr__(self):
         return 'Select(%s, %s)' % (self.value, self.values)
@@ -331,7 +315,6 @@ class SubSelect:
 
 
 class Where:
-    name = 'WHERE'
 
     def __init__(self, value, conditions):
         self.value = value

@@ -313,19 +313,19 @@ def style(statements, indent=0, keyword_upper=True, liner=None):
         liner = Liner()
 
     structures = {
-        From.name: _style_from,
-        GroupBy.name: _style_group_by,
-        Having.name: _style_having,
-        Insert.name: _style_insert,
-        Limit.name: _style_limit,
-        OrderBy.name: _style_order_by,
-        Select.name: _style_select,
-        Semicolon.name: _style_semicolon,
-        Where.name: _style_where,
+        From: _style_from,
+        GroupBy: _style_group_by,
+        Having: _style_having,
+        Insert: _style_insert,
+        Limit: _style_limit,
+        OrderBy: _style_order_by,
+        Select: _style_select,
+        Semicolon: _style_semicolon,
+        Where: _style_where,
     }
 
     for i, statement in enumerate(statements):
-        func = structures[statement.name]
+        func = structures[statement.__class__]
         try:
             func(statement, liner=liner, indent=indent)
         except IndexError:
