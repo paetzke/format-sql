@@ -46,6 +46,18 @@ def test_from_6(from_6):
     assert_style(from_6.statements, from_6.style)
 
 
+def test_from_7(from_7):
+    assert_style(from_7.statements, from_7.style)
+
+
+def test_from_8(from_8):
+    assert_style(from_8.statements, from_8.style)
+
+
+def test_from_8(from_8):
+    assert_style(from_8.statements, from_8.style)
+
+
 def test_func_1(func_1):
     assert_func_style(func_1.statements, func_1.style)
 
