@@ -1,6 +1,13 @@
 * CHANGELOG
 
 ** 0.10 (UNRELEASED)
+- Parse function calls in joins, for example:
+  #+BEGIN_SRC sql
+    FROM
+        x
+        JOIN r ON
+            XYZ(r.id) = ABC(x.r)
+  #+END_SRC
 
 ** 0.9
 - Parse INSERTs. This kind of INSERTs should work now:
