@@ -14,26 +14,26 @@ def _match(toks, types_list):
     if len(toks) < len(types_list):
         return False
 
-    for token, types in zip(toks, types_list):
+    for tok, types in zip(toks, types_list):
         if types is None:
             continue
         if not isinstance(types, tuple):
             types = (types,)
 
-        if token._type not in types:
+        if tok._type not in types:
             return False
 
     return True
 
 
-def _get_simple_object(token, **kwargs):
+def _get_simple_object(tok, **kwargs):
     clazz = {
         Token.IDENTIFIER: Identifier,
         Token.NUMBER: Number,
         Token.STR: Str,
         Token.NOT: Not,
-    }[token._type]
-    return clazz(token._value, **kwargs)
+    }[tok._type]
+    return clazz(tok._value, **kwargs)
 
 
 def _eq(self, other, attrs):
