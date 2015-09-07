@@ -184,6 +184,9 @@ class Func:
     def __eq__(self, other):
         return _eq(self, other, ['name', 'args', 'as_', 'alias'])
 
+    def __repr__(self):
+        return '%s(%s)' % (self.name, self.args)
+
 
 class Having:
 
@@ -395,6 +398,35 @@ def _parse_from(tokens):
 
                     vals.append(condition)
                     i += 3
+
+                if types_match(tokens[i:], [Token.IDENTIFIER, Token.COMPARE, Token.FUNC]):
+                    func, j = _parse_func(tokens[i + 2:])
+                    condition = Condition([Identifier(tokens[i + 0]._value),
+                                           Operator(tokens[i + 1]._value),
+                                           func])
+                    vals.append(condition)
+                    i += 3 + j
+
+                if types_match(tokens[i:], [Token.FUNC]):
+                    func, j = _parse_func(tokens[i:])
+
+                    if types_match(tokens[i + j:], [Token.COMPARE, Token.IDENTIFIER]):
+                        i += j
+                        condition = Condition([func,
+                                               Operator(tokens[i + 0]._value),
+                                               Identifier(tokens[i + 1]._value)])
+                        vals.append(condition)
+                        i += 2
+
+                    elif types_match(tokens[i + j:], [Token.COMPARE, Token.FUNC]):
+                        i += j
+                        func2, j = _parse_func(tokens[i + 1:])
+
+                        condition = Condition([func,
+                                               Operator(tokens[i + 0]._value),
+                                               func2])
+                        vals.append(condition)
+                        i += 2 + j
 
                 if len(tokens) <= i or tokens[i]._type != Token.LINK:
                     break
