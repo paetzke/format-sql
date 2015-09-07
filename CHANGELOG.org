@@ -1,5 +1,7 @@
 * CHANGELOG
 
+** 0.10 (UNRELEASED)
+
 ** 0.9
 - Parse INSERTs. This kind of INSERTs should work now:
   #+BEGIN_SRC sql
