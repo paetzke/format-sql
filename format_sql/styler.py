@@ -154,8 +154,8 @@ def _style_order_by(order_by, liner, indent):
     for i, value in enumerate(order_by.values):
         liner.add_to_line('    ' * (indent + 1) + '%s' % value)
 
-        if 'sort' in value.kwargs:
-            sort = value.kwargs['sort'].upper()
+        if value.sort:
+            sort = value.sort.upper()
             liner.add_to_line(' %s' % sort)
 
         if i + 1 < len(order_by.values):

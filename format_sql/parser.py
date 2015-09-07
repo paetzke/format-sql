@@ -7,6 +7,7 @@ Copyright (c) 2014-2015, Friedrich Paetzke (paetzke@fastmail.fm)
 All rights reserved.
 
 """
+import attr
 from format_sql.tokenizer import Token
 
 
@@ -34,18 +35,6 @@ def _get_simple_object(tok, **kwargs):
         Token.NOT: Not,
     }[tok._type]
     return clazz(tok._value, **kwargs)
-
-
-def _eq(self, other, attrs):
-    if not isinstance(other, self.__class__):
-        return False
-
-    for attr in attrs:
-        equal = getattr(self, attr) == getattr(other, attr)
-        if not equal:
-            return False
-
-    return True
 
 
 class InvalidSQL(Exception):
@@ -84,250 +73,156 @@ class UnbalancedParenthesis(InvalidSQL):
     pass
 
 
-class SingleValue:
-
-    def __init__(self, value):
-        self.value = value
-
-    def __eq__(self, other):
-        return _eq(self, other, ['value'])
-
-
-class SingleAndListValue:
-
-    def __init__(self, value, values=[]):
-        self.value = value
-        self.values = values
-
-    def __eq__(self, other):
-        return _eq(self, other, ['value', 'values'])
-
-
-class Value:
-
-    def __init__(self, value, alias=None, as_=None, **kwargs):
-        self.value = value
-        self.alias = alias
-        self.as_ = as_
-        self.kwargs = kwargs
-
-    def __eq__(self, other):
-        return _eq(self, other, ['value', 'alias', 'as_', 'kwargs'])
+@attr.s
+class Identifier(object):
+    value = attr.ib()
+    alias = attr.ib(default=None)
+    as_ = attr.ib(default=None)
+    sort = attr.ib(default=None)
 
     def __str__(self):
         return '%s' % self.value
 
 
-class Identifier(Value):
-
-    def __repr__(self):
-        return 'Identifier(%s)' % self.value
-
-
-class Number(Value):
-
-    def __repr__(self):
-        return 'Number(%s)' % self.value
-
-
-class Str(Value):
-
-    def __repr__(self):
-        return 'Str(%s)' % self.value
-
-
-class Semicolon(Value):
-
-    def __repr__(self):
-        return 'Semicolon(%s)' % self.value
-
-
-class Is(SingleValue):
-
-    def __repr__(self):
-        return 'Is(%s)' % self.value
-
-
-class Null(SingleValue):
-
-    def __repr__(self):
-        return 'Null(%s)' % self.value
-
-
-class GroupBy:
-
-    def __init__(self, values, with_rollup=None):
-        self.values = values
-        self.with_rollup = with_rollup
-
-    def __eq__(self, other):
-        return _eq(self, other, ['values', 'with_rollup'])
-
-    def __repr__(self):
-        return 'GroupBy(with_rollup=%s, values=%s)' % (self.with_rollup, self.values)
-
-
-class From(SingleAndListValue):
-
-    def __repr__(self):
-        return 'From(%s, values=%s)' % (self.value, self.values)
-
-
-class Func:
-
-    def __init__(self, name, args, as_=None, alias=None):
-        self.name = name
-        self.args = args
-        self.as_ = as_
-        self.alias = alias
-
-    def __eq__(self, other):
-        return _eq(self, other, ['name', 'args', 'as_', 'alias'])
-
-    def __repr__(self):
-        return '%s(%s)' % (self.name, self.args)
-
-
-class Having:
-
-    def __init__(self, value, values):
-        self.value = value
-        self.values = values
-
-    def __eq__(self, other):
-        return _eq(self, other, ['value', 'values'])
-
-    def __repr__(self):
-        return 'Having(%s, %s)' % (self.value, self.values)
-
-
-class Join(SingleValue):
-
-    def __repr__(self):
-        return 'Join(%s)' % self.value
-
-
-class Insert:
-
-    def __init__(self, insert, table, values=None, cols=None, select=None):
-        self.insert = insert
-        self.table = table
-        self.values = values if values else []
-        self.select = select if select else []
-        self.cols = cols if cols else []
-
-    def __eq__(self, other):
-        return _eq(self, other, ['insert', 'table', 'cols', 'values', 'select'])
-
-    def __repr__(self):
-        return 'Insert(%s, %s, %s)' % (self.insert, self.table, self.values)
-
-
-class Values:
-
-    def __init__(self, value,  values):
-        self.value = value
-        self.values = values
-
-    def __eq__(self, other):
-        return _eq(self, other, ['value', 'values'])
-
-    def __repr__(self):
-        return 'Values(%s, %s)' % (self.value, self.values)
-
-
-class Limit:
-
-    def __init__(self, row_count, offset=None, offset_keyword=None):
-        self.row_count = row_count
-        self.offset = offset
-        self.offset_keyword = offset_keyword
-
-    def __eq__(self, other):
-        return _eq(self, other, ['row_count', 'offset', 'offset_keyword'])
-
-    def __repr__(self):
-        return 'Limit(row_count=%s, offset=%s)' % (self.row_count, self.offset)
-
-
-class Link(SingleValue):
-
-    def __repr__(self):
-        return 'Link(%s)' % self.value
+@attr.s
+class Number(object):
+    value = attr.ib()
+    alias = attr.ib(default=None)
+    as_ = attr.ib(default=None)
+    sort = attr.ib(default=None)
 
     def __str__(self):
         return '%s' % self.value
 
 
-class Not(SingleValue):
-    pass
-
-
-class On(SingleAndListValue):
-
-    def __repr__(self):
-        return 'On(%s, %s)' % (self.value, self.values)
-
-
-class Operator(SingleValue):
-
-    def __repr__(self):
-        return 'Operator(%s)' % self.value
+@attr.s
+class Str(object):
+    value = attr.ib()
+    alias = attr.ib(default=None)
+    as_ = attr.ib(default=None)
+    sort = attr.ib(default=None)
 
     def __str__(self):
         return '%s' % self.value
 
 
-class OrderBy:
-
-    def __init__(self, values):
-        self.values = values
-
-    def __eq__(self, other):
-        return _eq(self, other, ['values'])
-
-    def __repr__(self):
-        return 'OrderBy(values=%s)' % self.values
+@attr.s
+class Semicolon(object):
+    value = attr.ib()
 
 
-class Condition:
-
-    def __init__(self, values):
-        self.values = values
-
-    def __eq__(self, other):
-        return _eq(self, other, ['values'])
-
-    def __repr__(self):
-        return 'Condition(%s)' % self.values
+@attr.s
+class Is(object):
+    value = attr.ib()
 
 
-class Select(SingleAndListValue):
-
-    def __repr__(self):
-        return 'Select(%s, %s)' % (self.value, self.values)
-
-
-class SubSelect:
-
-    def __init__(self, values=[]):
-        self.values = values
-
-    def __eq__(self, other):
-        return _eq(self, other, ['values'])
+@attr.s
+class Null(object):
+    value = attr.ib()
 
 
-class Where:
+@attr.s
+class GroupBy(object):
+    values = attr.ib()
+    with_rollup = attr.ib(default=None)
 
-    def __init__(self, value, conditions):
-        self.value = value
-        self.conditions = conditions
 
-    def __eq__(self, other):
-        return _eq(self, other, ['value', 'conditions'])
+@attr.s
+class From(object):
+    value = attr.ib()
+    values = attr.ib()
 
-    def __repr__(self):
-        return 'Where(%s, %s)' % (self.value, self.conditions)
+
+@attr.s
+class Func(object):
+    name = attr.ib()
+    args = attr.ib()
+    as_ = attr.ib(default=None)
+    alias = attr.ib(default=None)
+
+
+@attr.s
+class Having(object):
+    value = attr.ib()
+    values = attr.ib()
+
+
+@attr.s
+class Join(object):
+    value = attr.ib()
+
+
+@attr.s
+class Insert(object):
+    insert = attr.ib()
+    table = attr.ib()
+    values = attr.ib(default=[])
+    cols = attr.ib(default=[])
+    select = attr.ib(default=[])
+
+
+@attr.s
+class Values(object):
+    value = attr.ib()
+    values = attr.ib()
+
+
+@attr.s
+class Limit(object):
+    row_count = attr.ib()
+    offset = attr.ib(default=None)
+    offset_keyword = attr.ib(default=None)
+
+
+@attr.s
+class Link(object):
+    value = attr.ib()
+
+
+@attr.s
+class Not(object):
+    value = attr.ib()
+
+
+@attr.s
+class On(object):
+    value = attr.ib()
+    values = attr.ib(default=[])
+
+
+@attr.s
+class Operator(object):
+    value = attr.ib()
+
+    def __str__(self):
+        return '%s' % self.value
+
+
+@attr.s
+class OrderBy(object):
+    values = attr.ib()
+
+
+@attr.s
+class Condition(object):
+    values = attr.ib()
+
+
+@attr.s
+class Select(object):
+    value = attr.ib()
+    values = attr.ib()
+
+
+@attr.s
+class SubSelect(object):
+    values = attr.ib()
+
+
+@attr.s
+class Where(object):
+    value = attr.ib()
+    conditions = attr.ib()
 
 
 def _parse_func(toks):
