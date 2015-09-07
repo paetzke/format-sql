@@ -75,6 +75,22 @@ def test_parse_from_5(from_5):
     assert_statements(from_5.tokens, from_5.statements)
 
 
+def test_parse_from_6(from_6):
+    assert_statements(from_6.tokens, from_6.statements)
+
+
+def test_parse_from_7(from_7):
+    assert_statements(from_7.tokens, from_7.statements)
+
+
+def test_parse_from_8(from_8):
+    assert_statements(from_8.tokens, from_8.statements)
+
+
+def test_parse_from_9(from_9):
+    assert_statements(from_9.tokens, from_9.statements)
+
+
 def test_parse_func_1(func_1):
     assert_statements(func_1.tokens, func_1.statements)
 

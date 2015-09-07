@@ -231,6 +231,22 @@ def test_tokenize_from_5(from_5):
     assert_tokens(from_5.tokens, tokenize(from_5.sql))
 
 
+def test_tokenize_from_6(from_6):
+    assert_tokens(from_6.tokens, tokenize(from_6.sql))
+
+
+def test_tokenize_from_7(from_7):
+    assert_tokens(from_7.tokens, tokenize(from_7.sql))
+
+
+def test_tokenize_from_8(from_8):
+    assert_tokens(from_8.tokens, tokenize(from_8.sql))
+
+
+def test_tokenize_from_9(from_9):
+    assert_tokens(from_9.tokens, tokenize(from_9.sql))
+
+
 def test_tokenize_func_1(func_1):
     assert_tokens(func_1.tokens, tokenize(func_1.sql))
 

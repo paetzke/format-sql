@@ -206,6 +206,121 @@ def from_6():
 
 
 @fixture
+def from_7():
+    return Data(
+        sql='From x join r on x.r = Xyz(r.id)',
+        tokens=[
+            Token(Token.FROM, 'From'),
+            Token(Token.IDENTIFIER, 'x'),
+            Token(Token.JOIN, 'join'),
+            Token(Token.IDENTIFIER, 'r'),
+            Token(Token.ON, 'on'),
+            Token(Token.IDENTIFIER, 'x.r'),
+            Token(Token.COMPARE, '='),
+            Token(Token.FUNC, 'Xyz'),
+            Token(Token.PARENTHESIS_OPEN, '('),
+            Token(Token.IDENTIFIER, 'r.id'),
+            Token(Token.PARENTHESIS_CLOSE, ')'),
+        ],
+        statements=[
+            From('From', values=[
+                Identifier('x'),
+                Join('join'),
+                Identifier('r'),
+                On('on', values=[
+                    Condition([
+                        Identifier('x.r'),
+                        Operator('='),
+                        Func('Xyz', args=[Identifier('r.id')])
+                    ])])])
+        ],
+        style=[
+            'FROM',
+            '    x',
+            '    JOIN r ON',
+            '        x.r = XYZ(r.id)',
+        ])
+
+
+@fixture
+def from_8():
+    return Data(
+        sql='From x join r on Xyz(r.id) = x.r',
+        tokens=[
+            Token(Token.FROM, 'From'),
+            Token(Token.IDENTIFIER, 'x'),
+            Token(Token.JOIN, 'join'),
+            Token(Token.IDENTIFIER, 'r'),
+            Token(Token.ON, 'on'),
+            Token(Token.FUNC, 'Xyz'),
+            Token(Token.PARENTHESIS_OPEN, '('),
+            Token(Token.IDENTIFIER, 'r.id'),
+            Token(Token.PARENTHESIS_CLOSE, ')'),
+            Token(Token.COMPARE, '='),
+            Token(Token.IDENTIFIER, 'x.r'),
+        ],
+        statements=[
+            From('From', values=[
+                Identifier('x'),
+                Join('join'),
+                Identifier('r'),
+                On('on', values=[
+                    Condition([
+                        Func('Xyz', args=[Identifier('r.id')]),
+                        Operator('='),
+                        Identifier('x.r')
+                    ])])])
+        ],
+        style=[
+            'FROM',
+            '    x',
+            '    JOIN r ON',
+            '        XYZ(r.id) = x.r',
+        ])
+
+
+@fixture
+def from_9():
+    return Data(
+        sql='From x join r on Xyz(r.id) = Abc(x.r)',
+        tokens=[
+            Token(Token.FROM, 'From'),
+            Token(Token.IDENTIFIER, 'x'),
+            Token(Token.JOIN, 'join'),
+            Token(Token.IDENTIFIER, 'r'),
+            Token(Token.ON, 'on'),
+            Token(Token.FUNC, 'Xyz'),
+            Token(Token.PARENTHESIS_OPEN, '('),
+            Token(Token.IDENTIFIER, 'r.id'),
+            Token(Token.PARENTHESIS_CLOSE, ')'),
+            Token(Token.COMPARE, '='),
+            Token(Token.FUNC, 'Abc'),
+            Token(Token.PARENTHESIS_OPEN, '('),
+            Token(Token.IDENTIFIER, 'x.r'),
+            Token(Token.PARENTHESIS_CLOSE, ')'),
+        ],
+        statements=[
+            From('From', values=[
+                Identifier('x'),
+                Join('join'),
+                Identifier('r'),
+                On('on', values=[
+                    Condition([
+                        Func('Xyz', args=[Identifier('r.id')]),
+                        Operator('='),
+                        Func('Abc', args=[Identifier('x.r')]),
+
+                    ])])])
+        ],
+        style=[
+            'FROM',
+            '    x',
+            '    JOIN r ON',
+            '        XYZ(r.id) = ABC(x.r)'
+        ])
+
+
+@fixture
 def func_1():
     return Data(
         sql='CONCAT(last_name,", ",first_name)',

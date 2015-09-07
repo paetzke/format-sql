@@ -106,9 +106,14 @@ def _style_from(from_, liner, indent):
                     new_line = False
 
                 elif isinstance(v, Condition):
-                    liner.add_to_line('%s %s %s' % (v.values[0],
-                                                    v.values[1],
-                                                    v.values[2]))
+                    for vv in v.values:
+                        if isinstance(vv, Func):
+                            _style_func(vv, liner, end_line=False)
+                        elif isinstance(vv, Identifier):
+                            liner.add_to_line('%s' % vv)
+                        else:
+                            liner.add_to_line(' %s ' % vv)
+
                     liner.end_line()
                     new_line = True
 
