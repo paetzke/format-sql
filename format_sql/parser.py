@@ -10,7 +10,7 @@ All rights reserved.
 from format_sql.tokenizer import Token
 
 
-def types_match(tokens, types_list):
+def _match(tokens, types_list):
     if len(tokens) < len(types_list):
         return False
 
@@ -391,7 +391,7 @@ def _parse_from(tokens):
             vals = []
 
             while len(tokens) > i:
-                if types_match(tokens[i:], [Token.IDENTIFIER, Token.COMPARE, Token.IDENTIFIER]):
+                if _match(tokens[i:], [Token.IDENTIFIER, Token.COMPARE, Token.IDENTIFIER]):
                     condition = Condition([Identifier(tokens[i + 0]._value),
                                            Operator(tokens[i + 1]._value),
                                            Identifier(tokens[i + 2]._value)])
@@ -399,7 +399,7 @@ def _parse_from(tokens):
                     vals.append(condition)
                     i += 3
 
-                if types_match(tokens[i:], [Token.IDENTIFIER, Token.COMPARE, Token.FUNC]):
+                if _match(tokens[i:], [Token.IDENTIFIER, Token.COMPARE, Token.FUNC]):
                     func, j = _parse_func(tokens[i + 2:])
                     condition = Condition([Identifier(tokens[i + 0]._value),
                                            Operator(tokens[i + 1]._value),
@@ -407,10 +407,10 @@ def _parse_from(tokens):
                     vals.append(condition)
                     i += 3 + j
 
-                if types_match(tokens[i:], [Token.FUNC]):
+                if _match(tokens[i:], [Token.FUNC]):
                     func, j = _parse_func(tokens[i:])
 
-                    if types_match(tokens[i + j:], [Token.COMPARE, Token.IDENTIFIER]):
+                    if _match(tokens[i + j:], [Token.COMPARE, Token.IDENTIFIER]):
                         i += j
                         condition = Condition([func,
                                                Operator(tokens[i + 0]._value),
@@ -418,7 +418,7 @@ def _parse_from(tokens):
                         vals.append(condition)
                         i += 2
 
-                    elif types_match(tokens[i + j:], [Token.COMPARE, Token.FUNC]):
+                    elif _match(tokens[i + j:], [Token.COMPARE, Token.FUNC]):
                         i += j
                         func2, j = _parse_func(tokens[i + 1:])
 
@@ -455,7 +455,7 @@ def _parse_alias(tokens):
         result['as'] = tokens[i]._value
         i += 1
 
-    if types_match(tokens[i:], [(Token.IDENTIFIER, Token.STR, Token.NUMBER)]):
+    if _match(tokens[i:], [(Token.IDENTIFIER, Token.STR, Token.NUMBER)]):
         result['alias'] = tokens[i]._value
         i += 1
     return result, i
@@ -496,18 +496,18 @@ def _parse_having(tokens):
 def _parse_limit(tokens):
     if len(tokens) > 3:
 
-        if types_match(tokens, [Token.LIMIT, Token.NUMBER, Token.COMMA, Token.NUMBER]):
+        if _match(tokens, [Token.LIMIT, Token.NUMBER, Token.COMMA, Token.NUMBER]):
             return Limit(row_count=Number(tokens[3]._value),
                          offset=Number(tokens[1]._value)), 4
 
-        if types_match(tokens, [Token.LIMIT, Token.NUMBER, Token.IDENTIFIER, Token.NUMBER]):
+        if _match(tokens, [Token.LIMIT, Token.NUMBER, Token.IDENTIFIER, Token.NUMBER]):
             if tokens[2]._value.upper() == 'OFFSET':
 
                 return Limit(row_count=Number(tokens[1]._value),
                              offset=Number(tokens[3]._value),
                              offset_keyword=tokens[2]._value), 4
 
-    if types_match(tokens, [Token.LIMIT, Token.NUMBER]):
+    if _match(tokens, [Token.LIMIT, Token.NUMBER]):
         return Limit(row_count=Number(tokens[1]._value)), 2
 
     raise InvalidLimit('%s' % tokens)
@@ -521,7 +521,7 @@ def _parse_order_by(tokens):
         if not tokens[i]._type in (Token.IDENTIFIER, Token.NUMBER):
             raise InvalidOrderBy()
 
-        if types_match(tokens[i:], [None, (Token.ASC, Token.DESC)]):
+        if _match(tokens[i:], [None, (Token.ASC, Token.DESC)]):
             value = _get_simple_object(tokens[i], sort=tokens[i + 1]._value)
             values.append(value)
             i += 2
@@ -530,7 +530,7 @@ def _parse_order_by(tokens):
             values.append(value)
             i += 1
 
-        if types_match(tokens[i:], [Token.COMMA]):
+        if _match(tokens[i:], [Token.COMMA]):
             i += 1
         else:
             break
@@ -560,7 +560,7 @@ def _parse_insert(tokens):
     value_val = tokens[i]._value
     select = []
     values = []
-    if types_match(tokens[i:], [Token.VALUES, Token.PARENTHESIS_OPEN]):
+    if _match(tokens[i:], [Token.VALUES, Token.PARENTHESIS_OPEN]):
         i += 2
 
         values_list = []
@@ -573,9 +573,9 @@ def _parse_insert(tokens):
             if tokens[i]._type == Token.COMMA:
                 i += 1
 
-            elif types_match(tokens[i:], [Token.PARENTHESIS_CLOSE,
-                                          Token.COMMA,
-                                          Token.PARENTHESIS_OPEN]):
+            elif _match(tokens[i:], [Token.PARENTHESIS_CLOSE,
+                                     Token.COMMA,
+                                     Token.PARENTHESIS_OPEN]):
                 values_list.append(values)
                 values = []
                 i += 3
@@ -638,10 +638,10 @@ def _parse_conditions(tokens):
     i = 0
     while i < len(tokens):
 
-        if types_match(tokens[i:], [Token.NOT,
-                                    (Token.IDENTIFIER, Token.NUMBER, Token.STR),
-                                    Token.COMPARE,
-                                    (Token.IDENTIFIER, Token.NUMBER, Token.STR)]):
+        if _match(tokens[i:], [Token.NOT,
+                               (Token.IDENTIFIER, Token.NUMBER, Token.STR),
+                               Token.COMPARE,
+                               (Token.IDENTIFIER, Token.NUMBER, Token.STR)]):
 
             condition = Condition([Not(tokens[i]._value),
                                    _get_simple_object(tokens[i + 1]),
@@ -650,28 +650,28 @@ def _parse_conditions(tokens):
             conditions.append(condition)
             i += 4
 
-        elif types_match(tokens[i:], [(Token.IDENTIFIER, Token.NUMBER, Token.STR),
-                                      Token.COMPARE,
-                                      (Token.IDENTIFIER, Token.NUMBER, Token.STR)]):
+        elif _match(tokens[i:], [(Token.IDENTIFIER, Token.NUMBER, Token.STR),
+                                 Token.COMPARE,
+                                 (Token.IDENTIFIER, Token.NUMBER, Token.STR)]):
             condition = Condition([_get_simple_object(tokens[i]),
                                    Operator(tokens[i + 1]._value),
                                    _get_simple_object(tokens[i + 2])])
             conditions.append(condition)
             i += 3
 
-        elif types_match(tokens[i:], [(Token.IDENTIFIER, Token.NUMBER, Token.STR),
-                                      Token.IS,
-                                      Token.NULL]):
+        elif _match(tokens[i:], [(Token.IDENTIFIER, Token.NUMBER, Token.STR),
+                                 Token.IS,
+                                 Token.NULL]):
             condition = Condition([_get_simple_object(tokens[i]),
                                    Is(tokens[i + 1]._value),
                                    Null(tokens[i + 2]._value)])
             conditions.append(condition)
             i += 3
 
-        elif types_match(tokens[i:], [(Token.IDENTIFIER, Token.NUMBER, Token.STR),
-                                      Token.IS,
-                                      Token.NOT,
-                                      Token.NULL]):
+        elif _match(tokens[i:], [(Token.IDENTIFIER, Token.NUMBER, Token.STR),
+                                 Token.IS,
+                                 Token.NOT,
+                                 Token.NULL]):
             condition = Condition([_get_simple_object(tokens[i]),
                                    Is(tokens[i + 1]._value),
                                    Not(tokens[i + 2]._value),
@@ -679,7 +679,7 @@ def _parse_conditions(tokens):
             conditions.append(condition)
             i += 4
 
-        elif types_match(tokens[i:], [Token.NOT, Token.FUNC, None, None, None, None]):
+        elif _match(tokens[i:], [Token.NOT, Token.FUNC, None, None, None, None]):
             func, j = _parse_func(tokens[i + 1:])
             condition = Condition([Not(tokens[i]._value),
                                    func,
@@ -688,11 +688,11 @@ def _parse_conditions(tokens):
             conditions.append(condition)
             i += j
 
-        elif types_match(tokens, [(Token.IDENTIFIER, Token.NUMBER),
-                                  (Token.IN, Token.COMPARE),
-                                  Token.PARENTHESIS_OPEN,
-                                  None,
-                                  None]):
+        elif _match(tokens, [(Token.IDENTIFIER, Token.NUMBER),
+                             (Token.IN, Token.COMPARE),
+                             Token.PARENTHESIS_OPEN,
+                             None,
+                             None]):
             condition = Condition([_get_simple_object(tokens[i]),
                                    Operator(tokens[i + 1]._value)])
             i += 3
@@ -732,7 +732,7 @@ def _parse_conditions(tokens):
 def _parse_identifier(tokens):
     count = 0
 
-    if types_match(tokens, [(Token.IDENTIFIER, Token.STR, Token.NUMBER)]):
+    if _match(tokens, [(Token.IDENTIFIER, Token.STR, Token.NUMBER)]):
         if tokens[0]._type == Token.IDENTIFIER:
             cls = Identifier
         elif tokens[0]._type == Token.NUMBER:
