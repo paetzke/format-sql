@@ -3,7 +3,7 @@
 format-sql
 Makes your SQL readable.
 
-Copyright (c) 2014, Friedrich Paetzke (paetzke@fastmail.fm)
+Copyright (c) 2014-2015, Friedrich Paetzke (paetzke@fastmail.fm)
 All rights reserved.
 
 """
@@ -18,6 +18,7 @@ setup(name='format-sql',
       author_email='paetzke@fastmail.fm',
       url='https://github.com/paetzke/format-sql',
       packages=find_packages(exclude=['tests*']),
+      install_requires=open('requirements/package.txt').read().splitlines(),
       entry_points={
           'console_scripts': ['format-sql = format_sql.main:main']
       },
