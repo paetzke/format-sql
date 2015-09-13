@@ -45,6 +45,7 @@ class Token:
     WITH_ROLLUP = 'WITH'
     WHERE = 'WHERE'
     VALUES = 'VALUES'
+    BETWEEN = 'BETWEEN'
 
     def __init__(self, token_type, token_value):
         self._type = token_type
@@ -100,7 +101,7 @@ TOKEN_RES = OrderedDict([
                   r'\bright\s+outer\s+join\b', r'\bright\s+join\b',
                   r'\bnatural\s+join\b', r'\binner\s+join\b',
                   r'\bjoin\b']),
-
+    (Token.BETWEEN, [r'\bbetween\b']),
 ])
 
 

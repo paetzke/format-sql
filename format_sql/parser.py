@@ -7,8 +7,9 @@ Copyright (c) 2014-2015, Friedrich Paetzke (paetzke@fastmail.fm)
 All rights reserved.
 
 """
-import attr
 from format_sql.tokenizer import Token
+
+import attr
 
 
 def _match(toks, types_list):
@@ -188,6 +189,11 @@ class Not(object):
 class On(object):
     value = attr.ib()
     values = attr.ib(default=[])
+
+
+@attr.s
+class Between(object):
+    value = attr.ib()
 
 
 @attr.s
@@ -544,6 +550,20 @@ def _parse_conditions(toks):
                                    _get_simple_object(toks[i + 3])])
             conditions.append(condition)
             i += 4
+        elif _match(toks[i:], [(Token.IDENTIFIER, Token.NUMBER, Token.STR),
+                               Token.BETWEEN,
+                               (Token.IDENTIFIER, Token.NUMBER, Token.STR),
+                               Token.LINK,
+                               (Token.IDENTIFIER, Token.NUMBER, Token.STR)]):
+            condition = Condition([
+                _get_simple_object(toks[i]),
+                Between(toks[i + 1]._value),
+                _get_simple_object(toks[i + 2]),
+                Link(toks[i + 3]._value),
+                _get_simple_object(toks[i + 4])
+            ])
+            conditions.append(condition)
+            i += 5
 
         elif _match(toks[i:], [(Token.IDENTIFIER, Token.NUMBER, Token.STR),
                                Token.COMPARE,

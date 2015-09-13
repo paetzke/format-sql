@@ -220,3 +220,7 @@ def test_insert_3(insert_3):
 
 def test_insert_4(insert_4):
     assert_style(insert_4.statements, insert_4.style)
+
+
+def test_between_1(between_1):
+    assert_style(between_1.statements, between_1.style)

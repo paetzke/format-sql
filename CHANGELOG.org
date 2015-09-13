@@ -1,6 +1,15 @@
 * CHANGELOG
 
 ** 0.11 (UNRELEASED)
+- Parse =between= comparisons
+  #+BEGIN_SRC sql
+    SELECT
+        *
+    FROM
+        ys
+    WHERE
+        ys.id BETWEEN 91 AND 92
+  #+END_SRC
 
 ** 0.10
 - Parse function calls in joins, for example:
