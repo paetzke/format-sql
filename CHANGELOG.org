@@ -8,6 +8,10 @@
         JOIN r ON
             XYZ(r.id) = ABC(x.r)
   #+END_SRC
+- Parse SQL_CALC_FOUND_ROWS
+  #+BEGIN_SRC sql
+    SELECT SQL_CALC_FOUND_ROWS * FROM tbl_name WHERE id > 100 LIMIT 10;
+  #+END_SRC
 
 ** 0.9
 - Parse INSERTs. This kind of INSERTs should work now:

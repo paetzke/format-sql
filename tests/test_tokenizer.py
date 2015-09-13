@@ -7,8 +7,9 @@ Copyright (c) 2014-2015, Friedrich Paetzke (paetzke@fastmail.fm)
 All rights reserved.
 
 """
-import pytest
 from format_sql.tokenizer import StringNotTerminated, Token, tokenize
+
+import pytest
 
 try:
     from itertools import zip_longest
@@ -167,6 +168,8 @@ def test_tokenize_join(sql, expected_token):
     ('Select', (Token.SELECT, 'Select')),
     ('Select distinct', (Token.SELECT, 'Select distinct')),
     ('Select sql_no_cache', (Token.SELECT, 'Select sql_no_cache')),
+    ('SELECT SQL_CALC_FOUND_ROWS',
+     (Token.SELECT, 'SELECT SQL_CALC_FOUND_ROWS')),
 ])
 def test_tokenize_select(sql, expected_token):
     token_type, token_value = expected_token
