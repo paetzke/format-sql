@@ -5,3 +5,5 @@ ipdb
 orgco==0.2.0
 tox
 wheel
+sphinx
+sphinx-autobuild
