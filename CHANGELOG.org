@@ -1,5 +1,7 @@
 * CHANGELOG
 
+** 0.11 (UNRELEASED)
+
 ** 0.10
 - Parse function calls in joins, for example:
   #+BEGIN_SRC sql
