@@ -7,7 +7,7 @@ Copyright (c) 2014-2015, Friedrich Paetzke (paetzke@fastmail.fm)
 All rights reserved.
 
 """
-from format_sql.parser import (Condition, From, Func, GroupBy, Having,
+from format_sql.parser import (Between, Condition, From, Func, GroupBy, Having,
                                Identifier, Insert, InvalidSQL, Is, Join, Limit,
                                Link, Not, Null, Number, On, Operator, OrderBy,
                                Select, Semicolon, Str, SubSelect, Where)
@@ -215,6 +215,16 @@ def _style_where(where, liner, indent):
                                    Operator,
                                    (Identifier, Number, Str)]):
             liner.add_to_line(' '.join('%s' % x for x in condition.values))
+            i += 1
+
+        elif types_match(condition, [(Identifier, Number, Str),
+                                     Between,
+                                     (Identifier, Number, Str),
+                                     Link,
+                                     (Identifier, Number, Str)]):
+            liner.add_to_line('%s BETWEEN %s AND %s' % (condition.values[0],
+                                                        condition.values[2],
+                                                        condition.values[4]))
             i += 1
 
         elif types_match(condition, [(Identifier, Number, Str), Is, Null]):

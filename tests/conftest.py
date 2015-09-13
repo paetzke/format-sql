@@ -10,11 +10,12 @@ All rights reserved.
 import os
 from collections import namedtuple
 
-from format_sql.parser import (Condition, From, Func, GroupBy, Having,
+from format_sql.parser import (Between, Condition, From, Func, GroupBy, Having,
                                Identifier, Insert, Is, Join, Limit, Link, Not,
                                Null, Number, On, Operator, OrderBy, Select,
                                Semicolon, Str, SubSelect, Values, Where)
 from format_sql.tokenizer import Token
+
 from pytest import fixture
 
 Data = namedtuple('Data', ['sql', 'tokens', 'statements', 'style'])
@@ -1392,4 +1393,40 @@ def insert_4():
             '    *',
             'FROM',
             '    eggs'
+        ])
+
+
+@fixture
+def between_1():
+    return Data(
+        sql='SELECT * FROM ys WHERE ys.id BETWEEN 91 AND 92',
+        tokens=[
+            Token(Token.SELECT, 'SELECT'),
+            Token(Token.IDENTIFIER, '*'),
+            Token(Token.FROM, 'FROM'),
+            Token(Token.IDENTIFIER, 'ys'),
+            Token(Token.WHERE, 'WHERE'),
+            Token(Token.IDENTIFIER, 'ys.id'),
+            Token(Token.BETWEEN, 'BETWEEN'),
+            Token(Token.NUMBER, '91'),
+            Token(Token.LINK, 'AND'),
+            Token(Token.NUMBER, '92'),
+        ],
+        statements=[
+            Select('SELECT', [Identifier('*')]),
+            From('FROM', [Identifier('ys')]),
+            Where('WHERE',
+                  [Condition([Identifier('ys.id'),
+                              Between('BETWEEN'),
+                              Number('91'),
+                              Link('AND'),
+                              Number('92')])])
+        ],
+        style=[
+            'SELECT',
+            '    *',
+            'FROM',
+            '    ys',
+            'WHERE',
+            '    ys.id BETWEEN 91 AND 92'
         ])
