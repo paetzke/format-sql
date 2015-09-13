@@ -7,6 +7,8 @@ format-sql
   :target: https://coveralls.io/r/paetzke/format-sql?branch=master
 .. image:: https://badge.fury.io/py/format-sql.svg
   :target: https://pypi.python.org/pypi/format-sql/
+.. image:: https://readthedocs.org/projects/format-sql/badge/?version=latest
+  :target: https://readthedocs.org/projects/format-sql/?badge=latest
 
 Makes your SQL readable.
 
