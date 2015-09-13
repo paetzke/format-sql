@@ -85,6 +85,7 @@ TOKEN_RES = OrderedDict([
     (Token.HAVING, [r'\bhaving\b']),
     (Token.SELECT, [r'\bselect\s+distinct\b',
                     r'\bselect\s+sql_no_cache\b',
+                    r'\bselect\s+sql_calc_found_rows\b',
                     r'\bselect\b']),
     (Token.LIMIT, [r'\blimit\b']),
     (Token.LINK, [r'\band\b', r'\bor\b']),
