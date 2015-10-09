@@ -176,7 +176,7 @@ def tokenize(s):
         elif word.startswith(STR_STARTERS):
             yield Token(Token.STR, word)
 
-        elif word in ('=', '<>', '<', '>', '!=', '>=', '<='):
+        elif word in ('=', '<>', '<', '>', '!=', '>=', '<=') or word.upper() == 'LIKE':
             yield Token(Token.COMPARE, word)
 
         elif word.upper() in ('AND', 'OR'):

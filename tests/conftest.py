@@ -1430,3 +1430,35 @@ def between_1():
             'WHERE',
             '    ys.id BETWEEN 91 AND 92'
         ])
+
+
+@fixture
+def like_1():
+    return Data(
+        sql="Select * From xs Where x Like 'A%Z'",
+        tokens=[
+            Token(Token.SELECT, 'Select'),
+            Token(Token.IDENTIFIER, '*'),
+            Token(Token.FROM, 'From'),
+            Token(Token.IDENTIFIER, 'xs'),
+            Token(Token.WHERE, 'Where'),
+            Token(Token.IDENTIFIER, 'x'),
+            Token(Token.COMPARE, 'Like'),
+            Token(Token.STR, "'A%Z'"),
+        ],
+        statements=[
+            Select('Select', [Identifier('*')]),
+            From('From', [Identifier('xs')]),
+            Where('Where',
+                  [Condition([Identifier('x'),
+                              Operator('Like'),
+                              Str("'A%Z'")])])
+        ],
+        style=[
+            'SELECT',
+            '    *',
+            'FROM',
+            '    xs',
+            'WHERE',
+            "    x LIKE 'A%Z'"
+        ])

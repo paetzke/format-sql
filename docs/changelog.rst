@@ -5,6 +5,18 @@ Changelog
 0.11 (UNRELEASED)
 -----------------
 
+* Parse ``like`` comparisons
+
+  .. code:: sql
+
+    SELECT
+        *
+    FROM
+        xs
+    WHERE
+        x LIKE 'A%Z'
+
+
 * Parse ``between`` comparisons
 
   .. code:: sql

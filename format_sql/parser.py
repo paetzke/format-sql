@@ -201,7 +201,7 @@ class Operator(object):
     value = attr.ib()
 
     def __str__(self):
-        return '%s' % self.value
+        return '%s' % self.value.upper()
 
 
 @attr.s
