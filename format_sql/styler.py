@@ -195,6 +195,58 @@ def _style_having(having, liner, indent):
     liner.end_line()
 
 
+def _style_condition(condition, liner, indent):
+
+    if len(condition.values) == 4 and isinstance(condition.values[0], Not):
+        liner.add_to_line('NOT ')
+        condition.values.pop(0)
+
+    if types_match(condition, [(Identifier, Number, Str),
+                               Operator,
+                               (Identifier, Number, Str)]):
+
+        liner.add_to_line(' '.join('%s' % x for x in condition.values))
+
+    elif types_match(condition, [(Identifier, Number, Str),
+                                 Between,
+                                 (Identifier, Number, Str),
+                                 Link,
+                                 (Identifier, Number, Str)]):
+        liner.add_to_line('%s BETWEEN %s AND %s' % (condition.values[0],
+                                                    condition.values[2],
+                                                    condition.values[4]))
+
+    elif types_match(condition, [(Identifier, Number, Str), Is, Null]):
+        liner.add_to_line('%s IS NULL' % condition.values[0])
+
+    elif types_match(condition, [(Identifier, Number, Str), Is, Not, Null]):
+        liner.add_to_line('%s IS NOT NULL' % condition.values[0])
+
+    elif types_match(condition, [(Identifier, Number, Str), Operator, list]):
+        liner.add_to_line('%s IN (' % condition.values[0])
+        liner.end_line()
+
+        for j, value in enumerate(condition.values[2]):
+            liner.add_to_line('    ' * (indent + 2))
+
+            liner.add_to_line(value)
+            if j + 1 < len(condition.values[2]):
+                liner.add_to_line(',')
+
+            else:
+                liner.add_to_line(')')
+            liner.end_line()
+
+    elif types_match(condition, [Identifier, Operator, SubSelect]):
+        liner.add_to_line('%s %s (' % (condition.values[0],
+                                       str(condition.values[1]).upper()))
+        liner.end_line()
+        style(condition.values[2].values, liner=liner, indent=indent + 2)
+        liner.add_to_last_line(')')
+
+    liner.end_line()
+
+
 def _style_where(where, liner, indent):
     liner.add_line('    ' * indent + 'WHERE')
 
@@ -205,62 +257,8 @@ def _style_where(where, liner, indent):
             liner.add_to_line('%s ' % where.conditions[i].value.upper())
             i += 1
 
-        condition = where.conditions[i]
-
-        if len(condition.values) == 4 and isinstance(condition.values[0], Not):
-            liner.add_to_line('NOT ')
-            condition.values.pop(0)
-
-        if types_match(condition, [(Identifier, Number, Str),
-                                   Operator,
-                                   (Identifier, Number, Str)]):
-            liner.add_to_line(' '.join('%s' % x for x in condition.values))
-            i += 1
-
-        elif types_match(condition, [(Identifier, Number, Str),
-                                     Between,
-                                     (Identifier, Number, Str),
-                                     Link,
-                                     (Identifier, Number, Str)]):
-            liner.add_to_line('%s BETWEEN %s AND %s' % (condition.values[0],
-                                                        condition.values[2],
-                                                        condition.values[4]))
-            i += 1
-
-        elif types_match(condition, [(Identifier, Number, Str), Is, Null]):
-            liner.add_to_line('%s IS NULL' % condition.values[0])
-            i += 1
-
-        elif types_match(condition, [(Identifier, Number, Str), Is, Not, Null]):
-            liner.add_to_line('%s IS NOT NULL' % condition.values[0])
-            i += 1
-
-        elif types_match(condition, [(Identifier, Number, Str), Operator, list]):
-            liner.add_to_line('%s IN (' % condition.values[0])
-            liner.end_line()
-
-            for j, value in enumerate(condition.values[2]):
-                liner.add_to_line('    ' * (indent + 2))
-
-                liner.add_to_line(value)
-                if j + 1 < len(condition.values[2]):
-                    liner.add_to_line(',')
-
-                else:
-                    liner.add_to_line(')')
-                liner.end_line()
-
-            i += 1
-
-        elif types_match(condition, [Identifier, Operator, SubSelect]):
-            liner.add_to_line('%s %s (' % (condition.values[0],
-                                           str(condition.values[1]).upper()))
-            liner.end_line()
-            style(condition.values[2].values, liner=liner, indent=indent + 2)
-            liner.add_to_last_line(')')
-            i += 1
-
-        liner.end_line()
+        _style_condition(where.conditions[i], liner, indent)
+        i += 1
 
 
 def _style_func(func, liner, end_line=True):

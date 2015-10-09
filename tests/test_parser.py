@@ -259,3 +259,7 @@ def test_parse_insert_4(insert_4):
 
 def test_parse_between_1(between_1):
     assert_statements(between_1.tokens, between_1.statements)
+
+
+def test_parse_like_1(like_1):
+    assert_statements(like_1.tokens, like_1.statements)

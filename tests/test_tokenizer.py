@@ -417,3 +417,7 @@ def test_tokenize_insert4(insert_4):
 
 def test_tokenize_between_1(between_1):
     assert_tokens(between_1.tokens, tokenize(between_1.sql))
+
+
+def test_tokenize_like_1(like_1):
+    assert_tokens(like_1.tokens, tokenize(like_1.sql))
