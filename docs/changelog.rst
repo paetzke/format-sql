@@ -2,8 +2,12 @@ Changelog
 =========
 
 
-0.11 (UNRELEASED)
+0.12 (UNRELEASED)
 -----------------
+
+
+0.11
+----
 
 * Parse ``like`` comparisons
 
