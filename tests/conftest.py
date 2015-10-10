@@ -15,7 +15,6 @@ from format_sql.parser import (Between, Condition, From, Func, GroupBy, Having,
                                Null, Number, On, Operator, OrderBy, Select,
                                Semicolon, Str, SubSelect, Values, Where)
 from format_sql.tokenizer import Token
-
 from pytest import fixture
 
 Data = namedtuple('Data', ['sql', 'tokens', 'statements', 'style'])
@@ -1208,6 +1207,75 @@ def composition_2():
             '    *',
             'FROM',
             '    k;',
+        ]
+    )
+
+
+@fixture
+def composition_3():
+    return Data(
+        sql="select p.* from p1 as p left join p2 as r on r.sk = CONCAT(p.x, '-!') where 1 = 1",
+        tokens=[
+            Token(Token.SELECT, 'select'),
+            Token(Token.IDENTIFIER, 'p.*'),
+            Token(Token.FROM, 'from'),
+            Token(Token.IDENTIFIER, 'p1'),
+            Token(Token.AS, 'as'),
+            Token(Token.IDENTIFIER, 'p'),
+            Token(Token.JOIN, 'left join'),
+            Token(Token.IDENTIFIER, 'p2'),
+            Token(Token.AS, 'as'),
+            Token(Token.IDENTIFIER, 'r'),
+            Token(Token.ON, 'on'),
+            Token(Token.IDENTIFIER, 'r.sk'),
+            Token(Token.COMPARE, '='),
+            Token(Token.FUNC, 'CONCAT'),
+            Token(Token.PARENTHESIS_OPEN, '('),
+            Token(Token.IDENTIFIER, 'p.x'),
+            Token(Token.COMMA, ','),
+            Token(Token.STR, "'-!'"),
+            Token(Token.PARENTHESIS_CLOSE, ')'),
+            Token(Token.WHERE, 'where'),
+            Token(Token.NUMBER, '1'),
+            Token(Token.COMPARE, '='),
+            Token(Token.NUMBER, '1')
+        ],
+        statements=[
+            Select('select', [
+                Identifier('p.*')
+            ]),
+            From('from', [
+                Identifier('p1', as_='as', alias='p'),
+                Join('left join'),
+                Identifier('p2', as_='as', alias='r'),
+                On('on', values=[
+                    Condition([
+                        Identifier('r.sk'),
+                        Operator('='),
+                        Func('CONCAT', args=[
+                            Identifier('p.x'),
+                            Str("'-!'")
+                        ])
+                    ])
+                ])
+            ]),
+            Where('where', [
+                Condition([
+                    Number('1'),
+                    Operator('='),
+                    Number('1')
+                ])
+            ])
+        ],
+        style=[
+            'SELECT',
+            '    p.*',
+            'FROM',
+            '    p1 AS p',
+            '    LEFT JOIN p2 AS r ON',
+            "        r.sk = CONCAT(p.x, '-!')",
+            'WHERE',
+            '    1 = 1'
         ]
     )
 

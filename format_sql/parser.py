@@ -7,9 +7,8 @@ Copyright (c) 2014-2015, Friedrich Paetzke (paetzke@fastmail.fm)
 All rights reserved.
 
 """
-from format_sql.tokenizer import Token
-
 import attr
+from format_sql.tokenizer import Token
 
 
 def _match(toks, types_list):
@@ -306,7 +305,7 @@ def _parse_from(toks):
                                            Operator(toks[i + 1]._value),
                                            func])
                     vals.append(condition)
-                    i += 3 + j
+                    i += 2 + j
 
                 if _match(toks[i:], [Token.FUNC]):
                     func, j = _parse_func(toks[i:])
