@@ -5,6 +5,19 @@ Changelog
 0.12 (UNRELEASED)
 -----------------
 
+* Fix: Parsing SQL after a function call in a join failed.
+
+  .. code:: sql
+
+    SELECT
+        p.*
+    FROM
+        p1 AS p
+        LEFT JOIN p2 AS r ON
+            r.sk = CONCAT(p.x, '-!')
+    WHERE
+        1 = 1
+
 
 0.11
 ----

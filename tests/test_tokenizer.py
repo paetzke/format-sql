@@ -7,9 +7,8 @@ Copyright (c) 2014-2015, Friedrich Paetzke (paetzke@fastmail.fm)
 All rights reserved.
 
 """
-from format_sql.tokenizer import StringNotTerminated, Token, tokenize
-
 import pytest
+from format_sql.tokenizer import StringNotTerminated, Token, tokenize
 
 try:
     from itertools import zip_longest
@@ -392,6 +391,10 @@ def test_tokenize_composition_1(composition_1):
 
 def test_tokenize_composition_2(composition_2):
     assert_tokens(composition_2.tokens, tokenize(composition_2.sql))
+
+
+def test_tokenize_composition_3(composition_3):
+    assert_tokens(composition_3.tokens, tokenize(composition_3.sql))
 
 
 def test_tokenize_multiple_statements1(multiple_statements_1):
