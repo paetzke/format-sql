@@ -202,6 +202,10 @@ def test_composition_2(composition_2):
     assert_style(composition_2.statements, composition_2.style)
 
 
+def test_composition_3(composition_3):
+    assert_style(composition_3.statements, composition_3.style)
+
+
 def test_multiple_statements_1(multiple_statements_1):
     assert_style(multiple_statements_1.statements, multiple_statements_1.style)
 
