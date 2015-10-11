@@ -424,3 +424,11 @@ def test_tokenize_between_1(between_1):
 
 def test_tokenize_like_1(like_1):
     assert_tokens(like_1.tokens, tokenize(like_1.sql))
+
+
+def test_tokenize_case_1(case_1):
+    assert_tokens(case_1.tokens, tokenize(case_1.sql))
+
+
+def test_tokenize_case_2(case_2):
+    assert_tokens(case_2.tokens, tokenize(case_2.sql))

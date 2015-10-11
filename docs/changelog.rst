@@ -19,6 +19,21 @@ Changelog
         1 = 1
 
 
+* Parse ``case``
+
+  .. code:: sql
+
+    SELECT
+        CASE
+            WHEN spam THEN 1,
+        CASE
+            WHEN eggs THEN 1
+            WHEN eggs3 THEN 2
+            ELSE 0
+    FROM
+        table
+
+
 0.11
 ----
 

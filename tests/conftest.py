@@ -10,10 +10,11 @@ All rights reserved.
 import os
 from collections import namedtuple
 
-from format_sql.parser import (Between, Condition, From, Func, GroupBy, Having,
-                               Identifier, Insert, Is, Join, Limit, Link, Not,
-                               Null, Number, On, Operator, OrderBy, Select,
-                               Semicolon, Str, SubSelect, Values, Where)
+from format_sql.parser import (Between, Case, Condition, Else, From, Func,
+                               GroupBy, Having, Identifier, Insert, Is, Join,
+                               Limit, Link, Not, Null, Number, On, Operator,
+                               OrderBy, Select, Semicolon, Str, SubSelect,
+                               Values, When, Where)
 from format_sql.tokenizer import Token
 from pytest import fixture
 
@@ -1529,4 +1530,91 @@ def like_1():
             '    xs',
             'WHERE',
             "    x LIKE 'A%Z'"
+        ])
+
+
+@fixture
+def case_1():
+    return Data(
+        sql='SELECT CASE WHEN spam THEN 1 ELSE 0 FROM table',
+        tokens=[
+            Token(Token.SELECT, 'SELECT'),
+            Token(Token.CASE, 'CASE'),
+            Token(Token.WHEN, 'WHEN'),
+            Token(Token.IDENTIFIER, 'spam'),
+            Token(Token.THEN, 'THEN'),
+            Token(Token.NUMBER, '1'),
+            Token(Token.ELSE, 'ELSE'),
+            Token(Token.NUMBER, '0'),
+            Token(Token.FROM, 'FROM'),
+            Token(Token.IDENTIFIER, 'table'),
+        ],
+        statements=[
+            Select('SELECT', [
+                Case('CASE', [
+                    When('WHEN', 'spam', 'THEN', '1'),
+                    Else('ELSE',  '0'),
+                ])
+            ]),
+            From('FROM', [Identifier('table')])
+        ],
+        style=[
+            'SELECT',
+            '    CASE',
+            '        WHEN spam THEN 1',
+            '        ELSE 0',
+            'FROM',
+            '    table'
+        ])
+
+
+@fixture
+def case_2():
+    return Data(
+        sql='SELECT CASE WHEN spam THEN 1, CASE WHEN eggs THEN 1 WHEN eggs3 THEN 2 ELSE 0 FROM table',
+        tokens=[
+            Token(Token.SELECT, 'SELECT'),
+            Token(Token.CASE, 'CASE'),
+            Token(Token.WHEN, 'WHEN'),
+            Token(Token.IDENTIFIER, 'spam'),
+            Token(Token.THEN, 'THEN'),
+            Token(Token.NUMBER, '1'),
+            Token(Token.COMMA, ','),
+            Token(Token.CASE, 'CASE'),
+            Token(Token.WHEN, 'WHEN'),
+            Token(Token.IDENTIFIER, 'eggs'),
+            Token(Token.THEN, 'THEN'),
+            Token(Token.NUMBER, '1'),
+            Token(Token.WHEN, 'WHEN'),
+            Token(Token.IDENTIFIER, 'eggs3'),
+            Token(Token.THEN, 'THEN'),
+            Token(Token.NUMBER, '2'),
+            Token(Token.ELSE, 'ELSE'),
+            Token(Token.NUMBER, '0'),
+            Token(Token.FROM, 'FROM'),
+            Token(Token.IDENTIFIER, 'table'),
+        ],
+        statements=[
+            Select('SELECT', [
+                Case('CASE', [
+                    When('WHEN', 'spam', 'THEN', '1')
+                ]),
+                Case('CASE', [
+                    When('WHEN', 'eggs', 'THEN', '1'),
+                    When('WHEN', 'eggs3', 'THEN', '2'),
+                    Else('ELSE', '0')
+                ])
+            ]),
+            From('FROM', [Identifier('table')])
+        ],
+        style=[
+            'SELECT',
+            '    CASE',
+            '        WHEN spam THEN 1,',
+            '    CASE',
+            '        WHEN eggs THEN 1',
+            '        WHEN eggs3 THEN 2',
+            '        ELSE 0',
+            'FROM',
+            '    table'
         ])

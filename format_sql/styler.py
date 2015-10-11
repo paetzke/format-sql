@@ -7,10 +7,11 @@ Copyright (c) 2014-2015, Friedrich Paetzke (paetzke@fastmail.fm)
 All rights reserved.
 
 """
-from format_sql.parser import (Between, Condition, From, Func, GroupBy, Having,
-                               Identifier, Insert, InvalidSQL, Is, Join, Limit,
-                               Link, Not, Null, Number, On, Operator, OrderBy,
-                               Select, Semicolon, Str, SubSelect, Where)
+from format_sql.parser import (Between, Case, Condition, Else, From, Func,
+                               GroupBy, Having, Identifier, Insert, InvalidSQL,
+                               Is, Join, Limit, Link, Not, Null, Number, On,
+                               Operator, OrderBy, Select, Semicolon, Str,
+                               SubSelect, When, Where)
 
 
 def types_match(condition, types_list):
@@ -283,6 +284,15 @@ def _style_func(func, liner, end_line=True):
         liner.end_line()
 
 
+def _style_case(case, liner, indent):
+    liner.add_line(case.value.upper())
+    for i, when_else in enumerate(case.when_elses):
+        liner.add_to_line('%s%s' % ('    ' * (indent + 2), when_else))
+
+        if i < len(case.when_elses) - 1:
+            liner.end_line()
+
+
 def _style_insert(insert, liner, indent):
     liner.add_line('INSERT INTO')
     liner.add_line('    %s' % insert.table)
@@ -309,6 +319,10 @@ def _style_select(select, liner, indent):
         liner.add_to_line('    ' * (indent + 1))
         if isinstance(value, (Identifier, Str, Number)):
             _style_identifier(value, liner, end_line=False)
+
+        elif isinstance(value, Case):
+            _style_case(value, liner, indent)
+
         elif isinstance(value, Func):
             _style_func(value, liner, end_line=False)
 

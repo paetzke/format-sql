@@ -153,6 +153,32 @@ class Join(object):
 
 
 @attr.s
+class Case(object):
+    value = attr.ib()
+    when_elses = attr.ib()
+
+
+@attr.s
+class When(object):
+    when = attr.ib()
+    condition = attr.ib()
+    then = attr.ib()
+    result = attr.ib()
+
+    def __str__(self):
+        return 'WHEN %s THEN %s' % (self.condition, self.result)
+
+
+@attr.s
+class Else(object):
+    else_ = attr.ib()
+    result = attr.ib()
+
+    def __str__(self):
+        return 'ELSE %s' % self.result
+
+
+@attr.s
 class Insert(object):
     insert = attr.ib()
     table = attr.ib()
@@ -506,10 +532,17 @@ def _parse_select(toks):
             value, j = _parse_identifier(toks[i:])
             values.append(value)
             i += j
+
         elif toks[i]._type == Token.FUNC:
             func, j = _parse_func(toks[i:])
             values.append(func)
             i += j
+
+        elif toks[i]._type == Token.CASE:
+            value, j = _parse_case(toks[i:])
+            values.append(value)
+            i += j
+
         else:
             raise InvalidSelect()
 
@@ -520,6 +553,39 @@ def _parse_select(toks):
         i += 1
 
     return Select(toks[0]._value, values), i
+
+
+def _parse_case(toks):
+    i = 1
+    when_elses = []
+
+    while i < len(toks):
+        if _match(toks[i:], [
+                Token.WHEN,
+                (Token.IDENTIFIER, Token.NUMBER, Token.STR),
+                Token.THEN,
+                (Token.IDENTIFIER, Token.NUMBER, Token.STR)]):
+
+            when = When(toks[i + 0]._value,
+                        toks[i + 1]._value,
+                        toks[i + 2]._value,
+                        toks[i + 3]._value,)
+            when_elses.append(when)
+            i += 4
+
+        elif _match(toks[i:], [
+                Token.ELSE,
+                (Token.IDENTIFIER, Token.NUMBER, Token.STR)]):
+
+            else_ = Else(toks[i + 0]._value,
+                         toks[i + 1]._value)
+            when_elses.append(else_)
+            i += 2
+
+        else:
+            break
+
+    return Case(toks[0]._value, when_elses), i
 
 
 def _parse_semicolon(toks):
