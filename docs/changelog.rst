@@ -2,8 +2,12 @@ Changelog
 =========
 
 
-0.12 (UNRELEASED)
+0.13 (UNRELEASED)
 -----------------
+
+
+0.12
+----
 
 * Fix: Parsing SQL after a function call in a join failed.
 
