@@ -46,6 +46,10 @@ class Token:
     WHERE = 'WHERE'
     VALUES = 'VALUES'
     BETWEEN = 'BETWEEN'
+    CASE = 'CASE'
+    WHEN = 'WHEN'
+    THEN = 'THEN'
+    ELSE = 'ELSE'
 
     def __init__(self, token_type, token_value):
         self._type = token_type
@@ -102,6 +106,10 @@ TOKEN_RES = OrderedDict([
                   r'\bnatural\s+join\b', r'\binner\s+join\b',
                   r'\bjoin\b']),
     (Token.BETWEEN, [r'\bbetween\b']),
+    (Token.CASE, [r'\bcase\b']),
+    (Token.WHEN, [r'\bwhen\b']),
+    (Token.THEN, [r'\bthen\b']),
+    (Token.ELSE, [r'\belse\b']),
 ])
 
 

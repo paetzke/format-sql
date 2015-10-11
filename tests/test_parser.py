@@ -266,3 +266,11 @@ def test_parse_between_1(between_1):
 
 def test_parse_like_1(like_1):
     assert_statements(like_1.tokens, like_1.statements)
+
+
+def test_parse_case_1(case_1):
+    assert_statements(case_1.tokens, case_1.statements)
+
+
+def test_parse_case_2(case_2):
+    assert_statements(case_2.tokens, case_2.statements)

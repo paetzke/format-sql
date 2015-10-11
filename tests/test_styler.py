@@ -232,3 +232,11 @@ def test_between_1(between_1):
 
 def test_like_1(like_1):
     assert_style(like_1.statements, like_1.style)
+
+
+def test_case_1(case_1):
+    assert_style(case_1.statements, case_1.style)
+
+
+def test_case_2(case_2):
+    assert_style(case_2.statements, case_2.style)
